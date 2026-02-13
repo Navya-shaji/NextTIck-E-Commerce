@@ -37,12 +37,12 @@ const addCategory = async (req, res) => {
     const { name, description } = req.body;
 
     try {
-        const existingCategory = await Category.findOne({ name:{$regex:name,$options:"i"} });
+        const existingCategory = await Category.findOne({ name: { $regex: name, $options: "i" } });
         if (existingCategory) {
             return res.status(400).json({ error: "Category already exists" });
         }
 
-        
+
         const newCategory = new Category({
             name,
             description,
@@ -99,7 +99,7 @@ const removeCategoryOffer = async (req, res) => {
     try {
         const { categoryId } = req.body;
         const category = await Category.findById(categoryId);
-      
+
 
         if (!category) {
             return res.status(404).json({ status: false, message: "Category not found" });
@@ -153,14 +153,14 @@ const removeCategory = async (req, res) => {
 //For Geting Listed Category............................................
 
 
-const getListedCategory = async (req,res)=>{
-    try{
-        let id=req.query.id;
-       
-        await Category.updateOne({_id:id},{$set:{isListed:false}})
+const getListedCategory = async (req, res) => {
+    try {
+        let id = req.query.id;
+
+        await Category.updateOne({ _id: id }, { $set: { isListed: false } })
         res.redirect("/admin/category")
-        
-    }catch(error){
+
+    } catch (error) {
         res.redirect("/pageerror")
     }
 }
@@ -169,24 +169,24 @@ const getListedCategory = async (req,res)=>{
 
 
 
-const getUnlistedCategory=async(req,res)=>{
+const getUnlistedCategory = async (req, res) => {
     try {
         let id = req.query.id;
-       
-        await Category.updateOne({_id:id},{$set:{isListed:true}})
+
+        await Category.updateOne({ _id: id }, { $set: { isListed: true } })
         res.redirect("/admin/category")
     } catch (error) {
         res.redirect("/pageerror")
     }
 }
 
-const getEditCategory = async(req,res)=>{
-    try{
+const getEditCategory = async (req, res) => {
+    try {
         const id = req.query.id;
-        const category = await Category.findOne({_id:id});
-        res.render("editCategory",{category:category});
-      
-    }catch{
+        const category = await Category.findOne({ _id: id });
+        res.render("editCategory", { category: category });
+
+    } catch {
         res.redirect("/pageerror")
     }
 };
@@ -195,7 +195,7 @@ const getEditCategory = async(req,res)=>{
 
 const editCategory = async (req, res) => {
     try {
-        const id = req.params.id; 
+        const id = req.params.id;
         const { categoryName, description } = req.body;
 
         const existingCategory = await Category.findOne({ name: categoryName });
@@ -204,26 +204,26 @@ const editCategory = async (req, res) => {
             return res.status(400).json({ error: "Category exists, please choose another name" });
         }
 
-       const updatedCategory = await Category.findByIdAndUpdate(
-        id,
-        { name: categoryName, description },
-        { new: true, runValidators: true } ,
-     
-         
-        
-    );
+        const updatedCategory = await Category.findByIdAndUpdate(
+            id,
+            { name: categoryName, description },
+            { new: true, runValidators: true },
 
-    if (!updatedCategory) {
-        return res.status(404).json({ error: "Category not found." }); 
+
+
+        );
+
+        if (!updatedCategory) {
+            return res.status(404).json({ error: "Category not found." });
+        }
+
+        return res.redirect("/admin/category");
+    } catch (error) {
+        console.error("Error updating category:", error);
+        return res.status(500).json({ error: "Internal Server Error." });
     }
-
-    return res.redirect("/admin/category");
-} catch (error) {
-    console.error("Error updating category:", error);
-    return res.status(500).json({ error: "Internal Server Error." }); 
-}
 };
-  
+
 
 
 module.exports = {
@@ -235,5 +235,5 @@ module.exports = {
     getListedCategory,
     getUnlistedCategory,
     getEditCategory,
-    editCategory 
+    editCategory
 }

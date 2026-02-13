@@ -107,12 +107,12 @@ const updateQuantity = async (req, res) => {
     }
 
     cartItem.quantity = requestedQuantity;
- 
+
     cartItem.totalPrice = requestedQuantity * cartItem.price;
 
     const cartTotal = cart.items.reduce((total, item) => {
       if (item.status === 'placed') {
-        return total + item.totalPrice;  
+        return total + item.totalPrice;
       }
       return total;
     }, 0);
