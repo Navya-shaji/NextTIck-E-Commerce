@@ -134,6 +134,23 @@
             border-color: #fecaca;
         }
 
+        .btn-delete {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #f87171;
+            color: #fff;
+            border: 1px solid #ef4444;
+            transition: all 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
         /* Pagination */
         .pagination-wrap {
             margin-top: 2rem;
@@ -249,6 +266,9 @@
                                             Cancel
                                         </button>
                                         <% } %>
+                                            <button onclick="deleteOrder('<%= order._id %>')" class="btn-delete">
+                                                Delete
+                                            </button>
                                 </td>
                             </tr>
                             <% }); %>
@@ -406,6 +426,46 @@
                         });
                     } else {
                         Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Network error occurred', 'error');
+                }
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            const res = await Swal.fire({
+                title: 'Delete Order?',
+                text: 'This will permanently remove the order record!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (res.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/orders/delete-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Order has been permanently deleted.',
+                            icon: 'success',
+                            confirmButtonColor: '#1e293b'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to delete order', 'error');
                     }
                 } catch (error) {
                     console.error('Error:', error);

@@ -75,7 +75,7 @@ router.post("/addaddress", userAuth, profileController.postAddAddress);
 router.get("/userAddress", userAuth, profileController.getAddressPage);
 router.get("/edit-address/:id", userAuth, profileController.editAddress);
 router.post("/postEditAddress/:id", userAuth, profileController.postEditAddress);
-router.get("/delete-address/:id", userAuth, profileController.deleteAddress);
+router.post("/delete-address/:id", userAuth, profileController.deleteAddress);
 
 
 //wishlist Management...............................................................................................

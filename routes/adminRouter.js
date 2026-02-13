@@ -79,6 +79,7 @@ router.get('/orders/:orderId', adminAuth, orderController.getAdminOrderDetails);
 router.post('/orders/update-status', adminAuth, orderController.updateOrderStatus);
 router.post('/orders/update-item-status', adminAuth, orderController.updateItemStatus);
 router.post('/orders/cancel-order', adminAuth, orderController.cancelOrderAdmin);
+router.post('/orders/delete-order', adminAuth, orderController.deleteOrderAdmin);
 
 
 //coupon Management ............

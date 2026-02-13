@@ -30,7 +30,7 @@ const getOrderHistory = async (req, res) => {
         res.render('profile', {
             user: user,
             orders: orders,
-            activeTab: 'orders',
+            activeTab: 'v-pills-orders-tab',
             userAddress: {},
             wallet: { transactions: [], totalBalance: 0 },
             pagination: {

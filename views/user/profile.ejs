@@ -145,14 +145,14 @@
                     <tbody id="ordersTableBody">
                       <% if (typeof orders !=='undefined' && orders.length> 0) { %>
                         <% orders.forEach(order=> { %>
-                          <tr>
+                          <tr id="order-row-<%= order._id %>">
                             <td>#<%= order.orderId %>
                             </td>
                             <td>
                               <%= new Date(order.createdOn).toLocaleDateString() %>
                             </td>
                             <td>
-                              <span class="badge-premium <%= 
+                              <span id="status-<%= order._id %>" class="badge-premium <%= 
                                   order.status.toLowerCase() === 'pending' ? 'badge-pending' : 
                                   order.status.toLowerCase() === 'delivered' ? 'badge-success' : 
                                   'badge-danger' %>">
@@ -162,13 +162,13 @@
                             <td class="fw-bold">₹<%= (order.finalAmount || 0).toFixed(2) %>
                             </td>
                             <td>
-                              <span
+                              <span id="payment-status-<%= order._id %>"
                                 class="<%= order.paymentStatus.toLowerCase() === 'paid' ? 'text-success' : 'text-warning' %>">
                                 <%= order.paymentStatus %>
                               </span>
                             </td>
                             <td>
-                              <div class="dropdown">
+                              <div class="dropdown" id="action-dropdown-<%= order._id %>">
                                 <button class="btn-outline-gold dropdown-toggle px-3 py-2" type="button"
                                   id="orderAction<%= order._id %>" data-bs-toggle="dropdown" aria-expanded="false"
                                   style="font-size: 0.8rem;">
@@ -266,17 +266,19 @@
                 <div class="row">
                   <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
                     <% userAddress.address.forEach((addr)=> { %>
-                      <div class="col-md-6 mb-4">
+                      <div class="col-md-6 mb-4" id="address-card-<%= addr._id %>">
                         <div class="info-item h-100">
                           <div class="d-flex justify-content-between align-items-start mb-3">
                             <h5 class="mb-0 user-name" style="font-size: 1.1rem;">
                               <%= addr.name %>
                             </h5>
                             <div class="d-flex gap-2">
-                              <a href="/edit-address/<%= addr.id %>" class="text-primary"><i
+                              <a href="/edit-address/<%= addr._id %>" class="text-primary"><i
                                   class="fas fa-edit"></i></a>
-                              <a href="/delete-address/<%= addr.id %>" class="text-danger"><i
-                                  class="fas fa-trash-alt"></i></a>
+                              <button onclick="confirmDeleteAddress('<%= addr._id %>')"
+                                class="btn-link text-danger p-0 border-0 bg-transparent">
+                                <i class="fas fa-trash-alt"></i>
+                              </button>
                             </div>
                           </div>
 
@@ -464,11 +466,11 @@
     <script>
       let hasChanges = false;
 
-      function toggleEdit(inputId) {
+      function toggleEdit(inputId, forceDisable = false) {
         const input = document.getElementById(inputId);
         const saveButton = document.getElementById('saveButton');
 
-        if (input.disabled) {
+        if (input.disabled && !forceDisable) {
           input.disabled = false;
           input.classList.remove('form-control-plaintext');
           input.classList.add('form-control');
@@ -478,6 +480,7 @@
           input.disabled = true;
           input.classList.add('form-control-plaintext');
           input.classList.remove('form-control');
+          if (forceDisable) hasChanges = false;
           if (!hasChanges) saveButton.disabled = true;
         }
       }
@@ -504,7 +507,17 @@
           const data = await response.json();
           if (data.success) {
             Swal.fire({ icon: 'success', title: 'Updated!', text: 'Profile changes saved.', timer: 1500, showConfirmButton: false });
-            setTimeout(() => location.reload(), 1500);
+
+            // Update UI without reload
+            document.getElementById('editName').value = data.user.name;
+            document.getElementById('editPhone').value = data.user.phone || '';
+            // Update the sidebar name/email if they are there
+            const sidebarName = document.querySelector('.user-name');
+            if (sidebarName) sidebarName.textContent = data.user.name;
+
+            toggleEdit('editName', true); // Force disable
+            toggleEdit('editPhone', true); // Force disable
+            document.getElementById('saveButton').disabled = true;
           } else throw new Error(data.message);
         } catch (error) {
           Swal.fire('Error', error.message, 'error');
@@ -526,7 +539,12 @@
           const data = await res.json();
           if (data.success) {
             Swal.fire({ icon: 'success', title: 'Success', text: 'Image updated!', timer: 1000, showConfirmButton: false });
-            setTimeout(() => location.reload(), 1000);
+
+            // Update image UI
+            const profileImgs = document.querySelectorAll('.profile-image, .profile-pic');
+            profileImgs.forEach(img => {
+              img.src = data.imageUrl + '?t=' + new Date().getTime();
+            });
           } else throw new Error(data.message);
         } catch (err) {
           Swal.fire('Error', err.message, 'error');
@@ -547,18 +565,64 @@
 
       // Order Actions
       async function cancelOrder(orderId) {
-        const res = await Swal.fire({ title: 'Cancel Order?', text: 'Are you sure you want to cancel?', icon: 'warning', showCancelButton: true });
-        if (res.isConfirmed) {
+        const { value: reason } = await Swal.fire({
+          title: 'Cancel Order?',
+          input: 'textarea',
+          inputLabel: 'Reason for cancellation',
+          inputPlaceholder: 'Enter reason here...',
+          inputAttributes: {
+            'aria-label': 'Enter reason here'
+          },
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Confirm Cancellation',
+          inputValidator: (value) => {
+            if (!value) {
+              return 'You need to provide a reason!'
+            }
+          }
+        });
+
+        if (reason) {
           try {
             const response = await fetch('/orders/cancel', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderId, status: "Cancelled" })
+              body: JSON.stringify({ orderId, cancellationReason: reason })
             });
             const data = await response.json();
-            if (data.success) location.reload();
-            else throw new Error(data.message);
-          } catch (err) { Swal.fire('Error', err.message, 'error'); }
+            if (data.success) {
+              Swal.fire({
+                title: 'Cancelled!',
+                text: 'Order has been cancelled.',
+                icon: 'success',
+                confirmButtonColor: '#c5a059'
+              });
+
+              // Update UI without reload
+              const statusBadge = document.getElementById(`status-${orderId}`);
+              if (statusBadge) {
+                statusBadge.textContent = 'Cancelled';
+                statusBadge.className = 'badge-premium badge-danger';
+              }
+              const actionDropdown = document.getElementById(`action-dropdown-${orderId}`);
+              if (actionDropdown) {
+                const cancelBtn = actionDropdown.querySelector('.text-danger');
+                if (cancelBtn && cancelBtn.parentElement) {
+                  cancelBtn.parentElement.remove();
+                }
+                const retryBtn = actionDropdown.querySelector('.text-success');
+                if (retryBtn && retryBtn.parentElement) {
+                  retryBtn.parentElement.remove();
+                }
+              }
+            } else {
+              throw new Error(data.message);
+            }
+          } catch (err) {
+            Swal.fire('Error', err.message, 'error');
+          }
         }
       }
 
@@ -596,8 +660,27 @@
         })
           .then(res => res.json())
           .then(data => {
-            if (data.success) location.reload();
-            else throw new Error(data.message);
+            if (data.success) {
+              Swal.fire('Success', 'Payment verified!', 'success');
+              // Update UI
+              const statusBadge = document.getElementById(`status-${details.orderId}`);
+              if (statusBadge) {
+                statusBadge.textContent = 'Pending';
+                statusBadge.className = 'badge-premium badge-pending';
+              }
+              const paymentBadge = document.getElementById(`payment-status-${details.orderId}`);
+              if (paymentBadge) {
+                paymentBadge.textContent = 'Completed';
+                paymentBadge.className = 'text-success';
+              }
+              const actionDropdown = document.getElementById(`action-dropdown-${details.orderId}`);
+              if (actionDropdown) {
+                const retryBtn = actionDropdown.querySelector('.text-success');
+                if (retryBtn && retryBtn.parentElement) {
+                  retryBtn.parentElement.remove();
+                }
+              }
+            } else throw new Error(data.message);
           })
           .catch(err => Swal.fire('Error', err.message, 'error'));
       }
@@ -628,6 +711,36 @@
         } catch (err) { Swal.fire('Error', err.message, 'error'); }
       }
 
+      async function confirmDeleteAddress(addressId) {
+        const res = await Swal.fire({
+          title: 'Delete Address?',
+          text: 'Are you sure you want to remove this address?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (res.isConfirmed) {
+          try {
+            const response = await fetch(`/delete-address/${addressId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: 'Address removed successfully',
+                timer: 1500,
+                showConfirmButton: false
+              });
+              const card = document.getElementById(`address-card-${addressId}`);
+              if (card) card.remove();
+            } else throw new Error(data.message);
+          } catch (err) { Swal.fire('Error', err.message, 'error'); }
+        }
+      }
+
       // Handle tab persistence from URL
       document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -646,6 +759,7 @@
       window.saveProfileChanges = saveProfileChanges;
       window.deleteProfileImage = deleteProfileImage;
       window.cancelOrder = cancelOrder;
+      window.confirmDeleteAddress = confirmDeleteAddress;
       window.retryPayment = retryPayment;
       window.showChangePasswordModal = showChangePasswordModal;
       window.changePassword = changePassword;

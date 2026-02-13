@@ -695,16 +695,17 @@ const deleteAddress = async (req, res) => {
         const addressId = req.params.id;
         const findAddress = await Address.findOne({ "address._id": addressId });
         if (!findAddress) {
-            return res.status(404).send("Address not found");
+            return res.status(404).json({ success: false, message: "Address not found" });
         }
 
         await Address.updateOne(
             { "address._id": addressId },
             { $pull: { address: { _id: addressId } } }
         );
-        return res.redirect("/userProfile");
+        return res.status(200).json({ success: true, message: "Address deleted successfully" });
     } catch (error) {
-        res.redirect("/pageNotFound");
+        console.error("Error deleting address:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
 
