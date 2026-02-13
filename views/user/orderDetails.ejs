@@ -1,104 +1,133 @@
 <%- include("../../views/partials/user/header.ejs") %>
 
-<div class="container mt-5">
-  <h1 class="mb-4">Order Details</h1>
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Order #<%= order.orderId %></h5>
-      <p class="card-text"><strong>Status:</strong> <span id="orderStatus"><%= order.status %></span></p>
-      <p class="card-text"><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleString() %></p>
-      <p class="card-text"><strong>Total Amount:</strong> $<%= order.finalAmount.toFixed(2) %></p>
+  <div class="container mt-5">
+    <h1 class="mb-4">Order Details</h1>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Order #<%= order.orderId %>
+        </h5>
+        <p class="card-text"><strong>Status:</strong> <span id="orderStatus">
+            <%= order.status %>
+          </span></p>
+        <p class="card-text"><strong>Date:</strong>
+          <%= new Date(order.createdOn).toLocaleString() %>
+        </p>
+        <p class="card-text"><strong>Total Amount:</strong> $<%= order.finalAmount.toFixed(2) %>
+        </p>
 
-      <h6 class="mt-4">Shipping Address</h6>
-      <address>
-        <%= order.address.name %><br>
-        <%= order.address.address %><br>
-        <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %><br>
-        Phone: <%= order.address.phone %>
-      </address>
+        <h6 class="mt-4">Shipping Address</h6>
+        <address>
+          <%= order.address.name %><br>
+            <%= order.address.address %><br>
+              <%= order.address.city %>, <%= order.address.state %>
+                  <%= order.address.pincode %><br>
+                    Phone: <%= order.address.phone %>
+        </address>
 
-      <h6 class="mt-4">Order Items</h6>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% order.orderItems.forEach(item => { %>
+        <h6 class="mt-4">Order Items</h6>
+        <table class="table">
+          <thead>
             <tr>
-              <td><%= item.product.productName %></td>
-              <td><%= item.quantity %></td>
-              <td>$<%= item.price.toFixed(2) %></td>
-              <td>$<%= (item.quantity * item.price).toFixed(2) %></td>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
             </tr>
-          <% }); %>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
-            <td>$<%= order.totalPrice.toFixed(2) %></td>
-          </tr>
-          <% if (order.discount > 0) { %>
+          </thead>
+          <tbody>
+            <% order.orderItems.forEach(item=> { %>
+              <tr>
+                <td>
+                  <%= item.product.productName %>
+                </td>
+                <td>
+                  <%= item.quantity %>
+                </td>
+                <td>$<%= item.price.toFixed(2) %>
+                </td>
+                <td>$<%= (item.quantity * item.price).toFixed(2) %>
+                </td>
+              </tr>
+              <% }); %>
+          </tbody>
+          <tfoot>
             <tr>
-              <td colspan="3" class="text-end"><strong>Discount:</strong></td>
-              <td>-$<%= order.discount.toFixed(2) %></td>
+              <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+              <td>$<%= order.totalPrice.toFixed(2) %>
+              </td>
             </tr>
-          <% } %>
-          <tr>
-            <td colspan="3" class="text-end"><strong>Total:</strong></td>
-            <td>$<%= order.finalAmount.toFixed(2) %></td>
-          </tr>
-        </tfoot>
-      </table>
-      
+            <% if (order.discount> 0) { %>
+              <tr>
+                <td colspan="3" class="text-end"><strong>Discount:</strong></td>
+                <td>-$<%= order.discount.toFixed(2) %>
+                </td>
+              </tr>
+              <% } %>
+                <tr>
+                  <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                  <td>$<%= order.finalAmount.toFixed(2) %>
+                  </td>
+                </tr>
+          </tfoot>
+        </table>
 
-      <div class="mt-4">
-        <h6>Change Order Status</h6>
-        <select id="statusSelect" class="form-select" onchange="changeOrderStatus('<%= order._id %>', this.value)">
-          <option value="">Select new status</option>
-          <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-          <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-          <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-          <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-          <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-        </select>
+
+        <div class="mt-4">
+          <h6>Change Order Status</h6>
+          <select id="statusSelect" class="form-select" onchange="changeOrderStatus('<%= order._id %>', this.value)">
+            <option value="">Select new status</option>
+            <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>>Processing</option>
+            <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
+            <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-function changeOrderStatus(orderId, newStatus) {
-  if (confirm(`Are you sure you want to change the order status to ${newStatus}?`)) {
-    fetch(`/orders/${orderId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ newStatus }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        document.getElementById('orderStatus').textContent = newStatus;
-        alert('Order status updated successfully');
-      } else {
-        alert(data.message || 'Failed to update order status');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while updating the order status');
-    });
-  }
-}
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function changeOrderStatus(orderId, newStatus) {
+      if (!newStatus) return;
+
+      Swal.fire({
+        title: 'Confirm Status Change',
+        text: `Are you sure you want to change the order status to ${newStatus}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, change it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ newStatus }),
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                document.getElementById('orderStatus').textContent = newStatus;
+                Swal.fire('Updated!', 'Order status updated successfully', 'success');
+              } else {
+                Swal.fire('Error', data.message || 'Failed to update order status', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error', 'An error occurred while updating the order status', 'error');
+            });
+        }
+      });
+    }
+  </script>
 
 
 
 
-<%- include("../../views/partials/user/footer.ejs") %>
+  <%- include("../../views/partials/user/footer.ejs") %>

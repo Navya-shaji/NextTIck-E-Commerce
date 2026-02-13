@@ -255,14 +255,20 @@
                                 <div class="fw-bold mb-2">₹<%= (item.price * item.quantity).toFixed(2) %>
                                 </div>
 
-                                <% if ((order.status==='Pending' || order.status==='Processing' ) && (item.status
-                                    !=='Cancelled' )) { %>
+                                <% if (['Pending', 'Processing' ].includes(order.status) && item.status !=='Cancelled'
+                                    && item.status !=='Returned' ) { %>
                                     <button onclick="cancelSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
                                         class="btn-action-small btn-cancel">Cancel Item</button>
-                                    <% } else if (order.status==='Delivered' && item.status==='Delivered' ) { %>
+                                    <% } else if ((order.status==='Delivered' || item.status==='Delivered' ) &&
+                                        !['Cancelled', 'Returned' , 'Return Request' ].includes(item.status)) { %>
                                         <button
                                             onclick="returnSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
                                             class="btn-action-small btn-return">Return Item</button>
+
+                                        <button
+                                            onclick="openReviewModal('<%= item.product._id %>', '<%= item.product.productName %>', '<%= order._id %>')"
+                                            class="btn-action-small ms-2"
+                                            style="color: #28a745; border-color: #28a745;">Review Product</button>
                                         <% } %>
 
                                             <% if (item.status==='Cancelled' ) { %>
@@ -350,6 +356,48 @@
         </div>
     </main>
 
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title font-heading">Product Review</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="reviewForm">
+                        <input type="hidden" id="reviewProductId">
+                        <input type="hidden" id="reviewOrderId">
+                        <div class="mb-4">
+                            <label class="form-label d-block mb-3">Rate your experience</label>
+                            <div class="star-rating d-flex gap-2 fs-3">
+                                <i class="far fa-star rating-star" data-rating="1"
+                                    style="cursor: pointer; color: #ffd700;"></i>
+                                <i class="far fa-star rating-star" data-rating="2"
+                                    style="cursor: pointer; color: #ffd700;"></i>
+                                <i class="far fa-star rating-star" data-rating="3"
+                                    style="cursor: pointer; color: #ffd700;"></i>
+                                <i class="far fa-star rating-star" data-rating="4"
+                                    style="cursor: pointer; color: #ffd700;"></i>
+                                <i class="far fa-star rating-star" data-rating="5"
+                                    style="cursor: pointer; color: #ffd700;"></i>
+                            </div>
+                            <input type="hidden" id="reviewRating" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="reviewComment" class="form-label">Your feedback</label>
+                            <textarea class="form-control border-secondary" id="reviewComment" rows="4"
+                                placeholder="Tell us what you liked or disliked..."></textarea>
+                        </div>
+                        <button type="submit"
+                            class="btn btn-dark w-100 py-2 mt-3 text-uppercase letter-spacing-1">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <%- include("../../views/partials/user/footer.ejs") %>
 
         <script>
@@ -419,4 +467,74 @@
                 // This could optionally call a bulk return endpoint or iterate all products
                 window.location.href = `/return-reason/${orderId}`;
             }
+
+            // Review Logic
+            let reviewModal;
+            document.addEventListener('DOMContentLoaded', () => {
+                reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+
+                // Star Rating logic
+                const stars = document.querySelectorAll('.rating-star');
+                stars.forEach(star => {
+                    star.addEventListener('click', function () {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        document.getElementById('reviewRating').value = rating;
+
+                        stars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.remove('far');
+                                s.classList.add('fas');
+                            } else {
+                                s.classList.remove('fas');
+                                s.classList.add('far');
+                            }
+                        });
+                    });
+                });
+            });
+
+            function openReviewModal(productId, productName, orderId) {
+                document.getElementById('reviewProductId').value = productId;
+                document.getElementById('reviewOrderId').value = orderId;
+                document.querySelector('#reviewModal .modal-title').textContent = `Review: ${productName}`;
+                document.getElementById('reviewForm').reset();
+                document.getElementById('reviewRating').value = 0;
+                document.querySelectorAll('.rating-star').forEach(s => {
+                    s.classList.remove('fas');
+                    s.classList.add('far');
+                });
+                reviewModal.show();
+            }
+
+            document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const productId = document.getElementById('reviewProductId').value;
+                const orderId = document.getElementById('reviewOrderId').value;
+                const rating = document.getElementById('reviewRating').value;
+                const comment = document.getElementById('reviewComment').value;
+
+                if (rating == 0) {
+                    return Swal.fire('Note', 'Please select a rating.', 'info');
+                }
+                if (!comment.trim()) {
+                    return Swal.fire('Note', 'Please enter your feedback.', 'info');
+                }
+
+                try {
+                    const res = await fetch('/submit-review', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId, orderId, rating, comment })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        reviewModal.hide();
+                        Swal.fire('Thank You!', 'Your review has been submitted.', 'success');
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to submit review.', 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'Something went wrong.', 'error');
+                }
+            });
         </script>

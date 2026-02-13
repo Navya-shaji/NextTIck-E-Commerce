@@ -279,7 +279,8 @@
                                         <strong>Category:</strong>
                                         <%= product?.category?.name || 'N/A' %><br />
                                             <strong>Brand:</strong>
-                                            <%= product?.brand || 'N/A' %>
+                                            <%= product?.brand ? (typeof product.brand==='object' ?
+                                                product.brand.brandName : product.brand) : 'N/A' %>
                                     </div>
                                 </div>
 

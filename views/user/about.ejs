@@ -1,0 +1,211 @@
+<%- include('../partials/user/header') %>
+
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --accent-color: #c5a059;
+            --secondary-color: #f8f8f8;
+            --font-heading: 'Cinzel', serif;
+            --font-body: 'Outfit', sans-serif;
+        }
+
+        .about-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/about-bg.jpg');
+            /* Note: Image needs to exist or be generated */
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            margin-bottom: 80px;
+        }
+
+        .about-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .section-padding {
+            padding: 100px 0;
+        }
+
+        .philosophy-section {
+            background-color: var(--secondary-color);
+        }
+
+        .about-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .about-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: var(--accent-color);
+            margin-top: 15px;
+        }
+
+        .lead-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .value-card {
+            padding: 50px;
+            border: 1px solid var(--border-color);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .value-card:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .value-card:hover .value-icon {
+            color: var(--accent-color);
+        }
+
+        .value-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <main>
+        <section class="about-hero">
+            <div class="container">
+                <h1>Our Story</h1>
+                <p class="lead text-white-50">Crafting Time, Defining Moments</p>
+            </div>
+        </section>
+
+        <section class="section-padding">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-5 mb-lg-0">
+                        <h2 class="about-title">A Legacy of Precision</h2>
+                        <p class="lead-text">
+                            NexTick was born from a simple yet profound realization: that a watch is more than just a
+                            tool to tell time.
+                            It is a statement of identity, a vessel for memories, and a masterwork of engineering.
+                        </p>
+                        <p class="text-muted">
+                            Founded in 2024, we set out to curate a collection that bridges the gap between traditional
+                            horology and modern aesthetics.
+                            Every timepiece in our boutique is hand-selected for its craftsmanship, story, and enduring
+                            value.
+                        </p>
+                    </div>
+                    <div class="col-lg-5 offset-lg-1">
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-number">5k+</span>
+                                <span class="stat-label">Watch Lovers</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">20+</span>
+                                <span class="stat-label">Elite Brands</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">100%</span>
+                                <span class="stat-label">Auth Guaranteed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="philosophy-section section-padding">
+            <div class="container text-center">
+                <h2 class="about-title d-inline-block">Our Values</h2>
+                <div class="row mt-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card shadow-sm">
+                            <i class="fas fa-gem value-icon"></i>
+                            <h4>Quality First</h4>
+                            <p class="small opacity-75">We only offer timepieces that meet our rigorous standards of
+                                mechanical excellence and material durability.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card shadow-sm">
+                            <i class="fas fa-handshake value-icon"></i>
+                            <h4>Transparency</h4>
+                            <p class="small opacity-75">From origin stories to pricing, we believe in complete honesty
+                                with our community of collectors.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card shadow-sm">
+                            <i class="fas fa-infinity value-icon"></i>
+                            <h4>Timelessness</h4>
+                            <p class="small opacity-75">Our focus is on design that transcends trends, ensuring your
+                                investment remains relevant for generations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../partials/user/footer') %>

@@ -140,6 +140,37 @@
       transition: transform 0.2s;
     }
 
+    /* Header Search */
+    .header-search {
+      flex: 0 0 300px;
+      margin: 0 40px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 15px 8px 35px;
+      border: 1px solid #eeeeee;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: var(--nav-font);
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--header-accent);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: #999;
+    }
+
     .action-icon:hover {
       color: var(--header-accent);
       transform: translateY(-2px);
@@ -334,10 +365,18 @@
         <h1>NexTick</h1>
       </a>
 
+      <div class="header-search">
+        <form action="/shop" method="GET">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" name="query" class="search-input" placeholder="Search for timepieces...">
+        </form>
+      </div>
+
       <nav class="main-nav">
         <ul class="nav-menu">
           <li><a href="/" class="nav-link">Home</a></li>
           <li><a href="/shop" class="nav-link">Shop</a></li>
+          <li><a href="/about" class="nav-link">About</a></li>
         </ul>
       </nav>
 

@@ -304,59 +304,138 @@
         /* Related Products */
         .related-section {
             margin-top: 80px;
-            padding-top: 40px;
+            padding-top: 60px;
             border-top: 1px solid var(--border-color);
         }
 
         .section-heading {
             font-family: var(--font-heading);
-            font-size: 2rem;
+            font-size: 1.8rem;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            color: var(--primary-color);
         }
 
-        .product-card {
-            border: none;
-            transition: all 0.3s;
+        .premium-product-card {
+            background: #fff;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            padding-bottom: 20px;
         }
 
-        .product-card:hover .card-img {
-            transform: scale(1.05);
+        .premium-product-card:hover {
+            transform: translateY(-8px);
         }
 
-        .card-img-wrapper {
+        .premium-image-wrapper {
+            position: relative;
+            background: #f9f9f9;
+            aspect-ratio: 1;
             overflow: hidden;
             margin-bottom: 15px;
-            background: #f8f8f8;
-            aspect-ratio: 1;
+            border-radius: 12px;
         }
 
-        .card-img {
+        .premium-card-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
+            object-fit: contain;
+            padding: 15px;
+            transition: transform 0.6s ease;
         }
 
-        .card-info {
+        .premium-product-card:hover .premium-card-img {
+            transform: scale(1.1);
+        }
+
+        .premium-card-info {
             text-align: center;
         }
 
-        .card-title {
-            font-family: var(--font-heading);
-            font-size: 1rem;
-            margin-bottom: 8px;
+        .premium-card-title {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 6px;
             color: var(--primary-color);
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            line-clamp: 1;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .card-price {
+        .premium-card-price {
             font-weight: 600;
             color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        /* Review Styles */
+        .reviews-section {
+            margin-top: 80px;
+            padding-top: 60px;
+            border-top: 1px solid #eee;
+        }
+
+        .review-card {
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #eee;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .review-card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            border-color: var(--accent-color);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-name {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+
+        .review-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .review-stars {
+            color: #ffd700;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .review-comment {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .avg-rating-box {
+            background: var(--secondary-color);
+            padding: 40px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .avg-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
         }
 
         /* Magnifier */
@@ -502,13 +581,6 @@
 
                             <% if (product.quantity> 0) { %>
                                 <div class="controls-wrapper">
-                                    <div class="quantity-wrapper">
-                                        <button class="qty-btn" onclick="updateQuantity(-1)">-</button>
-                                        <input type="number" id="quantity" class="qty-input" value="1" min="1"
-                                            max="<%= Math.min(5, product.quantity) %>" readonly>
-                                        <button class="qty-btn" onclick="updateQuantity(1)">+</button>
-                                    </div>
-
                                     <button onclick="addToCart('<%= product._id %>')" class="btn-add-cart">Add to
                                         Bag</button>
 
@@ -536,15 +608,103 @@
                                                 <div id="shipping" class="accordion-collapse collapse"
                                                     data-bs-parent="#productAccordion">
                                                     <div class="accordion-body text-muted small">
-                                                        Brand: <%= product.brand ? product.brand.brandName : 'N/A' %>
-                                                            <br>
-                                                            Category: <%= product.category ? product.category.name
-                                                                : 'N/A' %>
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>Brand</span>
+                                                            <span class="text-dark fw-bold">
+                                                                <%= product.brand ? product.brand.brandName : 'Luxury'
+                                                                    %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>Category</span>
+                                                            <span class="text-dark fw-bold">
+                                                                <%= product.category ? product.category.name : 'Watches'
+                                                                    %>
+                                                            </span>
+                                                        </div>
+                                                        <% if (product.color) { %>
+                                                            <div class="d-flex justify-content-between mb-2">
+                                                                <span>Color</span>
+                                                                <span class="text-dark fw-bold">
+                                                                    <%= product.color %>
+                                                                </span>
+                                                            </div>
+                                                            <% } %>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Movement</span>
+                                                                    <span
+                                                                        class="text-dark fw-bold">Automatic/Quartz</span>
+                                                                </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <div class="row mb-5 align-items-center">
+                <div class="col-md-6">
+                    <h2 class="section-heading mb-0">Customer Reviews</h2>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">
+                        <%= reviews.length %> Reviews
+                    </span>
+                </div>
+            </div>
+
+            <div class="row">
+                <% if (reviews && reviews.length> 0) { %>
+                    <div class="col-lg-4 mb-5">
+                        <div class="avg-rating-box shadow-sm">
+                            <% let totalRating=reviews.reduce((acc, curr)=> acc + curr.rating, 0);
+                                let avg = (totalRating / reviews.length).toFixed(1);
+                                %>
+                                <span class="avg-number">
+                                    <%= avg %>
+                                </span>
+                                <div class="review-stars mb-2">
+                                    <% for(let i=1; i<=5; i++) { %>
+                                        <i class="<%= i <= Math.round(avg) ? 'fas' : 'far' %> fa-star"></i>
+                                        <% } %>
+                                </div>
+                                <p class="text-muted small mb-0">Based on <%= reviews.length %> verified ratings</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <% reviews.forEach(review=> { %>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="reviewer-name">
+                                        <%= review.userName %>
+                                    </span>
+                                    <span class="review-date">
+                                        <%= new Date(review.createdOn).toLocaleDateString() %>
+                                    </span>
+                                </div>
+                                <div class="review-stars">
+                                    <% for(let i=1; i<=5; i++) { %>
+                                        <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
+                                        <% } %>
+                                </div>
+                                <p class="review-comment">
+                                    <%= review.comment %>
+                                </p>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <div class="col-12 text-center py-5">
+                            <div class="text-muted mb-3">
+                                <i class="far fa-comment-dots fa-3x opacity-25"></i>
+                            </div>
+                            <h4 class="font-heading">No reviews yet</h4>
+                            <p class="text-muted">Be the first to share your thoughts after purchasing.</p>
+                        </div>
+                        <% } %>
             </div>
         </div>
 
@@ -555,18 +715,18 @@
                 <div class="row">
                     <% relatedProducts.forEach(related=> { %>
                         <div class="col-md-3 col-6 mb-4">
-                            <div class="product-card">
+                            <div class="premium-product-card">
                                 <a href="/productDetails?id=<%= related._id %>" class="text-decoration-none">
-                                    <div class="card-img-wrapper">
+                                    <div class="premium-image-wrapper">
                                         <img src="/uploads/re-image/<%= related.productImage[0] %>"
-                                            alt="<%= related.productName %>" class="card-img"
+                                            alt="<%= related.productName %>" class="premium-card-img"
                                             onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'">
                                     </div>
-                                    <div class="card-info">
-                                        <h5 class="card-title">
+                                    <div class="premium-card-info">
+                                        <h5 class="premium-card-title">
                                             <%= related.productName %>
                                         </h5>
-                                        <div class="card-price">₹<%= related.salesPrice %>
+                                        <div class="premium-card-price">₹<%= related.salesPrice.toLocaleString() %>
                                         </div>
                                     </div>
                                 </a>
@@ -594,7 +754,7 @@
             glass.style.backgroundImage = "url('" + src + "')";
         }
 
-        // Magnifier Logic - Lens Effect
+        // Magnifier Logic - Improved Lens Effect
         function magnify(e) {
             if (window.innerWidth <= 768) return;
 
@@ -607,36 +767,31 @@
 
             // Get standard dimensions
             const rect = container.getBoundingClientRect();
+
+            // Get cursor position relative to image container
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            // Calculate percentage position (0.0 to 1.0)
-            let xPercent = x / rect.width;
-            let yPercent = y / rect.height;
+            // Calculate ratios for background position (0% to 100%)
+            let bgX = (x / rect.width) * 100;
+            let bgY = (y / rect.height) * 100;
 
             // Clamp values
-            xPercent = Math.max(0, Math.min(1, xPercent));
-            yPercent = Math.max(0, Math.min(1, yPercent));
+            bgX = Math.max(0, Math.min(100, bgX));
+            bgY = Math.max(0, Math.min(100, bgY));
 
-            // Set background position
-            const zoomLevel = 2.5;
-
+            // Calculate zoom properties
+            const zoomLevel = 3;
             glass.style.backgroundImage = `url('${img.src}')`;
-            glass.style.backgroundRepeat = "no-repeat";
             glass.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
+            glass.style.backgroundPosition = `${bgX}% ${bgY}%`;
 
-            // Calculate the position of the zoomed image
-            // We need to shift the background image so that the point under the cursor 
-            // corresponds to the same point in the zoomed image.
+            // Center the glass on cursor
+            let glassX = x - (glass.offsetWidth / 2);
+            let glassY = y - (glass.offsetHeight / 2);
 
-            const bgPosX = (xPercent * 100) + "%";
-            const bgPosY = (yPercent * 100) + "%";
-
-            glass.style.backgroundPosition = `${bgPosX} ${bgPosY}`;
-
-            // Position the glass at the cursor
-            glass.style.left = `${x - (glass.offsetWidth / 2)}px`;
-            glass.style.top = `${y - (glass.offsetHeight / 2)}px`;
+            glass.style.left = `${glassX}px`;
+            glass.style.top = `${glassY}px`;
         }
 
         function removeMagnify() {
@@ -678,6 +833,10 @@
                             position: 'top-end',
                             toast: true
                         });
+                        // Update cart count in header
+                        if (response.cartCount !== undefined) {
+                            $('.cart-count').text(response.cartCount);
+                        }
                     } else {
                         Swal.fire({
                             icon: 'info',

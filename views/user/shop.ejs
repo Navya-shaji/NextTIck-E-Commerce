@@ -612,7 +612,6 @@
 
             <select class="sort-select-premium"
               onchange="const u = new URL(window.location.href); u.searchParams.set('sort', this.value); window.location.href = u.toString()">
-              <option value="newest" <%=query.sort==='newest' ? 'selected' : '' %>>New Arrivals</option>
               <option value="price_asc" <%=query.sort==='price_asc' ? 'selected' : '' %>>Price: Low to High</option>
               <option value="price_desc" <%=query.sort==='price_desc' ? 'selected' : '' %>>Price: High to Low</option>
               <option value="a_to_z" <%=query.sort==='a_to_z' ? 'selected' : '' %>>A - Z</option>

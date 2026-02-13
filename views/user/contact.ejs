@@ -1,0 +1,220 @@
+<%- include('../partials/user/header') %>
+
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --accent-color: #c5a059;
+            --secondary-color: #f8f8f8;
+            --font-heading: 'Cinzel', serif;
+            --font-body: 'Outfit', sans-serif;
+        }
+
+        .contact-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/contact-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 40vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .contact-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .contact-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .contact-card {
+            border: 1px solid #eee;
+            padding: 40px;
+            height: 100%;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .contact-card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--secondary-color);
+            color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+
+        .contact-form-wrapper {
+            background: var(--secondary-color);
+            padding: 60px;
+            border-radius: 4px;
+        }
+
+        .form-label {
+            font-family: var(--font-body);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
+        .form-control {
+            border: none;
+            border-bottom: 1px solid #ddd;
+            border-radius: 0;
+            padding: 15px 0;
+            background: transparent;
+            font-family: var(--font-body);
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--accent-color);
+            background: transparent;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .map-container {
+            height: 450px;
+            width: 100%;
+            filter: grayscale(100%) invert(90%);
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .contact-form-wrapper {
+                padding: 30px;
+            }
+        }
+    </style>
+
+    <main>
+        <section class="contact-hero">
+            <div class="container">
+                <h1>Get In Touch</h1>
+                <p class="lead text-white-50">Expert advice on your next timepiece</p>
+            </div>
+        </section>
+
+        <section class="contact-section">
+            <div class="container">
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h5>Our Boutique</h5>
+                            <p class="text-muted small">203 Fake St. Mountain View,<br>San Francisco, CA, USA</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <h5>Phone Support</h5>
+                            <p class="text-muted small">Hotline: +45 1276 89456<br>Mon - Fri: 9:00 - 18:00</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h5>Email Inquiry</h5>
+                            <p class="text-muted small">ntick@gmail.com<br>support@nextick.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-lg-12">
+                        <div class="contact-form-wrapper shadow-sm">
+                            <h2 class="font-heading mb-5 text-center">Send Us a Message</h2>
+                            <form id="contactForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label class="form-label">Your Name</label>
+                                        <input type="text" class="form-control" placeholder="Enter your name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" placeholder="Enter your email"
+                                            required>
+                                    </div>
+                                    <div class="col-md-12 mb-4">
+                                        <label class="form-label">Subject</label>
+                                        <input type="text" class="form-control" placeholder="Inquiry about..." required>
+                                    </div>
+                                    <div class="col-md-12 mb-4">
+                                        <label class="form-label">Message</label>
+                                        <textarea class="form-control" rows="5" placeholder="Your message here..."
+                                            required></textarea>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn-submit">Submit Inquiry</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="map-section">
+            <iframe class="map-container"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3168.6392906233483!2d-122.0837392!3d37.3860517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fb0d25bf8ba93%3A0x73b781a70c322b7d!2sGoogle%20Plex!5e0!3m2!1sen!2sus!4v1634567890123!5m2!1sen!2sus"
+                allowfullscreen="" loading="lazy"></iframe>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'success',
+                title: 'Message Sent',
+                text: 'Our concierge will contact you within 24 hours.',
+                confirmButtonColor: '#1a1a1a'
+            }).then(() => {
+                this.reset();
+            });
+        });
+    </script>
+
+    <%- include('../partials/user/footer') %>

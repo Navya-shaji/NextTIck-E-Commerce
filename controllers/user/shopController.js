@@ -67,10 +67,7 @@ const loadshoppingPage = async (req, res) => {
     }
 
     if (req.query.query) {
-      query.$or = [
-        { productName: { $regex: req.query.query, $options: "i" } },
-        // { 'category.name': { $regex: req.query.query, $options: "i" } }
-      ];
+      query.productName = { $regex: req.query.query, $options: "i" };
     }
 
     const totalProducts = await Product.countDocuments(query);
@@ -169,9 +166,33 @@ const searchProducts = async (req, res) => {
   }
 };
 
+const loadAboutPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findById(user);
+    res.render("about", { user: userData });
+  } catch (error) {
+    console.error("Error loading about page:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+const loadContactPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findById(user);
+    res.render("contact", { user: userData });
+  } catch (error) {
+    console.error("Error loading contact page:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
 
 
 module.exports = {
   loadshoppingPage,
   searchProducts,
+  loadAboutPage,
+  loadContactPage
 };

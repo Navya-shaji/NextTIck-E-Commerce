@@ -363,7 +363,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="cart-item-total">
+                                            <div class="cart-item-total" id="total-<%= item.productId._id %>">
                                                 ₹<%= (item.price * item.quantity).toLocaleString() %>
                                             </div>
 
@@ -385,7 +385,7 @@
                         <h2>Summary</h2>
                         <div class="summary-row">
                             <span>Subtotal</span>
-                            <span>₹<%= totalAmount.toLocaleString() %></span>
+                            <span id="cart-subtotal">₹<%= totalAmount.toLocaleString() %></span>
                         </div>
                         <div class="summary-row">
                             <span>Shipping</span>
@@ -398,7 +398,7 @@
 
                         <div class="summary-row total">
                             <span>Estimated Total</span>
-                            <span>₹<%= totalAmount.toLocaleString() %></span>
+                            <span id="cart-total">₹<%= totalAmount.toLocaleString() %></span>
                         </div>
 
                         <button onclick="window.location.href='/checkout'" class="checkout-btn-premium" <%=!products ||
@@ -433,6 +433,32 @@
                     const data = await response.json();
 
                     if (data.success) {
+                        // Dynamic Update without reload
+                        itemRow.querySelector('input').value = newVal;
+
+                        // Update item total
+                        const itemTotalEl = document.querySelector(`#total-${productId}`);
+                        if (itemTotalEl) {
+                            itemTotalEl.textContent = `₹${data.totalPrice.toLocaleString()}`;
+                        }
+
+                        // Update cart subtotal & total
+                        const subtotalEl = document.querySelector('#cart-subtotal');
+                        const totalEl = document.querySelector('#cart-total');
+                        if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+                        if (totalEl) totalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+
+                        // Update header cart count
+                        if (data.cartCount !== undefined) {
+                            document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
+                        }
+
+                        // Update buttons state
+                        const minusBtn = itemRow.querySelector('button:first-of-type');
+                        const plusBtn = itemRow.querySelector('button:last-of-type');
+                        if (minusBtn) minusBtn.disabled = newVal <= 1;
+                        // For plusBtn, we'd need maxAllowedQuantity, but let's keep it simple for now or check data if we added it 
+
                         const Toast = Swal.mixin({
                             toast: true,
                             position: 'top-end',
@@ -440,7 +466,6 @@
                             timer: 1000
                         });
                         Toast.fire({ icon: 'success', title: 'Cart updated' });
-                        setTimeout(() => location.reload(), 1000);
                     } else {
                         Swal.fire('Note', data.message || 'Limit reached', 'info');
                     }
@@ -475,7 +500,41 @@
 
                         const data = await response.json();
                         if (data.success) {
-                            location.reload();
+                            // Dynamic remove
+                            const itemRow = document.querySelector(`#item-${productId}`);
+                            if (itemRow) {
+                                itemRow.style.opacity = '0';
+                                itemRow.style.transform = 'translateX(20px)';
+                                setTimeout(() => {
+                                    itemRow.remove();
+
+                                    // Update cart count in header
+                                    if (data.cartCount !== undefined) {
+                                        document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
+                                    }
+
+                                    // If no items left, show empty state or reload
+                                    if (document.querySelectorAll('.cart-item-row').length === 0) {
+                                        location.reload(); // Easier to let it show the empty state EJS block
+                                    } else {
+                                        // Update totals (we'd need cartTotal in remove response too)
+                                        // For now, let's just reload if it's easier, or update if we have data
+                                        // Let's check if we can get cartTotal from remove response
+                                        // I'll update the controller to return cartTotal too.
+                                        if (data.cartTotal !== undefined) {
+                                            const subtotalEl = document.querySelector('#cart-subtotal');
+                                            const totalEl = document.querySelector('#cart-total');
+                                            if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+                                            if (totalEl) totalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+                                        } else {
+                                            // Fallback to reload if controller doesn't provide total yet
+                                            location.reload();
+                                        }
+                                    }
+                                }, 300);
+                            } else {
+                                location.reload();
+                            }
                         }
                     } catch (e) {
                         Swal.fire('Error', 'Action failed', 'error');

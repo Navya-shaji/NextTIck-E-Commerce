@@ -298,11 +298,9 @@
                                 <% } else { %>
                                     <p>No saved addresses found.</p>
                                     <% } %>
-                                        <a href="/add-address">
-                                            <button class="btn btn-primary">
-                                                Add Address
-                                            </button>
-                                        </a>
+                                        <button class="btn btn-primary" onclick="showAddAddressForm()">
+                                            Add Address
+                                        </button>
                         </div>
                     </div>
 
@@ -477,10 +475,6 @@
                                 <input type="text" class="form-control" id="addressType">
                             </div>
                             <div class="mb-3">
-                                <label for="street" class="form-label">Street</label>
-                                <input type="text" class="form-control" id="street">
-                            </div>
-                            <div class="mb-3">
                                 <label for="city" class="form-label">City</label>
                                 <input type="text" class="form-control" id="city">
                             </div>
@@ -585,20 +579,21 @@
 
             function saveAddress() {
                 const addressData = {
-                    _id: document.getElementById('addressId').value,
                     name: document.getElementById('name').value,
                     addressType: document.getElementById('addressType').value,
-                    street: document.getElementById('street').value,
                     city: document.getElementById('city').value,
                     state: document.getElementById('state').value,
                     pincode: document.getElementById('pincode').value,
-                    landmark: document.getElementById('landmark').value,
+                    landMark: document.getElementById('landmark').value,
                     phone: document.getElementById('phone').value,
                     altPhone: document.getElementById('altPhone').value
                 };
 
-                fetch('/address', {
-                    method: addressData._id ? 'PUT' : 'POST',
+                const addressId = document.getElementById('addressId').value;
+                const endpoint = addressId ? `/postEditAddress/${addressId}` : '/addaddress';
+
+                fetch(endpoint, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },

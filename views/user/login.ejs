@@ -57,6 +57,13 @@
                   Sign in with Google
                 </a>
               </div>
+
+              <div class="demo-login" style="margin-top: 20px;">
+                <button type="button" onclick="loadDemoCredentials()" class="auth-btn demo-btn"
+                  style="background: #f8f8f8; color: #1a1a1a; border: 1px solid #ddd;">
+                  USE DEMO LOGIN
+                </button>
+              </div>
         </form>
 
         <p class="switch-auth">
@@ -149,4 +156,11 @@
     });
   });
 
+  function loadDemoCredentials() {
+    document.getElementById('email').value = 'user@example.com';
+    document.getElementById('password').value = 'Password@123';
+    // Clear any existing errors
+    document.getElementById('emailError').textContent = '';
+    document.getElementById('passwordError').textContent = '';
+  }
 </script>

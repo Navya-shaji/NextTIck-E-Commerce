@@ -8,6 +8,8 @@ const USER_ROUTES = {
     LOGIN: '/login',
     VERIFY_OTP: '/verify-otp',
     RESEND_OTP: '/resend-otp',
+    ABOUT: '/about',
+    CONTACT: '/contact',
 
     // Google Auth
     AUTH_GOOGLE: '/auth/google',
@@ -95,7 +97,10 @@ const USER_ROUTES = {
     UPDATE_WALLET_AFTER_PAYMENT: '/update-wallet-after-payment',
 
     // Coupon
-    APPLY_COUPON: '/apply-coupon'
+    APPLY_COUPON: '/apply-coupon',
+
+    // Reviews
+    SUBMIT_REVIEW: '/submit-review'
 };
 
 module.exports = USER_ROUTES;

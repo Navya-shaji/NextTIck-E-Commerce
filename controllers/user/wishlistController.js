@@ -1,6 +1,8 @@
 const Wishlist = require("../../models/wishlistSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
+const Category = require("../../models/categorySchema");
+const Brand = require("../../models/brandSchema");
 
 
 //loading wishlist page....................................................
@@ -12,10 +14,10 @@ const loadWishlist = async (req, res) => {
       .populate({
         path: 'products.productId',
         model: 'Product',
-        populate: {
-          path: 'category',
-          model: 'Category'
-        }
+        populate: [
+          { path: 'category', model: 'Category' },
+          { path: 'brand', model: 'Brand' }
+        ]
       })
       .lean();
 

@@ -495,14 +495,27 @@ const cancelOrderProducts = async (req, res) => {
 
         let refundAmount = 0;
 
-        products.forEach(({ productId, reason }) => {
+        for (const { productId, reason } of products) {
             const item = order.orderItems.find(i => i.product.toString() === productId);
-            if (item && item.status !== 'Cancelled') {
+            const cancellableOrderStatuses = ['Pending', 'Processing'];
+
+            if (item && item.status !== 'Cancelled' && (item.status === 'Pending' || cancellableOrderStatuses.includes(order.status))) {
                 item.status = 'Cancelled';
                 item.cancellationReason = reason;
                 refundAmount += item.price * item.quantity;
+
+                // Restore stock
+                try {
+                    const product = await Product.findById(productId);
+                    if (product) {
+                        product.quantity += item.quantity;
+                        await product.save();
+                    }
+                } catch (stockError) {
+                    console.error('Error restoring stock for item:', productId, stockError);
+                }
             }
-        });
+        }
 
         // Update overall status if all items are cancelled
         const allCancelled = order.orderItems.every(i => i.status === 'Cancelled');
@@ -551,7 +564,9 @@ const returnOrderProducts = async (req, res) => {
 
         products.forEach(({ productId, reason }) => {
             const item = order.orderItems.find(i => i.product.toString() === productId);
-            if (item && item.status === 'Delivered') {
+            // Allow return if order is delivered OR item is explicitly marked as delivered
+            // AND it's not already returned/requested
+            if (item && (item.status === 'Delivered' || order.status === 'Delivered') && item.status !== 'Return Request' && item.status !== 'Returned') {
                 item.status = 'Return Request';
                 item.returnReason = reason;
             }
