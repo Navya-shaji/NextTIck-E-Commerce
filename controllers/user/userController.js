@@ -1,11 +1,12 @@
 
-const User= require("../../models/userSchema");
-const nodemailer =require("nodemailer");
-const env=require("dotenv").config()
-const bcrypt =require("bcrypt")
-const Category=require("../../models/categorySchema")
-const Product =require("../../models/productSchema")
-const brand=require("../../models/brandSchema");
+const User = require("../../models/userSchema");
+const nodemailer = require("nodemailer");
+const env = require("dotenv").config()
+const bcrypt = require("bcrypt")
+const Category = require("../../models/categorySchema")
+const Product = require("../../models/productSchema")
+const brand = require("../../models/brandSchema");
+const Banner = require("../../models/bannerSchema");
 const PDFDocument = require('pdfkit');
 const Order = require('../../models/orderSchema');
 
@@ -13,15 +14,15 @@ const Order = require('../../models/orderSchema');
 
 // signupPage loadSignup........................................
 
-const loadSignup =async(req,res)=>{
+const loadSignup = async (req, res) => {
     try {
         const error = req.session.errorMessage;
-        req.session.errorMessage=''
-        return res.render("signup",{message:error})
+        req.session.errorMessage = ''
+        return res.render("signup", { message: error })
 
-        } catch (error) {
+    } catch (error) {
         res.status(500).send("Server Error")
-        
+
     }
 
 }
@@ -30,86 +31,86 @@ const loadSignup =async(req,res)=>{
 //Signup Page............................................................
 
 
-const signup =async(req,res)=>{
+const signup = async (req, res) => {
     try {
-        const {name,phone,email,password,cpassword}=req.body
-        if(password!==cpassword){
+        const { name, phone, email, password, cpassword } = req.body
+        if (password !== cpassword) {
             res.session.errorMessage = "Password do not matched "
             res.redirect("/signup")
-            return res.render("signup",{message:"Passwords do not match "})
+            return res.render("signup", { message: "Passwords do not match " })
         }
 
-        const findUser=await User.findOne({email});
-        if(findUser){
-            return res.render("signup",{message:"User with this email Already exists"})
+        const findUser = await User.findOne({ email });
+        if (findUser) {
+            return res.render("signup", { message: "User with this email Already exists" })
         }
 
-        const otp=generateOtp();
-        
-        const emailSent =await sendVerificationEmail(email,otp)
-        if(!emailSent){
+        const otp = generateOtp();
+
+        const emailSent = await sendVerificationEmail(email, otp)
+        if (!emailSent) {
             return res.json("email-error")
         }
 
-        req.session.userOtp=otp;
-        req.session.userData={name,phone,email,password}
-        
+        req.session.userOtp = otp;
+        req.session.userData = { name, phone, email, password }
+
 
         res.render("verify-otp");
-        console.log("OTP Sent",otp)
+        console.log("OTP Sent", otp)
 
 
 
     } catch (error) {
-        console.error("signup error",error);
+        console.error("signup error", error);
         res.redirect("/pageNotFound")
-        
+
     }
 }
 
 
-  
+
 //GenerateOtp function()....................................................
 
 
-function generateOtp(){
-    return Math.floor(100000+Math.random()*900000).toString();
+function generateOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
 
 }
 
-async function sendVerificationEmail(email,otp){
+async function sendVerificationEmail(email, otp) {
     try {
-        const transporter =nodemailer.createTransport({
-            service:"gmail",
-            Port:587,
-            secure:false,
-            requireTLS:true,
-            auth:{
-                user:process.env.NODEMAILER_EMAIL,
-                pass:process.env.NODEMAILER_PASSWORD
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            Port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
             }
         })
 
-          const info =await transporter.sendMail({
-            from:process.env.NODEMAILER_EMAIL,
-            to:email,
-            subject:"Verify your account",
-            text:`Your OTP is ${otp}`,
-            html:`<br> Your OTP:${otp}</br>`,
+        const info = await transporter.sendMail({
+            from: process.env.NODEMAILER_EMAIL,
+            to: email,
+            subject: "Verify your account",
+            text: `Your OTP is ${otp}`,
+            html: `<br> Your OTP:${otp}</br>`,
 
-          })
+        })
 
-          return info.accepted.length>0
+        return info.accepted.length > 0
 
     } catch (error) {
-        console.error("Error sending email",error)
+        console.error("Error sending email", error)
         return false;
     }
 }
 
 
 
- //pageNotFound..................................................
+//pageNotFound..................................................
 
 const pageNotFound = async (req, res) => {
     try {
@@ -127,18 +128,25 @@ const pageNotFound = async (req, res) => {
 
 const loadHomepage = async (req, res) => {
     try {
-     
-      const products = await Product.find({}).populate('category'); 
+        const products = await Product.find({}).populate('category');
 
-      const userData = req.session.user ?? req.session.passport?.user
-      res.render('home', { products, user:userData });
+        // Fetch active banners
+        const currentDate = new Date();
+        const banners = await Banner.find({
+            isActive: true,
+            startDate: { $lte: currentDate },
+            endDate: { $gte: currentDate }
+        }).sort({ createdOn: -1 });
+
+        const userData = req.session.user ?? req.session.passport?.user
+        res.render('home', { products, user: userData, banners });
     } catch (error) {
-      console.error('Error loading homepage:', error);
-      res.status(500).send('Internal Server Error');
+        console.error('Error loading homepage:', error);
+        res.status(500).send('Internal Server Error');
     }
-  };
-  
- 
+};
+
+
 //Password Securing.........................................
 
 const securePassword = async (password) => {
@@ -171,7 +179,7 @@ const verifyOtp = async (req, res) => {
             await saveUserData.save();
             req.session.user = saveUserData;
 
-         
+
             delete req.session.userOtp;
             delete req.session.userData;
 
@@ -198,12 +206,12 @@ const resendOtp = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email not found in session." });
         }
 
-        const otp = generateOtp(); 
+        const otp = generateOtp();
         req.session.userOtp = otp;
 
-        const emailSent = await sendVerificationEmail(email, otp); 
+        const emailSent = await sendVerificationEmail(email, otp);
         if (emailSent) {
-            console.log("Resend OTP:", otp); 
+            console.log("Resend OTP:", otp);
             return res.status(200).json({ success: true, message: "OTP Resent Successfully" });
         } else {
             return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again." });
@@ -224,7 +232,7 @@ const loadLogin = async (req, res) => {
         if (!req.session.user) {
             return res.render("login");
         }
-        
+
         return res.redirect("/");
     } catch (error) {
         console.error("Error in loadLogin:", error.message);
@@ -264,26 +272,25 @@ const login = async (req, res) => {
 
 
 //Logout..........................................................
- 
-const logout =async(req,res)=>{
+
+const logout = async (req, res) => {
     try {
-        req.session.destroy((err)=>{
-            if(err)
-{
-    return res.redirect("/pageNotFound")
-    
-}      
-return res.redirect("/login")
-  })
+        req.session.destroy((err) => {
+            if (err) {
+                return res.redirect("/pageNotFound")
+
+            }
+            return res.redirect("/login")
+        })
     } catch (error) {
-      res.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
     }
 }
 
 
 
 
-module.exports={
+module.exports = {
     loadHomepage,
     pageNotFound,
     loadSignup,

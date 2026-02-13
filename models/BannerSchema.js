@@ -14,9 +14,6 @@ const bannerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    link: {
-        type: String
-    },
     startDate: {
         type: Date,
         required: true
@@ -32,6 +29,10 @@ const bannerSchema = new mongoose.Schema({
     createdOn: {
         type: Date,
         default: Date.now
+    },
+    link: {
+        type: String,
+        default: ''
     }
 })
 

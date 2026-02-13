@@ -1,6 +1,7 @@
 const Banner = require("../../models/bannerSchema");
 const fs = require("fs");
 const path = require("path");
+const { SUCCESS_MESSAGES, ERROR_MESSAGES } = require("../../constants/messages");
 
 // Load Banners Page
 const loadBanners = async (req, res) => {
@@ -16,28 +17,28 @@ const loadBanners = async (req, res) => {
 // Add Banner
 const addBanner = async (req, res) => {
     try {
-        const { title, description, link, startDate, endDate } = req.body;
+        const { title, description, startDate, endDate, link } = req.body;
         const image = req.file ? req.file.filename : null;
 
         if (!image) {
-            return res.status(400).json({ success: false, message: "Banner image is required" });
+            return res.status(400).json({ success: false, message: ERROR_MESSAGES.BANNER_IMAGE_REQUIRED });
         }
 
         const newBanner = new Banner({
             image,
             title,
             description,
-            link,
             startDate,
             endDate,
+            link: link || '',
             isActive: true
         });
 
         await newBanner.save();
-        res.json({ success: true, message: "Banner added successfully" });
+        res.json({ success: true, message: SUCCESS_MESSAGES.BANNER_ADDED });
     } catch (error) {
         console.error("Error adding banner:", error);
-        res.status(500).json({ success: false, message: "Failed to add banner" });
+        res.status(500).json({ success: false, message: ERROR_MESSAGES.BANNER_ADD_FAILED });
     }
 };
 
@@ -48,16 +49,51 @@ const toggleBannerStatus = async (req, res) => {
         const banner = await Banner.findById(id);
 
         if (!banner) {
-            return res.status(404).json({ success: false, message: "Banner not found" });
+            return res.status(404).json({ success: false, message: ERROR_MESSAGES.BANNER_NOT_FOUND });
         }
 
         banner.isActive = !banner.isActive;
         await banner.save();
 
-        res.json({ success: true, message: "Banner status updated", isActive: banner.isActive });
+        res.json({ success: true, message: SUCCESS_MESSAGES.BANNER_UPDATED, isActive: banner.isActive });
     } catch (error) {
         console.error("Error toggling banner status:", error);
-        res.status(500).json({ success: false, message: "Failed to update banner status" });
+        res.status(500).json({ success: false, message: ERROR_MESSAGES.BANNER_UPDATE_FAILED });
+    }
+};
+
+// Edit Banner
+const editBanner = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, startDate, endDate, link } = req.body;
+        const banner = await Banner.findById(id);
+
+        if (!banner) {
+            return res.status(404).json({ success: false, message: ERROR_MESSAGES.BANNER_NOT_FOUND });
+        }
+
+        // Update banner fields
+        banner.title = title;
+        banner.description = description;
+        banner.startDate = startDate;
+        banner.endDate = endDate;
+        banner.link = link || '';
+
+        // If new image is uploaded, delete old image and update
+        if (req.file) {
+            const oldImagePath = path.join(__dirname, "../../public/uploads/banners", banner.image);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+            banner.image = req.file.filename;
+        }
+
+        await banner.save();
+        res.json({ success: true, message: SUCCESS_MESSAGES.BANNER_UPDATED });
+    } catch (error) {
+        console.error("Error editing banner:", error);
+        res.status(500).json({ success: false, message: ERROR_MESSAGES.BANNER_UPDATE_FAILED });
     }
 };
 
@@ -68,7 +104,7 @@ const deleteBanner = async (req, res) => {
         const banner = await Banner.findById(id);
 
         if (!banner) {
-            return res.status(404).json({ success: false, message: "Banner not found" });
+            return res.status(404).json({ success: false, message: ERROR_MESSAGES.BANNER_NOT_FOUND });
         }
 
         // Delete image file
@@ -78,10 +114,10 @@ const deleteBanner = async (req, res) => {
         }
 
         await Banner.findByIdAndDelete(id);
-        res.json({ success: true, message: "Banner deleted successfully" });
+        res.json({ success: true, message: SUCCESS_MESSAGES.BANNER_DELETED });
     } catch (error) {
         console.error("Error deleting banner:", error);
-        res.status(500).json({ success: false, message: "Failed to delete banner" });
+        res.status(500).json({ success: false, message: ERROR_MESSAGES.BANNER_DELETE_FAILED });
     }
 };
 
@@ -98,13 +134,14 @@ const getActiveBanners = async (req, res) => {
         res.json({ success: true, banners });
     } catch (error) {
         console.error("Error fetching active banners:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch banners" });
+        res.status(500).json({ success: false, message: ERROR_MESSAGES.SERVER_ERROR });
     }
 };
 
 module.exports = {
     loadBanners,
     addBanner,
+    editBanner,
     toggleBannerStatus,
     deleteBanner,
     getActiveBanners

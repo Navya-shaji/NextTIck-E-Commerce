@@ -100,32 +100,50 @@
             color: #92400e;
         }
 
-        .action-btn {
-            padding: 0.4rem 0.8rem;
+        .action-dropdown-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 0.5rem 1rem;
             border-radius: 6px;
-            border: none;
             font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.2s;
             cursor: pointer;
         }
 
-        .btn-toggle {
+        .action-dropdown-btn:hover {
             background: #f1f5f9;
-            color: #475569;
+            border-color: #cbd5e1;
         }
 
-        .btn-toggle:hover {
-            background: #e2e8f0;
+        .dropdown-menu {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
         }
 
-        .btn-delete {
+        .dropdown-item {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            color: #334155;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-item.text-danger:hover {
             background: #fee2e2;
             color: #991b1b;
         }
 
-        .btn-delete:hover {
-            background: #fecaca;
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #e2e8f0;
         }
 
         /* Modal Styling */
@@ -205,7 +223,6 @@
                             <th>Image</th>
                             <th>Title</th>
                             <th>Description</th>
-                            <th>Link</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Status</th>
@@ -225,10 +242,6 @@
                                     </td>
                                     <td>
                                         <%= banner.description.substring(0, 50) %>...
-                                    </td>
-                                    <td>
-                                        <a href="<%= banner.link %>" target="_blank"
-                                            style="color: var(--accent-gold);">View</a>
                                     </td>
                                     <td>
                                         <%= new Date(banner.startDate).toLocaleDateString() %>
@@ -253,22 +266,46 @@
                                                             <% } %>
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2">
-                                            <button class="action-btn btn-toggle"
-                                                onclick="toggleBannerStatus('<%= banner._id %>')">
-                                                <i class="fas fa-toggle-on"></i>
+                                        <div class="dropdown">
+                                            <button class="action-dropdown-btn" type="button" data-bs-toggle="dropdown">
+                                                Actions <i class="fas fa-chevron-down ms-1"></i>
                                             </button>
-                                            <button class="action-btn btn-delete"
-                                                onclick="deleteBanner('<%= banner._id %>')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="#" data-id="<%= banner._id %>"
+                                                        data-title="<%= banner.title %>"
+                                                        data-description="<%= banner.description %>"
+                                                        data-start="<%= banner.startDate %>"
+                                                        data-end="<%= banner.endDate %>"
+                                                        data-link="<%= banner.link || '' %>"
+                                                        data-image="<%= banner.image %>"
+                                                        onclick="handleEditButtonClick(this); return false;">
+                                                        <i class="fas fa-edit me-2"></i>Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#"
+                                                        onclick="toggleBannerStatus('<%= banner._id %>'); return false;">
+                                                        <i class="fas fa-toggle-on me-2"></i>Toggle Status
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#"
+                                                        onclick="deleteBanner('<%= banner._id %>'); return false;">
+                                                        <i class="fas fa-trash me-2"></i>Delete
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </td>
                                 </tr>
                                 <% }) %>
                                     <% } else { %>
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted">No banners found</td>
+                                            <td colspan="7" class="text-center text-muted">No banners found</td>
                                         </tr>
                                         <% } %>
                     </tbody>
@@ -288,13 +325,9 @@
                 <div class="modal-body">
                     <form id="addBannerForm" enctype="multipart/form-data">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Banner Title *</label>
                                 <input type="text" class="form-control" name="title" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Link URL *</label>
-                                <input type="url" class="form-control" name="link" placeholder="https://" required>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -312,12 +345,77 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Link (Optional)</label>
+                            <input type="url" class="form-control" name="link" placeholder="https://example.com">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Banner Image *</label>
                             <input type="file" class="form-control" name="image" accept="image/*" required
                                 onchange="previewImage(event)">
                             <img id="imagePreview" class="image-preview">
                         </div>
                         <button type="submit" class="btn btn-gold w-100">Add Banner</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Banner Modal -->
+    <div class="modal fade" id="editBannerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Banner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editBannerForm" enctype="multipart/form-data">
+                        <input type="hidden" id="editBannerId" name="bannerId">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Banner Title *</label>
+                                <input type="text" class="form-control" id="editTitle" name="title" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3"
+                                required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" id="editStartDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" class="form-control" id="editEndDate" name="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Link (Optional)</label>
+                            <input type="url" class="form-control" id="editLink" name="link"
+                                placeholder="https://example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Image</label>
+                            <div>
+                                <img id="editCurrentImage" class="banner-image mb-2" style="display: block;">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Change Banner Image (Optional)</label>
+                            <input type="file" class="form-control" name="image" accept="image/*"
+                                onchange="previewEditImage(event)">
+                            <img id="editImagePreview" class="image-preview">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-gold flex-grow-1">Update Banner</button>
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteBannerFromModal()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -453,6 +551,102 @@
                 }
             }
         }
+
+        function handleEditButtonClick(btn) {
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            const description = btn.getAttribute('data-description');
+            const start = btn.getAttribute('data-start');
+            const end = btn.getAttribute('data-end');
+            const link = btn.getAttribute('data-link');
+            const image = btn.getAttribute('data-image');
+            openEditModal(id, title, description, start, end, link, image);
+        }
+
+        function openEditModal(bannerId, title, description, startDate, endDate, link, image) {
+            document.getElementById('editBannerId').value = bannerId;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editDescription').value = description;
+
+            // Format dates for input fields (YYYY-MM-DD)
+            const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
+            const formattedEndDate = new Date(endDate).toISOString().split('T')[0];
+            document.getElementById('editStartDate').value = formattedStartDate;
+            document.getElementById('editEndDate').value = formattedEndDate;
+
+            document.getElementById('editLink').value = link;
+            document.getElementById('editCurrentImage').src = `/uploads/banners/${image}`;
+            document.getElementById('editImagePreview').style.display = 'none';
+
+            // Show the modal
+            const editModalElement = document.getElementById('editBannerModal');
+            let modal = bootstrap.Modal.getInstance(editModalElement);
+            if (!modal) {
+                modal = new bootstrap.Modal(editModalElement);
+            }
+            modal.show();
+        }
+
+        function deleteBannerFromModal() {
+            const bannerId = document.getElementById('editBannerId').value;
+            deleteBanner(bannerId);
+            // Hide modal after starting delete process
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editBannerModal'));
+            if (modal) modal.hide();
+        }
+
+        function previewEditImage(event) {
+            const preview = document.getElementById('editImagePreview');
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('editBannerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const bannerId = document.getElementById('editBannerId').value;
+
+            try {
+                const response = await fetch(`/admin/editBanner/${bannerId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        confirmButtonColor: '#c5a059'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message,
+                        confirmButtonColor: '#c5a059'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to update banner',
+                    confirmButtonColor: '#c5a059'
+                });
+            }
+        });
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

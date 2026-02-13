@@ -244,263 +244,293 @@
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container mt-4">
-      <ul class="pagination justify-content-center">
-        <% if (currentPage> 1) { %>
-          <li class="page-item">
-            <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-          </li>
-          <% } %>
-            <% for (let i=1; i <=totalPages; i++) { %>
-              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>">
-                  <%= i %>
-                </a>
+    <% if (totalPages> 1) {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+
+      if (currentPage <= 3) { endPage=Math.min(totalPages, 5); } if (currentPage> totalPages - 3) {
+        startPage = Math.max(1, totalPages - 4);
+        }
+        %>
+        <div class="pagination-container mt-4">
+          <ul class="pagination justify-content-center">
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
               </li>
               <% } %>
-                <% if (currentPage < totalPages) { %>
+
+                <% if (startPage> 1) { %>
                   <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+                    <a class="page-link" href="?page=1">1</a>
                   </li>
-                  <% } %>
-      </ul>
-    </div>
-    </section>
+                  <% if (startPage> 2) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <% } %>
+                      <% } %>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <% for (let i=startPage; i <=endPage; i++) { %>
+                          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>">
+                              <%= i %>
+                            </a>
+                          </li>
+                          <% } %>
+
+                            <% if (endPage < totalPages) { %>
+                              <% if (endPage < totalPages - 1) { %>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <% } %>
+                                  <li class="page-item">
+                                    <a class="page-link" href="?page=<%= totalPages %>">
+                                      <%= totalPages %>
+                                    </a>
+                                  </li>
+                                  <% } %>
+
+                                    <% if (currentPage < totalPages) { %>
+                                      <li class="page-item">
+                                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+                                      </li>
+                                      <% } %>
+          </ul>
+        </div>
+        <% } %>
+          </section>
+
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    <script>
-      function handleFormSubmit(event) {
-        event.preventDefault();
+          <script>
+            function handleFormSubmit(event) {
+              event.preventDefault();
 
-        if (!validateForm()) {
-          return;
-        }
+              if (!validateForm()) {
+                return;
+              }
 
-        const name = document.getElementsByName('name')[0].value;
-        const description = document.getElementById('descriptionId').value;
+              const name = document.getElementsByName('name')[0].value;
+              const description = document.getElementById('descriptionId').value;
 
 
-        return fetch('/admin/addCategory', {
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name, description })
-        })
-          .then(response => {
+              return fetch('/admin/addCategory', {
+                method: 'post',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+              })
+                .then(response => {
 
-            if (!response.ok) {
-              return response.json().then(err => {
-                throw new Error(err.error);
+                  if (!response.ok) {
+                    return response.json().then(err => {
+                      throw new Error(err.error);
+                    });
+                  }
+
+                  return response.json();
+                })
+                .then(data => {
+
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Category added successfully!',
+                    showConfirmButton: false,
+                    timer: 2000
+                  }).then(() => {
+                    location.reload();
+                  });
+                })
+                .catch(error => {
+
+                  if (error.message === 'Category already exists') {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Oops',
+                      text: 'Category already exists'
+                    });
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Oops',
+                      text: 'An error occurred while adding the category'
+                    });
+                  }
+                });
+            }
+
+
+
+            async function addOffer(categoryId) {
+
+              const { value: amount } = await Swal.fire({
+                title: "Offer in Percentage",
+                input: "number",
+                inputLabel: "Percentage",
+                inputPlaceholder: "%",
+                inputAttributes: {
+                  min: 0,
+                  max: 100,
+                  step: 1
+                }
+              });
+
+              if (amount) {
+                if (amount < 0 || amount > 100 || isNaN(amount)) {
+                  Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
+                  return;
+                }
+
+                try {
+                  Swal.fire({
+                    title: "Adding Offer...",
+                    text: "Please wait while the offer is being added",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                      Swal.showLoading();
+                    },
+                  });
+
+                  const response = await fetch("/admin/addCategoryOffer", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      percentage: amount,
+                      categoryId: categoryId,
+                    }),
+                  });
+
+                  const data = await response.json();
+
+                  Swal.close();
+
+                  if (response.ok && data.status === true) {
+                    Swal.fire("Offer Added", "The offer has been added successfully", "success").then(() => {
+                      location.reload();
+                    });
+                  } else {
+                    Swal.fire("Failed", data.message || "Adding offer failed", "error");
+                  }
+                } catch (error) {
+                  Swal.fire(
+                    "Error",
+                    "An error occurred while adding the offer. Please try again.",
+                    "error"
+                  );
+                  console.error("Error adding offer:", error);
+                }
+              }
+            }
+
+
+            async function removeOffer(categoryId) {
+              const confirm = await Swal.fire({
+                title: "Remove Offer",
+                text: "Are you sure you want to remove the offer from this category?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, Remove",
+                cancelButtonText: "Cancel",
+              });
+
+              if (confirm.isConfirmed) {
+                try {
+                  Swal.fire({
+                    title: "Removing Offer...",
+                    text: "Please wait while the offer is being removed",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                      Swal.showLoading();
+                    },
+                  });
+
+                  const response = await fetch("/admin/removeCategoryOffer", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      categoryId: categoryId,
+                    }),
+                  });
+
+                  const data = await response.json();
+
+                  Swal.close();
+
+                  if (response.ok && data.status === true) {
+                    Swal.fire("Offer Removed", "The offer has been successfully removed", "success").then(() => {
+                      location.reload();
+                    });
+                  } else {
+                    Swal.fire("Failed", data.message || "Removing offer failed", "error");
+                  }
+                } catch (error) {
+                  Swal.fire(
+                    "Error",
+                    "An error occurred while removing the offer. Please try again.",
+                    "error"
+                  );
+                  console.error("Error removing offer:", error);
+                }
+              }
+            }
+
+
+            //validation...............................................................................
+
+            function validateForm() {
+              clearErrorMessages();
+              const name = document.getElementsByName('name')[0].value.trim();
+              const description = document.getElementById('descriptionId').value.trim();
+              let isValid = true;
+
+              if (name === '') {
+                displayErrorMessage('name-error', 'Please enter a name');
+                isValid = false;
+              } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayErrorMessage('name-error', 'Only alphabets are allowed');
+                isValid = false;
+              }
+              if (description === '') {
+                displayErrorMessage('description-error', 'Please enter a description');
+                isValid = false;
+              }
+              return isValid;
+            }
+
+            function displayErrorMessage(elementId, message) {
+              var errorElement = document.getElementById(elementId);
+              errorElement.innerText = message;
+              errorElement.style.display = 'block';
+            }
+
+            function clearErrorMessages() {
+              const errorElements = document.querySelectorAll('.error-message');
+              errorElements.forEach((element) => {
+                element.innerText = '';
+                element.style.display = 'none';
               });
             }
 
-            return response.json();
-          })
-          .then(data => {
 
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Category added successfully!',
-              showConfirmButton: false,
-              timer: 2000
-            }).then(() => {
-              location.reload();
-            });
-          })
-          .catch(error => {
 
-            if (error.message === 'Category already exists') {
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops',
-                text: 'Category already exists'
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops',
-                text: 'An error occurred while adding the category'
+            function clearErrorMessage() {
+
+              const errorElements = document.getElementsByClassName("error-message");
+              Array.from(errorElements).forEach(element => {
+                element.innerText = "";
+                element.style.display = "none";
               });
             }
-          });
-      }
 
 
 
-      async function addOffer(categoryId) {
-
-        const { value: amount } = await Swal.fire({
-          title: "Offer in Percentage",
-          input: "number",
-          inputLabel: "Percentage",
-          inputPlaceholder: "%",
-          inputAttributes: {
-            min: 0,
-            max: 100,
-            step: 1
-          }
-        });
-
-        if (amount) {
-          if (amount < 0 || amount > 100 || isNaN(amount)) {
-            Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
-            return;
-          }
-
-          try {
-            Swal.fire({
-              title: "Adding Offer...",
-              text: "Please wait while the offer is being added",
-              allowOutsideClick: false,
-              didOpen: () => {
-                Swal.showLoading();
-              },
-            });
-
-            const response = await fetch("/admin/addCategoryOffer", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                percentage: amount,
-                categoryId: categoryId,
-              }),
-            });
-
-            const data = await response.json();
-
-            Swal.close();
-
-            if (response.ok && data.status === true) {
-              Swal.fire("Offer Added", "The offer has been added successfully", "success").then(() => {
-                location.reload();
-              });
-            } else {
-              Swal.fire("Failed", data.message || "Adding offer failed", "error");
-            }
-          } catch (error) {
-            Swal.fire(
-              "Error",
-              "An error occurred while adding the offer. Please try again.",
-              "error"
-            );
-            console.error("Error adding offer:", error);
-          }
-        }
-      }
+          </script>
 
 
-      async function removeOffer(categoryId) {
-        const confirm = await Swal.fire({
-          title: "Remove Offer",
-          text: "Are you sure you want to remove the offer from this category?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes, Remove",
-          cancelButtonText: "Cancel",
-        });
-
-        if (confirm.isConfirmed) {
-          try {
-            Swal.fire({
-              title: "Removing Offer...",
-              text: "Please wait while the offer is being removed",
-              allowOutsideClick: false,
-              didOpen: () => {
-                Swal.showLoading();
-              },
-            });
-
-            const response = await fetch("/admin/removeCategoryOffer", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                categoryId: categoryId,
-              }),
-            });
-
-            const data = await response.json();
-
-            Swal.close();
-
-            if (response.ok && data.status === true) {
-              Swal.fire("Offer Removed", "The offer has been successfully removed", "success").then(() => {
-                location.reload();
-              });
-            } else {
-              Swal.fire("Failed", data.message || "Removing offer failed", "error");
-            }
-          } catch (error) {
-            Swal.fire(
-              "Error",
-              "An error occurred while removing the offer. Please try again.",
-              "error"
-            );
-            console.error("Error removing offer:", error);
-          }
-        }
-      }
-
-
-      //validation...............................................................................
-
-      function validateForm() {
-        clearErrorMessages();
-        const name = document.getElementsByName('name')[0].value.trim();
-        const description = document.getElementById('descriptionId').value.trim();
-        let isValid = true;
-
-        if (name === '') {
-          displayErrorMessage('name-error', 'Please enter a name');
-          isValid = false;
-        } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-          displayErrorMessage('name-error', 'Only alphabets are allowed');
-          isValid = false;
-        }
-        if (description === '') {
-          displayErrorMessage('description-error', 'Please enter a description');
-          isValid = false;
-        }
-        return isValid;
-      }
-
-      function displayErrorMessage(elementId, message) {
-        var errorElement = document.getElementById(elementId);
-        errorElement.innerText = message;
-        errorElement.style.display = 'block';
-      }
-
-      function clearErrorMessages() {
-        const errorElements = document.querySelectorAll('.error-message');
-        errorElements.forEach((element) => {
-          element.innerText = '';
-          element.style.display = 'none';
-        });
-      }
-
-
-
-      function clearErrorMessage() {
-
-        const errorElements = document.getElementsByClassName("error-message");
-        Array.from(errorElements).forEach(element => {
-          element.innerText = "";
-          element.style.display = "none";
-        });
-      }
-
-
-
-    </script>
-
-
-    <%- include("../../views/partials/admin/footer") %>
+          <%- include("../../views/partials/admin/footer") %>

@@ -83,72 +83,122 @@
             color: #334155;
         }
 
+        /* Status Badge Styling */
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-processing {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .badge-shipped {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .badge-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-returned {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
         /* Status Select */
+        .status-select-wrap {
+            position: relative;
+            width: 140px;
+        }
+
         .status-select {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 0.4rem 2rem 0.4rem 0.8rem;
+            padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
             background-color: #f8fafc;
             cursor: pointer;
-            width: 140px;
+            width: 100%;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
         }
 
         .status-select:focus {
             border-color: var(--accent-gold);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
         }
 
-        /* Action Buttons */
-        .btn-view {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            background: #fff;
-            color: var(--text-dark);
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-        }
-
-        .btn-view:hover {
+        /* Action Dropdown */
+        .action-dropdown-btn {
             background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-dropdown-btn:hover {
+            background: #f1f5f9;
             border-color: #cbd5e1;
+            color: #1e293b;
         }
 
-        .btn-cancel {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+        .dropdown-menu {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            min-width: 160px;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1rem;
             font-size: 0.85rem;
-            font-weight: 600;
-            background: #fffafa;
-            color: #ef4444;
-            border: 1px solid #fee2e2;
+            color: #475569;
+            border-radius: 8px;
             transition: all 0.2s;
-            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
         }
 
-        .btn-cancel:hover {
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-item i {
+            width: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item.text-danger:hover {
             background: #fee2e2;
-            border-color: #fecaca;
-        }
-
-        .btn-delete {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: #f87171;
-            color: #fff;
-            border: 1px solid #ef4444;
-            transition: all 0.2s;
-            margin-left: 0.5rem;
-        }
-
-        .btn-delete:hover {
-            background: #ef4444;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            color: #991b1b;
         }
 
         /* Pagination */
@@ -165,6 +215,12 @@
             padding: 0.5rem 1rem;
             border-radius: 8px;
             margin: 0 2px;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background: #f1f5f9;
+            color: #1e293b;
         }
 
         .page-item.active .page-link {
@@ -230,45 +286,75 @@
                                 <td class="fw-bold text-dark">#<%= order.orderId %>
                                 </td>
                                 <td>
-                                    <%= order.userName || 'Guest' %>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">
+                                            <%= order.userName || 'Guest' %>
+                                        </span>
+                                        <small class="text-muted">
+                                            <%= order.userId?.email %>
+                                        </small>
+                                    </div>
                                 </td>
                                 <td class="text-muted">
-                                    <%= new Date(order.createdOn).toLocaleDateString() %>
+                                    <%= new Date(order.createdOn).toLocaleDateString(undefined, { day: '2-digit' ,
+                                        month: 'short' , year: 'numeric' }) %>
                                 </td>
                                 <td>
-                                    <select class="form-select status-select" data-order-id="<%= order._id %>"
-                                        <%=['Delivered', 'Cancelled' , 'Returned' ].includes(order.status) ? 'disabled'
-                                        : '' %>>
-                                        <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
-                                        </option>
-                                        <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
-                                            >Processing</option>
-                                        <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
-                                        </option>
-                                        <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
-                                            >Delivered</option>
-                                        <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
-                                            >Cancelled</option>
-                                        <option value="Return Request" <%=order.status==='Return Request' ? 'selected'
-                                            : '' %>>Return Request</option>
-                                        <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
-                                            >Returned</option>
-                                    </select>
+                                    <div class="status-select-wrap">
+                                        <select class="form-select status-select" data-order-id="<%= order._id %>"
+                                            <%=['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)
+                                            ? 'disabled' : '' %>>
+                                            <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>
+                                                >Pending</option>
+                                            <option value="Processing" <%=order.status==='Processing' ? 'selected' : ''
+                                                %>>Processing</option>
+                                            <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>
+                                                >Shipped</option>
+                                            <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                                >Delivered</option>
+                                            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                                >Cancelled</option>
+                                            <option value="Return Request" <%=order.status==='Return Request'
+                                                ? 'selected' : '' %>>Return Request</option>
+                                            <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
+                                                >Returned</option>
+                                        </select>
+                                    </div>
                                 </td>
-                                <td class="fw-bold">₹<%= order.finalAmount.toFixed(2) %>
+                                <td class="fw-bold">₹<%= order.finalAmount.toLocaleString('en-IN') %>
                                 </td>
                                 <td class="text-end">
-                                    <a href="/admin/orders/<%= order._id %>" class="btn-view">
-                                        Details
-                                    </a>
-                                    <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) { %>
-                                        <button onclick="cancelOrder('<%= order._id %>')" class="btn-cancel">
-                                            Cancel
+                                    <div class="dropdown">
+                                        <button class="action-dropdown-btn" type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                            Actions <i class="fas fa-chevron-down ms-1"></i>
                                         </button>
-                                        <% } %>
-                                            <button onclick="deleteOrder('<%= order._id %>')" class="btn-delete">
-                                                Delete
-                                            </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="/admin/orders/<%= order._id %>">
+                                                    <i class="fas fa-eye me-2"></i>Order Details
+                                                </a>
+                                            </li>
+                                            <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) {
+                                                %>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#"
+                                                        onclick="cancelOrder('<%= order._id %>'); return false;">
+                                                        <i class="fas fa-times me-2"></i>Cancel Order
+                                                    </a>
+                                                </li>
+                                                <% } %>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#"
+                                                            onclick="deleteOrder('<%= order._id %>'); return false;">
+                                                            <i class="fas fa-trash-alt me-2"></i>Delete Record
+                                                        </a>
+                                                    </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                             <% }); %>
@@ -289,20 +375,50 @@
                             </li>
                             <% } %>
 
-                                <% for (let i=1; i <=totalPages; i++) { %>
-                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                        <a class="page-link" href="?page=<%= i %>">
-                                            <%= i %>
-                                        </a>
-                                    </li>
-                                    <% } %>
+                                <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages,
+                                    currentPage + 2); if (currentPage <=3) { endPage=Math.min(totalPages, 5); } if
+                                    (currentPage> totalPages - 3) {
+                                    startPage = Math.max(1, totalPages - 4);
+                                    }
+                                    %>
 
-                                        <% if (currentPage < totalPages) { %>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<%= currentPage + 1 %>"><i
-                                                        class="fas fa-chevron-right"></i></a>
-                                            </li>
+                                    <% if (startPage> 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">1</a>
+                                        </li>
+                                        <% if (startPage> 2) { %>
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
                                             <% } %>
+                                                <% } %>
+
+                                                    <% for (let i=startPage; i <=endPage; i++) { %>
+                                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                            <a class="page-link" href="?page=<%= i %>">
+                                                                <%= i %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+
+                                                            <% if (endPage < totalPages) { %>
+                                                                <% if (endPage < totalPages - 1) { %>
+                                                                    <li class="page-item disabled"><span
+                                                                            class="page-link">...</span></li>
+                                                                    <% } %>
+                                                                        <li class="page-item">
+                                                                            <a class="page-link"
+                                                                                href="?page=<%= totalPages %>">
+                                                                                <%= totalPages %>
+                                                                            </a>
+                                                                        </li>
+                                                                        <% } %>
+
+                                                                            <% if (currentPage < totalPages) { %>
+                                                                                <li class="page-item">
+                                                                                    <a class="page-link"
+                                                                                        href="?page=<%= currentPage + 1 %>"><i
+                                                                                            class="fas fa-chevron-right"></i></a>
+                                                                                </li>
+                                                                                <% } %>
                     </ul>
                 </nav>
             </div>
@@ -313,9 +429,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Define the ordered statuses (Simplified for UI logic)
-            const statusOrder = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"];
+            function updateSelectStyle(select) {
+                const status = select.value;
+                // Remove all possible status classes
+                select.classList.remove('badge-pending', 'badge-processing', 'badge-shipped', 'badge-delivered', 'badge-cancelled', 'badge-returned');
+
+                // Add the appropriate class
+                if (status === 'Pending') select.classList.add('badge-pending');
+                else if (status === 'Processing') select.classList.add('badge-processing');
+                else if (status === 'Shipped') select.classList.add('badge-shipped');
+                else if (status === 'Delivered') select.classList.add('badge-delivered');
+                else if (status === 'Cancelled') select.classList.add('badge-cancelled');
+                else if (status === 'Return Request' || status === 'Returned') select.classList.add('badge-returned');
+            }
 
             document.querySelectorAll('.status-select').forEach(select => {
+                // Initialize style
+                updateSelectStyle(select);
+
                 // Store initial value
                 select.dataset.originalValue = select.value;
 
@@ -323,10 +454,6 @@
                     const orderId = this.dataset.orderId;
                     const newStatus = this.value;
                     const currentStatus = this.dataset.originalValue;
-
-                    // Basic validation (backend should also handle this)
-                    // if (statusOrder.indexOf(newStatus) < statusOrder.indexOf(currentStatus)) { ... }
-                    // We'll trust the backend response mostly, but prevent obvious UI mistakes if needed.
 
                     try {
                         const response = await fetch('/admin/orders/update-status', {
@@ -355,6 +482,9 @@
                                 title: 'Order status updated'
                             })
 
+                            // Update style
+                            updateSelectStyle(this);
+
                             // Update original value to the new successful status
                             this.dataset.originalValue = newStatus;
 
@@ -371,6 +501,7 @@
                                 confirmButtonColor: '#1e293b'
                             });
                             this.value = currentStatus;
+                            updateSelectStyle(this);
                         }
                     } catch (error) {
                         console.error('Error:', error);
@@ -380,6 +511,7 @@
                             icon: 'error'
                         });
                         this.value = currentStatus;
+                        updateSelectStyle(this);
                     }
                 });
             });
