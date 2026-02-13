@@ -1,265 +1,347 @@
 <%- include("../../views/partials/admin/header") %>
 
-<head>
-    <link rel="stylesheet" href="styles/adminOrder.css">
     <style>
-        .summary-card {
+        .content-wrapper {
+            padding: 2.5rem;
+            background-color: var(--admin-bg);
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Orders Table */
+        .orders-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1.25rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        /* Status Select */
+        .status-select {
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
+            padding: 0.4rem 2rem 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            background-color: #f8fafc;
+            cursor: pointer;
+            width: 140px;
         }
-        .summary-card:hover {
-            transform: translateY(-5px);
+
+        .status-select:focus {
+            border-color: var(--accent-gold);
+            outline: none;
         }
-        .card-body-icon {
-            font-size: 2rem;
-            opacity: 0.7;
-            margin-bottom: 10px;
+
+        /* Action Buttons */
+        .btn-view {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            background: #fff;
+            color: var(--text-dark);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
         }
-        .summary-title {
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+
+        .btn-view:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
         }
-        .summary-value {
-            font-size: 1.8rem;
-            font-weight: bold;
+
+        /* Pagination */
+        .pagination-wrap {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-link {
+            border: none;
+            color: #64748b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .page-item.active .page-link {
+            background: var(--accent-gold);
+            color: white;
         }
     </style>
-</head>
 
-<div class="container-fluid">
-    <!-- Order Summary Section -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-primary summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Orders</h5>
-                        <div class="summary-value"><%= totalOrders %></div>
-                    </div>
-                </div>
+    <div class="content-wrapper">
+        <div class="content-header">
+            <h2 class="content-title">Order Management</h2>
+        </div>
+
+        <!-- Order Summary Section -->
+        <div class="summary-grid">
+            <div class="premium-card">
+                <p class="card-label">Total Orders</p>
+                <h3 class="card-value">
+                    <%= totalOrders %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Active Revenue</p>
+                <h3 class="card-value" style="color: #10b981;">₹<%= activeRevenue.toLocaleString('en-IN') %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Total Revenue</p>
+                <h3 class="card-value">₹<%= totalRevenue.toLocaleString('en-IN') %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Pending</p>
+                <h3 class="card-value" style="color: #f59e0b;">
+                    <%= pendingOrders %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Completed</p>
+                <h3 class="card-value" style="color: #3b82f6;">
+                    <%= completedOrders %>
+                </h3>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-success summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Active Revenue</h5>
-                        <div class="summary-value">₹<%= activeRevenue.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
+
+        <!-- Orders Table Section -->
+        <div class="orders-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order=> { %>
+                            <tr>
+                                <td class="fw-bold text-dark">#<%= order.orderId %>
+                                </td>
+                                <td>
+                                    <%= order.userName || 'Guest' %>
+                                </td>
+                                <td class="text-muted">
+                                    <%= new Date(order.createdOn).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <select class="form-select status-select" data-order-id="<%= order._id %>"
+                                        <%=['Delivered', 'Cancelled' , 'Returned' ].includes(order.status) ? 'disabled'
+                                        : '' %>>
+                                        <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
+                                        </option>
+                                        <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
+                                            >Processing</option>
+                                        <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
+                                        </option>
+                                        <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                            >Delivered</option>
+                                        <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                            >Cancelled</option>
+                                        <option value="Return Request" <%=order.status==='Return Request' ? 'selected'
+                                            : '' %>>Return Request</option>
+                                        <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
+                                            >Returned</option>
+                                    </select>
+                                </td>
+                                <td class="fw-bold">₹<%= order.finalAmount.toFixed(2) %>
+                                </td>
+                                <td class="text-end">
+                                    <a href="/admin/orders/<%= order._id %>" class="btn-view">
+                                        Details
+                                    </a>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-danger summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Revenue</h5>
-                        <div class="summary-value">₹<%= totalRevenue.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
+
+        <!-- Pagination -->
+        <% if (totalPages> 1) { %>
+            <div class="pagination-wrap">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <% if (currentPage> 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>"><i
+                                        class="fas fa-chevron-left"></i></a>
+                            </li>
+                            <% } %>
+
+                                <% for (let i=1; i <=totalPages; i++) { %>
+                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+
+                                        <% if (currentPage < totalPages) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= currentPage + 1 %>"><i
+                                                        class="fas fa-chevron-right"></i></a>
+                                            </li>
+                                            <% } %>
+                    </ul>
+                </nav>
             </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-warning summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Pending Orders</h5>
-                        <div class="summary-value"><%= pendingOrders %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-info summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Completed Orders</h5>
-                        <div class="summary-value"><%= completedOrders %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Orders Table Section -->
-    <div class="row">
-        <div class="col-12">
-            <div style="background-color: white;">
-                <h3 style="font-family:math; margin-left: 24px; margin-top: 15px; font-size: 35px" class="card-title">Order Management</h3>
-                   
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% orders.forEach(order=> { %>
-                                        <tr>
-                                            <td>
-                                                <%= order.orderId %>
-                                            </td>
-                                            <td><%= order.userName %></td>
-
-                                            <td>
-                                                <%= new Date(order.createdOn).toLocaleDateString() %>
-                                            </td>
-                                            <td>
-                                                <select class="form-select status-select"
-                                                    data-order-id="<%= order._id %>">
-                                                    <option value="Pending" <%=order.status==='Pending' ? 'selected'
-                                                        : '' %>>Pending</option>
-                                                    <option value="Processing" <%=order.status==='Processing'
-                                                        ? 'selected' : '' %>>Processing</option>
-                                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
-                                                        : '' %>>Shipped</option>
-                                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
-                                                        : '' %>>Delivered</option>
-                                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
-                                                        : '' %>>Cancelled</option>
-                                                    <option value="Return Request" <%=order.status==='Return Request'
-                                                        ? 'selected' : '' %>>Return Request</option>
-                                                    <option value="Returned" <%=order.status==='Returned' ? 'selected'
-                                                        : '' %>>Returned</option>
-                                                </select>
-                                            </td>
-                                            <td>₹<%= order.finalAmount.toFixed(2) %>
-                                            </td>
-                                            <td>
-                                                <a href="/admin/orders/<%= order._id %>"
-                                                    class="btn btn-info btn-sm">View Details</a>
-                                            </td>
-                                        </tr>
-                                        <% }); %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="pagination-container mt-4">
-        <ul class="pagination justify-content-center">
-            <% if (currentPage> 1) { %>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-                </li>
-                <% } %>
-
-                    <% for (let i=1; i <=totalPages; i++) { %>
-                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>">
-                                <%= i %>
-                            </a>
-                        </li>
-                        <% } %>
-
-                            <% if (currentPage < totalPages) { %>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-                                </li>
-                                <% } %>
-        </ul>
+            <% } %>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Define the ordered statuses
+            // Define the ordered statuses (Simplified for UI logic)
             const statusOrder = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"];
-    
+
             document.querySelectorAll('.status-select').forEach(select => {
-                const currentStatus = select.value;
-    
-                if (["Delivered", "Cancelled", "Returned"].includes(currentStatus)) {
-                    select.disabled = true;
-                    return;
-                }
-    
+                // Store initial value
+                select.dataset.originalValue = select.value;
+
                 select.addEventListener('change', async function () {
                     const orderId = this.dataset.orderId;
                     const newStatus = this.value;
-    
-                    // Check if the new status is a valid forward transition
-                    if (statusOrder.indexOf(newStatus) < statusOrder.indexOf(currentStatus)) {
-                        Swal.fire({
-                            title: 'Invalid Transition',
-                            text: 'You cannot revert to a previous status.',
-                            icon: 'warning',
-                            confirmButtonText: 'OK',
-                        });
-                        this.value = currentStatus;
-                        return;
-                    }
-    
+                    const currentStatus = this.dataset.originalValue;
+
+                    // Basic validation (backend should also handle this)
+                    // if (statusOrder.indexOf(newStatus) < statusOrder.indexOf(currentStatus)) { ... }
+                    // We'll trust the backend response mostly, but prevent obvious UI mistakes if needed.
+
                     try {
-                        // Send the update request to the server
                         const response = await fetch('/admin/orders/update-status', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ orderId, status: newStatus }),
                         });
-    
+
                         const data = await response.json();
-    
+
                         if (data.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Status updated successfully.',
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            })
+
+                            Toast.fire({
                                 icon: 'success',
-                                confirmButtonText: 'OK',
-                            });
+                                title: 'Order status updated'
+                            })
+
+                            // Update original value to the new successful status
+                            this.dataset.originalValue = newStatus;
+
+                            // Disable if final status
+                            if (["Delivered", "Cancelled", "Returned"].includes(newStatus)) {
+                                this.disabled = true;
+                            }
+
                         } else {
                             Swal.fire({
-                                title: 'Error!',
-                                text: 'Failed to update status: ' + data.message,
+                                title: 'Update Failed',
+                                text: data.message || 'Could not update status',
                                 icon: 'error',
-                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#1e293b'
                             });
-                            this.value = currentStatus; 
+                            this.value = currentStatus;
                         }
                     } catch (error) {
-                        console.error('Error updating status:', error);
+                        console.error('Error:', error);
                         Swal.fire({
-                            title: 'Error!',
-                            text: 'Failed to update status. Please try again later.',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
+                            title: 'Error',
+                            text: 'Network error occurred',
+                            icon: 'error'
                         });
-                        this.value = currentStatus; 
+                        this.value = currentStatus;
                     }
                 });
             });
         });
     </script>
-    
 
     <%- include("../../views/partials/admin/footer") %>

@@ -6,68 +6,45 @@ const Brand = require('../../models/brandSchema');
 
 const loadDashboard = async (req, res) => {
     try {
-        // Get total users (excluding admin)
-        const totalUsers = await User.countDocuments({ isAdmin: { $ne: true } });
-
-        // Get total products (only active and available)
-        const totalProducts = await Product.countDocuments({ 
-            isBlocked: false,
-            status: 'Available'
-        });
-
-        // Get order statistics
+        // Summary Stats
         const [
-            totalOrdersCount,
             activeRevenueResult,
             totalRevenueResult,
             pendingOrdersCount,
-            completedOrdersCount
+            completedOrdersCount,
+            totalOrdersCount,
+            totalUsersCount,
+            totalProductsCount
         ] = await Promise.all([
-            Order.countDocuments(),
             Order.aggregate([
-                {
-                    $match: { 
-                        status: { $nin: ['Cancelled', 'Returned'] }
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$finalAmount' }
-                    }
-                }
+                { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
             ]),
             Order.aggregate([
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$finalAmount' }
-                    }
-                }
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
             ]),
             Order.countDocuments({ status: 'Pending' }),
-            Order.countDocuments({ status: 'Delivered' })
+            Order.countDocuments({ status: 'Delivered' }),
+            Order.countDocuments({}),
+            User.countDocuments({ isAdmin: false }),
+            Product.countDocuments({ isBlocked: false })
         ]);
 
         const activeRevenue = activeRevenueResult[0]?.total || 0;
         const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-        // Get current year for initial chart data
-        const currentYear = new Date().getFullYear();
-
-        // Get initial top 10 data
+        // Top Performers
         const [topProducts, topCategories, topBrands] = await Promise.all([
             getTopProducts(),
             getTopCategories(),
             getTopBrands()
         ]);
 
-       
-        // Get monthly data for initial chart
+        // Monthly Data (Current Year)
+        const currentYear = new Date().getFullYear();
         const monthlyData = await Order.aggregate([
             {
                 $match: {
-                    paymentStatus: 'Completed',
                     status: { $nin: ['Cancelled', 'Returned'] },
                     createdOn: {
                         $gte: new Date(currentYear, 0, 1),
@@ -84,7 +61,6 @@ const loadDashboard = async (req, res) => {
             { $sort: { '_id': 1 } }
         ]);
 
-        // Format monthly data
         const months = Array(12).fill(0);
         monthlyData.forEach(item => {
             months[item._id - 1] = item.total;
@@ -94,8 +70,8 @@ const loadDashboard = async (req, res) => {
 
         res.render('dashboard', {
             admin: req.session.admin,
-            totalUsers,
-            totalProducts,
+            totalUsers: totalUsersCount,
+            totalProducts: totalProductsCount,
             totalOrders: totalOrdersCount,
             activeRevenue,
             totalRevenue,
@@ -112,7 +88,7 @@ const loadDashboard = async (req, res) => {
 
     } catch (error) {
         console.error('Error in loadDashboard:', error);
-        res.status(500).render('admin/error', { message: 'Error loading dashboard', admin: req.session.admin });
+        res.status(500).render('admin/admin-error', { message: 'Error loading dashboard' });
     }
 };
 
@@ -120,12 +96,7 @@ const loadDashboard = async (req, res) => {
 async function getTopProducts() {
     try {
         const result = await Order.aggregate([
-            { 
-                $match: { 
-                    paymentStatus: 'Completed',
-                    status: { $nin: ['Cancelled', 'Returned'] }
-                }
-            },
+            { $match: { status: { $ne: 'Cancelled' } } },
             { $unwind: '$orderItems' },
             {
                 $lookup: {
@@ -137,30 +108,18 @@ async function getTopProducts() {
             },
             { $unwind: '$productInfo' },
             {
-                $match: {
-                    'productInfo.isBlocked': false,
-                    'productInfo.status': 'Available'
-                }
-            },
-            {
                 $group: {
                     _id: '$orderItems.product',
                     name: { $first: '$productInfo.productName' },
                     count: { $sum: '$orderItems.quantity' },
-                    revenue: { 
-                        $sum: { 
-                            $multiply: [
-                                { $toDouble: '$orderItems.price' }, 
-                                '$orderItems.quantity'
-                            ] 
-                        } 
+                    revenue: {
+                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
                     }
                 }
             },
             { $sort: { revenue: -1 } },
             { $limit: 10 }
         ]);
-        
         return result;
     } catch (error) {
         console.error('Error in getTopProducts:', error);
@@ -168,16 +127,10 @@ async function getTopProducts() {
     }
 }
 
-// Helper function to get top categories
 async function getTopCategories() {
     try {
         const result = await Order.aggregate([
-            { 
-                $match: { 
-                    paymentStatus: 'Completed',
-                    status: { $nin: ['Cancelled', 'Returned'] }
-                }
-            },
+            { $match: { status: { $ne: 'Cancelled' } } },
             { $unwind: '$orderItems' },
             {
                 $lookup: {
@@ -188,12 +141,6 @@ async function getTopCategories() {
                 }
             },
             { $unwind: '$productInfo' },
-            {
-                $match: {
-                    'productInfo.isBlocked': false,
-                    'productInfo.status': 'Available'
-                }
-            },
             {
                 $lookup: {
                     from: 'categories',
@@ -204,35 +151,18 @@ async function getTopCategories() {
             },
             { $unwind: '$categoryInfo' },
             {
-                $match: {
-                    'categoryInfo.isListed': true
-                }
-            },
-            {
                 $group: {
                     _id: '$productInfo.category',
                     name: { $first: '$categoryInfo.name' },
                     count: { $sum: '$orderItems.quantity' },
-                    revenue: { 
-                        $sum: { 
-                            $multiply: [
-                                { $toDouble: '$orderItems.price' }, 
-                                '$orderItems.quantity'
-                            ] 
-                        } 
-                    },
-                    uniqueProducts: { $addToSet: '$orderItems.product' }
-                }
-            },
-            {
-                $addFields: {
-                    uniqueProductCount: { $size: '$uniqueProducts' }
+                    revenue: {
+                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
+                    }
                 }
             },
             { $sort: { revenue: -1 } },
             { $limit: 10 }
         ]);
-        
         return result;
     } catch (error) {
         console.error('Error in getTopCategories:', error);
@@ -240,89 +170,44 @@ async function getTopCategories() {
     }
 }
 
-// Helper function to get top brands
 async function getTopBrands() {
     try {
-        // First, get all brands that are not blocked
-        const brands = await Brand.find({ isBlocked: false });
-    
-
-        // Get sales data for each brand
-        const brandSalesPromises = brands.map(async (brand) => {
-            // Get all products of this brand
-            const products = await Product.find({ 
-                brand: brand._id,
-                isBlocked: false
-            });
-            
-
-            // Get all orders containing these products
-            const productIds = products.map(p => p._id);
-            const orders = await Order.aggregate([
-                {
-                    $match: {
-                        paymentStatus: 'Completed',
-                        status: { $nin: ['Cancelled', 'Returned'] }
-                    }
-                },
-                { $unwind: '$orderItems' },
-                {
-                    $match: {
-                        'orderItems.product': { $in: productIds }
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        totalRevenue: {
-                            $sum: {
-                                $multiply: ['$orderItems.price', '$orderItems.quantity']
-                            }
-                        },
-                        totalQuantity: { $sum: '$orderItems.quantity' },
-                        uniqueOrders: { $addToSet: '$_id' }
-                    }
+        const result = await Order.aggregate([
+            { $match: { status: { $ne: 'Cancelled' } } },
+            { $unwind: '$orderItems' },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderItems.product',
+                    foreignField: '_id',
+                    as: 'productInfo'
                 }
-            ]);
-
-            const salesData = orders[0] || {
-                totalRevenue: 0,
-                totalQuantity: 0,
-                uniqueOrders: []
-            };
-
-            return {
-                _id: brand._id,
-                name: brand.brandName,
-                count: salesData.totalQuantity || 0,
-                revenue: salesData.totalRevenue || 0,
-                uniqueProductCount: products.length,
-                totalOrderCount: (salesData.uniqueOrders || []).length,
-                averageOrderValue: salesData.uniqueOrders?.length ? 
-                    (salesData.totalRevenue / salesData.uniqueOrders.length) : 0,
-                averageRevenuePerProduct: products.length ? 
-                    (salesData.totalRevenue / products.length) : 0
-            };
-        });
-
-        const brandSales = await Promise.all(brandSalesPromises);
-        
-        // Sort by revenue and get top 10
-        const topBrands = brandSales
-            .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, 10)
-            .map(brand => ({
-                ...brand,
-                revenue: Number(brand.revenue || 0),
-                count: Number(brand.count || 0),
-                uniqueProductCount: Number(brand.uniqueProductCount || 0),
-                totalOrderCount: Number(brand.totalOrderCount || 0),
-                averageOrderValue: Number(brand.averageOrderValue || 0).toFixed(2),
-                averageRevenuePerProduct: Number(brand.averageRevenuePerProduct || 0).toFixed(2)
-            }));
-
-        
-        return topBrands;
+            },
+            { $unwind: '$productInfo' },
+            {
+                $lookup: {
+                    from: 'brands',
+                    localField: 'productInfo.brand',
+                    foreignField: '_id',
+                    as: 'brandInfo'
+                }
+            },
+            { $unwind: '$brandInfo' },
+            {
+                $group: {
+                    _id: '$productInfo.brand',
+                    name: { $first: '$brandInfo.brandName' },
+                    count: { $sum: '$orderItems.quantity' },
+                    revenue: {
+                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
+                    },
+                    totalOrderCount: { $sum: 1 }
+                }
+            },
+            { $sort: { revenue: -1 } },
+            { $limit: 10 }
+        ]);
+        return result;
     } catch (error) {
         console.error('Error in getTopBrands:', error);
         return [];
@@ -348,7 +233,7 @@ const getSalesData = async (req, res) => {
             Order.countDocuments(),
             Order.aggregate([
                 {
-                    $match: { 
+                    $match: {
                         status: { $nin: ['Cancelled', 'Returned'] }
                     }
                 },
@@ -373,8 +258,8 @@ const getSalesData = async (req, res) => {
 
         const activeRevenue = activeRevenueResult[0]?.total || 0;
         const totalRevenue = totalRevenueResult[0]?.total || 0;
-        
-        switch(filter) {
+
+        switch (filter) {
             case 'yearly':
                 // Get last 5 years data
                 for (let i = 4; i >= 0; i--) {
@@ -395,7 +280,7 @@ const getSalesData = async (req, res) => {
                             }
                         }
                     ]);
-                    
+
                     labels.push(startYear - i);
                     data.push(yearData[0]?.total || 0);
                 }
@@ -410,7 +295,6 @@ const getSalesData = async (req, res) => {
                                 $gte: new Date(startYear, 0, 1),
                                 $lt: new Date(startYear + 1, 0, 1)
                             },
-                            paymentStatus: 'Completed',
                             status: { $nin: ['Cancelled', 'Returned'] }
                         }
                     },
@@ -443,7 +327,6 @@ const getSalesData = async (req, res) => {
                                     $gte: new Date(startYear, new Date().getMonth(), week * 7 + 1),
                                     $lt: new Date(startYear, new Date().getMonth(), (week + 1) * 7 + 1)
                                 },
-                                paymentStatus: 'Completed',
                                 status: { $nin: ['Cancelled', 'Returned'] }
                             }
                         },
@@ -470,7 +353,6 @@ const getSalesData = async (req, res) => {
                                     $gte: new Date(startYear, new Date().getMonth(), day),
                                     $lt: new Date(startYear, new Date().getMonth(), day + 1)
                                 },
-                                paymentStatus: 'Completed',
                                 status: { $nin: ['Cancelled', 'Returned'] }
                             }
                         },

@@ -1,150 +1,240 @@
 <%- include("../../views/partials/admin/header") %>
 
-<head>
-    <link rel="stylesheet" href="/styles/brands.css">
-</head>
+    <head>
+        <link rel="stylesheet" href="/styles/brands.css">
+    </head>
 
-<section class="content-main">
-    <div class="content-header">
-        <div>
-            <h2 class="content-title card-title">Brands</h2>
+    <style>
+        .content-wrapper {
+            padding: 2.5rem;
+            background-color: var(--admin-bg);
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .form-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-gold:hover {
+            background: var(--accent-gold-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Table Styling */
+        .table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .brand-logo-wrap {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .brand-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-active {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .badge-blocked {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .action-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .btn-block {
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #ffe4e6;
+        }
+
+        .btn-unblock {
+            background: #ecfdf5;
+            color: #10b981;
+            border: 1px solid #d1fae5;
+        }
+    </style>
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <h2 class="content-title">Brand Collection</h2>
         </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="row">
-                <!-- Add Brand Form -->
-                <div class="col-md-3">
-                    <form method="POST" action="/admin/addBrand" enctype="multipart/form-data">
-                        <div class="mb-4">
-                            <label for="product_name" class="form-label">Brand Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                placeholder="Type here"
-                                class="form-control"
-                                required
-                            />
-                        </div>
-                        <label for="brand_image" class="form-label">Brand Image</label>
-                        <div class="input-upload">
-                            <input 
-                                class="form-control border" 
-                                id="brand_image" 
-                                name="image" 
-                                type="file" 
-                                required 
-                            />
-                        </div>
-                        <div class="d-grid">
-                            <button class="btn btn-primary mt-3" type="submit">
-                                Add Brand
-                            </button>
-                        </div>
-                    </form>
-                </div>
 
-                <!-- Brand List Table -->
-                <div class="col-md-7 offset-md-1">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Brand</th>
-                                    <th>Logo</th>
-                                    <th>Status</th>
-                                    <th>Block/Unblock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% data.forEach((brand) => { %>
-                                    <tr>
-                                        <td class="text-start"><%= brand.brandName %></td>
-                                        <td class="text-center">
-                                            <div
-                                                class="d-flex align-items-center justify-content-center"
-                                                style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;"
-                                            >
-                                                <img
-                                                    src="/uploads/re-image/<%= brand.brandImage %>"
-                                                    alt="<%= brand.brandName %>"
-                                                    class="img-fluid rounded-circle brand-img"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <% if (brand.isBlocked) { %>
-                                                <span class="badge badge-danger">
-                                                    Blocked
-                                                </span>
-                                            <% } else { %>
-                                                <span class="badge badge-success">
-                                                    Active
-                                                </span>
-                                            <% } %>
-                                        </td>
-                                        <td class="text-center">
-                                            <% if (!brand.isBlocked) { %>
-                                                <form method="POST" action="/admin/blockBrand/<%= brand._id %>" style="display: inline;">
-                                                    <button class="btn btn-danger" style="width: 90px;">
-                                                        Block
-                                                    </button>
-                                                </form>
-                                            <% } else { %>
-                                                <form method="POST" action="/admin/unblockBrand/<%= brand._id %>" style="display: inline;">
-                                                    <button class="btn btn-success" style="width: 90px;">
-                                                        Unblock
-                                                    </button>
-                                                </form>
-                                            <% } %>
-
-                                            <!-- Delete Button -->
-                                            <form 
-                                                method="POST" 
-                                                action="/admin/deleteBrand/<%= brand._id %>" 
-                                                style="display: inline;"
-                                            >
-                                                <!-- <button 
-                                                    class="btn btn-danger" 
-                                                    style="width: 90px;" 
-                                                    onclick="return confirmDelete()"
-                                                >
-                                                    Delete
-                                                </button> -->
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
+        <div class="brands-grid">
+            <!-- Add Brand -->
+            <div class="premium-card">
+                <h5 class="card-title">Register New Brand</h5>
+                <form method="POST" action="/admin/addBrand" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label">Brand Identity</label>
+                        <input type="text" name="name" placeholder="Enter brand name" class="form-control" required />
                     </div>
+                    <div class="mb-4">
+                        <label class="form-label">Media Asset</label>
+                        <input class="form-control" name="image" type="file" required />
+                    </div>
+                    <button class="btn-gold" type="submit">Deploy Brand</button>
+                </form>
+            </div>
+
+            <!-- Brand List -->
+            <div class="premium-card" style="padding: 0; overflow: hidden;">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Brand Identity</th>
+                                <th class="text-center">Asset</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-end">Lifecycle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% data.forEach((brand)=> { %>
+                                <tr>
+                                    <td class="fw-bold">
+                                        <%= brand.brandName %>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="brand-logo-wrap mx-auto">
+                                            <img src="/uploads/re-image/<%= brand.brandImage %>"
+                                                alt="<%= brand.brandName %>" class="brand-logo" />
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span
+                                            class="status-badge <%= brand.isBlocked ? 'badge-blocked' : 'badge-active' %>">
+                                            <%= brand.isBlocked ? 'Inhibited' : 'Operational' %>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <% if (!brand.isBlocked) { %>
+                                            <form method="POST" action="/admin/blockBrand/<%= brand._id %>"
+                                                style="display: inline;">
+                                                <button class="action-btn btn-block"><i class="fas fa-ban me-1"></i>
+                                                    Block</button>
+                                            </form>
+                                            <% } else { %>
+                                                <form method="POST" action="/admin/unblockBrand/<%= brand._id %>"
+                                                    style="display: inline;">
+                                                    <button class="action-btn btn-unblock"><i
+                                                            class="fas fa-unlock me-1"></i> Unblock</button>
+                                                </form>
+                                                <% } %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container text-center mt-4">
-        <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-        <% } %>
-        <% for (let i = 1; i <= totalPages; i++) { %>
-            <% if (i === currentPage) { %>
-                <span class="current-page"><%= i %></span>
-            <% } else { %>
-                <a href="?page=<%= i %>"><%= i %></a>
-            <% } %>
-        <% } %>
-        <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-        <% } %>
-    </div>
-</section>
+    <script>
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this brand?");
+        }
+    </script>
 
-<script>
-    function confirmDelete() {
-        return confirm("Are you sure you want to delete this brand?");
-    }
-</script>
-
-<%- include("../../views/partials/admin/footer") %>
+    <%- include("../../views/partials/admin/footer") %>

@@ -1,35 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login</title>
   <link rel="stylesheet" href="/styles/adminLogin.css">
 </head>
-<body>
-  <div class="login-container">
-    <!-- Left Side: Image Section -->
-    <div class="image-section">
-      <img src="/images/a1.jpeg" alt="Admin Image">
-    </div>
 
-    <!-- Right Side: Login Form -->
-    <div class="login-section">
-      <h2>Admin Login</h2>
-      <form action="/admin/login" method="POST" onsubmit="return validateAdminLoginForm()">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email">
-          <div class="error-message" id="email-error"></div>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password">
-          <div class="error-message" id="password-error"></div>
-        </div>
-        <button type="submit" class="btn">Login</button>
-        <p class="forgot-password"><a href="/forgot-password">Forgot Password?</a></p>
-      </form>
+<body>
+  <div class="page-container">
+    <div class="auth-card">
+      <div class="form-side">
+        <h1 class="auth-title">ADMIN LOGIN</h1>
+
+        <form action="/admin/login" method="POST" class="auth-form" onsubmit="return validateAdminLoginForm()"
+          novalidate>
+          <div class="form-group">
+            <label for="email">Admin Email *</label>
+            <input type="email" id="email" name="email" placeholder="Admin Email" required>
+            <div class="error-message" id="email-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <div class="error-message" id="password-error"></div>
+          </div>
+
+          <div class="form-options">
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <p class="privacy-note">
+            Access to the admin dashboard is restricted to authorized personnel. Session activity is monitored for
+            security purposes.
+          </p>
+
+          <button type="submit" class="auth-btn">SIGN IN TO DASHBOARD</button>
+        </form>
+
+        <p class="switch-auth">
+          Return to <a href="/">Storefront</a>
+        </p>
+      </div>
+
+      <div class="image-side">
+        <!-- Background image via CSS -->
+      </div>
     </div>
   </div>
 

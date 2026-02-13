@@ -1,395 +1,499 @@
 <%- include("../../views/partials/admin/header") %>
-<link rel="stylesheet" href="/styles/admin.css">
-<style>
-    /* Page specific styles */
-    .filter-section {
-        background-color: #fff;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-    
-    .custom-dates {
-        transition: all 0.3s ease;
-    }
-    
-    .summary-card {
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-    }
-    .summary-card:hover {
-        transform: translateY(-5px);
-    }
-    .card-body-icon {
-        font-size: 2rem;
-        opacity: 0.7;
-        margin-bottom: 10px;
-    }
-    .summary-title {
-        font-size: 1.1rem;
-        margin-bottom: 5px;
-    }
-    .summary-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-    }
-    
-    .sales-summary-card {
-        min-height: 140px;
-        transition: transform 0.2s;
-    }
-    .sales-summary-card:hover {
-        transform: translateY(-5px);
-    }
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    .bg-primary-light { background-color: rgba(12, 151, 127, 0.1); }
-    .bg-success-light { background-color: rgba(40, 167, 69, 0.1); }
-    .bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
-    .bg-info-light { background-color: rgba(23, 162, 184, 0.1); }
-    .sales-amount {
-        font-size: 1.75rem;
-        font-weight: 600;
-        margin: 10px 0;
-    }
-    @media (max-width: 768px) {
-        .sales-summary-card {
-            min-height: auto;
+    <style>
+        .content-wrapper {
+            padding: 2.5rem;
+            background-color: var(--admin-bg);
         }
-    }
-</style>
 
-<div class="content-main">
-    <div class="content-header d-flex justify-content-between align-items-center">
-        <h2 class="content-title">Sales Report</h2>
-        <div class="btn-group">
-            <button onclick="downloadReport('pdf')" class="btn btn-outline-primary">
-                <i class="fas fa-file-pdf"></i> Download PDF
-            </button>
-            <button onclick="downloadReport('excel')" class="btn btn-outline-success ms-2">
-                <i class="fas fa-file-excel"></i> Download Excel
-            </button>
-        </div>
-    </div>
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
 
-    <!-- Order Statistics Section -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <!-- <div class="card text-white bg-primary summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Orders</h5>
-                        <div class="summary-value"><%= totalOrders.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="card text-white bg-info summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Completed Orders</h5>
-                        <div class="summary-value"><%= completedOrders.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-success summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Active Revenue</h5>
-                        <div class="summary-value">₹<%= activeRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 }) %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <!-- <div class="card text-white bg-danger summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Revenue</h5>
-                        <div class="summary-value">₹<%= totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 }) %></div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="card text-white bg-warning summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Pending Orders</h5>
-                        <div class="summary-value"><%= pendingOrders.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-          
-        </div>
-    </div>
+        .content-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
 
-    <!-- Summary Cards -->
-    <div class="row mt-4">
-        <div class="col-12 col-md-6 col-lg-3 mb-4">
-            <div class="card h-100 border-primary sales-summary-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-primary-light">
-                        <i class="fas fa-rupee-sign text-primary"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2">Total Revenue</h6>
-                    <h3 class="card-title text-primary sales-amount">₹<%= totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 }) %></h3>
-                    <p class="card-text small">After all discounts & deductions</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3 mb-4">
-            <div class="card h-100 border-success sales-summary-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-success-light">
-                        <i class="fas fa-shopping-cart text-success"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2">Total Orders</h6>
-                    <h3 class="card-title text-success sales-amount"><%= totalOrders.toLocaleString('en-IN') %></h3>
-                    <p class="card-text small">
-                        Active: <%= pendingOrders.toLocaleString('en-IN') %> |
-                        Cancelled: <%= cancelledOrders.toLocaleString('en-IN') %> |
-                        Returned: <%= returnedOrders.toLocaleString('en-IN') %>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3 mb-4">
-            <div class="card h-100 border-warning sales-summary-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-warning-light">
-                        <i class="fas fa-users text-warning"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2">Total Users</h6>
-                    <h3 class="card-title text-warning sales-amount"><%= totalUsers.toLocaleString('en-IN') %></h3>
-                    <p class="card-text small">Active customers in this period</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3 mb-4">
-            <div class="card h-100 border-info sales-summary-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-info-light">
-                        <i class="fas fa-box text-info"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2">Products Sold</h6>
-                    <h3 class="card-title text-info sales-amount"><%= productsSold.toLocaleString('en-IN') %></h3>
-                    <p class="card-text small">Total items sold in this period</p>
-                </div>
-            </div>
-        </div>
-    </div>
+        /* Summary Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-    <!-- Filters -->
-    <div class="card filter-section mb-4"> 
-        <div class="card-body">
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-revenue {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .icon-orders {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .icon-users {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .icon-products {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .card-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .card-subtext {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        /* Filters Section */
+        .filter-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .form-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-gold:hover {
+            background: var(--accent-gold-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary {
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--accent-gold);
+            color: white;
+        }
+
+        .btn-outline-success {
+            color: #10b981;
+            border: 1px solid #10b981;
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-outline-success:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Table Styling */
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Badges */
+        .badge-delivered {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .badge-shipped {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .badge-processing {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .badge-cancelled {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .badge-returned {
+            background: #fefce8;
+            color: #ca8a04;
+        }
+
+        .badge-pending {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* Pagination */
+        .pagination-wrap {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-link {
+            border: none;
+            color: #64748b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .page-item.active .page-link {
+            background: var(--accent-gold);
+            color: white;
+        }
+    </style>
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <h2 class="content-title">Sales Analytics</h2>
+            <div class="btn-group gap-2">
+                <button onclick="downloadReport('pdf')" class="btn-outline-primary">
+                    <i class="fas fa-file-pdf me-1"></i> PDF
+                </button>
+                <button onclick="downloadReport('excel')" class="btn-outline-success">
+                    <i class="fas fa-file-excel me-1"></i> Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="premium-card">
+                <div class="card-icon icon-revenue"><i class="fas fa-rupee-sign"></i></div>
+                <p class="card-label">Total Revenue</p>
+                <h3 class="card-value">₹<%= totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                </h3>
+                <p class="card-subtext">Net revenue (discounts applied)</p>
+            </div>
+            <div class="premium-card">
+                <div class="card-icon icon-orders"><i class="fas fa-shopping-cart"></i></div>
+                <p class="card-label">Total Orders</p>
+                <h3 class="card-value">
+                    <%= totalOrders.toLocaleString('en-IN') %>
+                </h3>
+                <p class="card-subtext">
+                    <%= completedOrders %> Completed • <%= cancelledOrders %> Cancelled
+                </p>
+            </div>
+            <div class="premium-card">
+                <div class="card-icon icon-users"><i class="fas fa-users"></i></div>
+                <p class="card-label">Unique Customers</p>
+                <h3 class="card-value">
+                    <%= totalUsers.toLocaleString('en-IN') %>
+                </h3>
+                <p class="card-subtext">Active in selected period</p>
+            </div>
+            <div class="premium-card">
+                <div class="card-icon icon-products"><i class="fas fa-box-open"></i></div>
+                <p class="card-label">Products Sold</p>
+                <h3 class="card-value">
+                    <%= productsSold.toLocaleString('en-IN') %>
+                </h3>
+                <p class="card-subtext">Total unit volume</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-card">
             <form id="filter-form" method="GET" class="row g-3 align-items-end">
                 <div class="col-12 col-md-3">
                     <label for="period" class="form-label">Time Period</label>
                     <select id="period" name="period" class="form-select">
-                        <option value="daily" <%= period === 'daily' ? 'selected' : '' %>>Daily</option>
-                        <option value="weekly" <%= period === 'weekly' ? 'selected' : '' %>>Weekly</option>
-                        <option value="monthly" <%= period === 'monthly' ? 'selected' : '' %>>Monthly</option>
-                        <option value="yearly" <%= period === 'yearly' ? 'selected' : '' %>>Yearly</option>
-                        <option value="custom" <%= period === 'custom' ? 'selected' : '' %>>Custom Range</option>
+                        <option value="daily" <%=period==='daily' ? 'selected' : '' %>>Daily</option>
+                        <option value="weekly" <%=period==='weekly' ? 'selected' : '' %>>Weekly</option>
+                        <option value="monthly" <%=period==='monthly' ? 'selected' : '' %>>Monthly</option>
+                        <option value="yearly" <%=period==='yearly' ? 'selected' : '' %>>Yearly</option>
+                        <option value="custom" <%=period==='custom' ? 'selected' : '' %>>Custom Range</option>
                     </select>
                 </div>
-                
+
                 <div class="col-12 col-md-3 custom-dates" style="display: none;">
                     <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control" 
-                           value="<%= startDate || '' %>">
+                    <input type="date" id="startDate" name="startDate" class="form-control"
+                        value="<%= startDate || '' %>">
                 </div>
-                
+
                 <div class="col-12 col-md-3 custom-dates" style="display: none;">
                     <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" 
-                           value="<%= endDate || '' %>">
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="<%= endDate || '' %>">
                 </div>
-                
+
                 <div class="col-12 col-md-3">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn-gold w-100">
                         <i class="fas fa-sync-alt"></i> Update Report
                     </button>
                 </div>
 
-                <!-- Hidden pagination fields -->
+                <!-- Hidden fields -->
                 <input type="hidden" name="page" value="<%= currentPage || 1 %>">
                 <input type="hidden" name="limit" value="<%= limit || 10 %>">
             </form>
         </div>
-    </div>
 
-    <!-- Orders Table -->
-    <div class="row">
-        <div class="col-12">
-            <div style="background-color: white;">
-                <h3 style="font-family:math; margin-left: 24px; margin-top: 15px; font-size: 35px" class="card-title">Sales Report</h3>
-                
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Total</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% orders.forEach(order => { %>
-                                    <tr>
-                                        <td>
-                                            <%= order.orderId %>
-                                        </td>
-                                        <td><%= order.userName %></td>
-                                        <td>
-                                            <%= new Date(order.createdOn).toLocaleDateString() %>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-<%= {
-                                                'Delivered': 'success',
-                                                'Shipped': 'info',
-                                                'Processing': 'primary',
-                                                'Cancelled': 'danger',
-                                                'Returned': 'warning',
-                                                'Return Request': 'warning',
-                                                'Pending': 'secondary'
-                                            }[order.status] || 'secondary' %>">
-                                                <%= order.status %>
-                                            </span>
-                                        </td>
-                                        <td>₹<%= order.finalAmount.toFixed(2) %></td>
-                                        <td>
-                                            <a href="/admin/orders/<%= order._id %>" class="btn btn-info btn-sm">View Details</a>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- Orders Table -->
+        <div class="report-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                            <!-- <th>Details</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order=> { %>
+                            <tr>
+                                <td class="fw-bold">#<%= order.orderId %>
+                                </td>
+                                <td>
+                                    <%= order.userName || 'Guest' %>
+                                </td>
+                                <td class="text-muted">
+                                    <%= new Date(order.createdOn).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <span
+                                        class="status-badge badge-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                                        <%= order.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= order.paymentMethod || 'N/A' %>
+                                </td>
+                                <td class="fw-bold">₹<%= order.finalAmount.toFixed(2) %>
+                                </td>
+                                <!-- <td>
+                                <a href="/admin/orders/<%= order._id %>" class="btn btn-sm btn-light border">View</a>
+                            </td> -->
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <% if (totalPages> 1) { %>
+            <div class="pagination-wrap">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <% if (currentPage> 1) { %>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="?page=<%= currentPage - 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><i
+                                        class="fas fa-chevron-left"></i></a>
+                            </li>
+                            <% } %>
+
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                        <a class="page-link"
+                                            href="?page=<%= i %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+
+                                        <% if (currentPage < totalPages) { %>
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="?page=<%= currentPage + 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><i
+                                                        class="fas fa-chevron-right"></i></a>
+                                            </li>
+                                            <% } %>
+                    </ul>
+                </nav>
+            </div>
+            <% } %>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container mt-4">
-        <ul class="pagination justify-content-center">
-            <% if (currentPage > 1) { %>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage - 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>">&laquo; Previous</a>
-                </li>
-            <% } %>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const periodSelect = document.getElementById('period');
+            const customDates = document.querySelectorAll('.custom-dates');
 
-            <% for(let i = 1; i <= totalPages; i++) { %>
-                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                    <a class="page-link" href="?page=<%= i %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= i %></a>
-                </li>
-            <% } %>
+            function toggleCustomDates() {
+                const isCustom = periodSelect.value === 'custom';
+                customDates.forEach(el => {
+                    el.style.display = isCustom ? 'block' : 'none';
+                });
+            }
 
-            <% if (currentPage < totalPages) { %>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage + 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>">Next &raquo;</a>
-                </li>
-            <% } %>
-        </ul>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const periodSelect = document.getElementById('period');
-    const customDates = document.querySelectorAll('.custom-dates');
-    
-    function toggleCustomDates() {
-        const isCustom = periodSelect.value === 'custom';
-        customDates.forEach(el => {
-            el.style.display = isCustom ? 'block' : 'none';
+            periodSelect.addEventListener('change', toggleCustomDates);
+            toggleCustomDates();
         });
-    }
-    
-    periodSelect.addEventListener('change', toggleCustomDates);
-    toggleCustomDates();
-});
 
-// function downloadReport(format) {
-//     const period = document.getElementById('period').value;
-//     const startDate = document.getElementById('startDate').value;
-//     const endDate = document.getElementById('endDate').value;
-    
-//     let url = `/admin/sales-report/download?format=${format}&period=${period}`;
-//     if (period === 'custom' && startDate && endDate) {
-//         url += `&startDate=${startDate}&endDate=${endDate}`;
-//     }
-    
-//     window.location.href = url;
-// }
-function downloadReport(format) {
-    console.log('Download initiated', { format });
-    
-    const period = document.getElementById('period')?.value;
-    const startDate = document.getElementById('startDate')?.value;
-    const endDate = document.getElementById('endDate')?.value;
-    
-    console.log('Form values:', { period, startDate, endDate });
-    
-    if (!period) {
-        console.error('Period is required');
-        return;
-    }
-    
-    let url = `/admin/sales-report/download?format=${encodeURIComponent(format)}&period=${encodeURIComponent(period)}`;
-    
-    if (period === 'custom' && startDate && endDate) {
-        url += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
-    }
-    
-    console.log('Generated URL:', url);
-    window.location.href = url;
-}
+        // function downloadReport(format) {
+        //     const period = document.getElementById('period').value;
+        //     const startDate = document.getElementById('startDate').value;
+        //     const endDate = document.getElementById('endDate').value;
 
-function changePage(page) {
-    const form = document.getElementById('filter-form');
-    form.querySelector('input[name="page"]').value = page;
-    form.submit();
-}
+        //     let url = `/admin/sales-report/download?format=${format}&period=${period}`;
+        //     if (period === 'custom' && startDate && endDate) {
+        //         url += `&startDate=${startDate}&endDate=${endDate}`;
+        //     }
 
-function changeLimit(limit) {
-    const form = document.getElementById('filter-form');
-    form.querySelector('input[name="limit"]').value = limit;
-    form.querySelector('input[name="page"]').value = 1; 
-    form.submit();
-}
+        //     window.location.href = url;
+        // }
+        function downloadReport(format) {
+            console.log('Download initiated', { format });
 
-</script>
-<%- include("../../views/partials/admin/footer") %>
+            const period = document.getElementById('period')?.value;
+            const startDate = document.getElementById('startDate')?.value;
+            const endDate = document.getElementById('endDate')?.value;
+
+            console.log('Form values:', { period, startDate, endDate });
+
+            if (!period) {
+                console.error('Period is required');
+                return;
+            }
+
+            let url = `/admin/sales-report/download?format=${encodeURIComponent(format)}&period=${encodeURIComponent(period)}`;
+
+            if (period === 'custom' && startDate && endDate) {
+                url += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+            }
+
+            console.log('Generated URL:', url);
+            window.location.href = url;
+        }
+
+        function changePage(page) {
+            const form = document.getElementById('filter-form');
+            form.querySelector('input[name="page"]').value = page;
+            form.submit();
+        }
+
+        function changeLimit(limit) {
+            const form = document.getElementById('filter-form');
+            form.querySelector('input[name="limit"]').value = limit;
+            form.querySelector('input[name="page"]').value = 1;
+            form.submit();
+        }
+
+    </script>
+    <%- include("../../views/partials/admin/footer") %>

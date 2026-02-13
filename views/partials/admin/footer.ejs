@@ -1,46 +1,26 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Toggle sidebar on mobile
-    document.querySelector('.btn-mobile').addEventListener('click', function() {
+    // Handle Mobile Sidebar
+    document.querySelector('.btn-mobile')?.addEventListener('click', function () {
         document.querySelector('.navbar-aside').classList.toggle('show');
-        document.querySelector('.main-wrap').classList.toggle('margin-left');
     });
 
-    // Sidebar minimize button
-    document.querySelector('.btn-aside-minimize').addEventListener('click', function() {
-        document.body.classList.toggle('aside-mini');
+    // Close sidebar on overlay click (mobile)
+    document.querySelector('.screen-overlay')?.addEventListener('click', function () {
+        document.querySelector('.navbar-aside').classList.remove('show');
     });
 
-    // Sales statistics chart
-    var ctx = document.getElementById('myChart').getContext('2d');
-    var chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Sales',
-                tension: 0.3,
-                fill: true,
-                backgroundColor: 'rgba(44, 120, 220, 0.2)',
-                borderColor: 'rgba(44, 120, 220)',
-                data: [18, 17, 4, 3, 2, 20, 25,31, 29, 32, 35, 40]
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    display: false,
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+    // Add active class to menu items based on URL
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.menu-link').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.closest('.menu-item').classList.add('active');
             }
-        }
+        });
     });
 </script>
 </body>
+
 </html>

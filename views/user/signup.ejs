@@ -1,91 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Signup Page</title>
-    <link rel="stylesheet" href="/styles/signup.css" />
-  </head>
-  <body>
-    <div class="container">
-      <div class="image-section"></div>
-      <div class="form-section">
-        <h2>Sign Up</h2>
-        <form
-          action="/signup"
-          method="POST"
-          class="signup-form"
-          id="signform"
-          novalidate
-        >
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup Page</title>
+  <link rel="stylesheet" href="/styles/signup.css" />
+</head>
+
+<body>
+  <div class="page-container">
+    <div class="auth-card">
+      <div class="form-side">
+        <h1 class="auth-title">REGISTER</h1>
+
+        <form action="/signup" method="POST" class="auth-form" id="signform" novalidate>
           <div class="form-group">
-            <label for="name"> Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Enter your name"
-            />
+            <label for="name">Name </label>
+            <input type="text" id="name" name="name" placeholder="Name" required>
             <div id="error1" class="error-message"></div>
           </div>
+
           <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-            />
+            <label for="email">Email </label>
+            <input type="email" id="email" name="email" placeholder="Email" required>
             <div id="error2" class="error-message"></div>
           </div>
+
           <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              placeholder="Enter your phone number"
-            />
+            <label for="phone">Phone Number </label>
+            <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
             <div id="error3" class="error-message"></div>
           </div>
+
           <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Enter your password"
-            />
+            <label for="password">Password </label>
+            <div class="password-wrapper">
+              <input type="password" id="password" name="password" placeholder="Password" required>
+            </div>
             <div id="error4" class="error-message"></div>
           </div>
+
           <div class="form-group">
-            <label for="confirm-password">Confirm Password</label>
-            <input
-              type="password"
-              id="cpassword"
-              name="cpassword"
-              placeholder="Confirm your password"
-            />
+            <label for="cpassword">Confirm Password </label>
+            <input type="password" id="cpassword" name="cpassword" placeholder="Confirm Password" required>
             <div id="error5" class="error-message"></div>
           </div>
-          <% if (locals.message && locals.message.length > 0) { %>
-          <div class="alert alert-danger text-center">
-            <%= locals.message %>
-          </div>
-          <% } %>
-          <button type="submit" class="signup-btn">Create Account</button>
-          <a href="/auth/google" class="google-btn">
-            <img src="images/icon.jpg" alt="Google Icon" />
 
-            Sign up with Google
-          </a>
+          <p class="privacy-note">
+            Your personal data will be used to support your experience throughout this website, to manage access to your
+            account, and for other purposes described in our <a href="#">privacy policy</a>.
+          </p>
+
+          <% if (locals.message && locals.message.length> 0) { %>
+            <div class="alert">
+              <%= locals.message %>
+            </div>
+            <% } %>
+
+              <button type="submit" class="auth-btn">SIGN UP</button>
         </form>
-        <p class="login-text">
-          Already have an account? <a href="/login">Login</a>
+
+        <p class="switch-auth">
+          Already have an account? <a href="/login">Sign In</a>
         </p>
       </div>
+
+      <div class="image-side">
+        <!-- Background image via CSS -->
+      </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
 
 

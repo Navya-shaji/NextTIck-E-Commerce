@@ -1,228 +1,360 @@
 <%- include("../partials/admin/header") %>
 
-<style>
-    .dashboard-card {
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: transform 0.2s;
-    }
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-    }
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    .bg-primary-light { background-color: rgba(12, 151, 127, 0.1); }
-    .bg-success-light { background-color: rgba(40, 167, 69, 0.1); }
-    .bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
-    .bg-info-light { background-color: rgba(23, 162, 184, 0.1); }
-    .chart-container {
-        position: relative;
-        height: 300px;
-    }
-    .filter-container {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .content-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding: 0.5rem 1rem;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    }
-    .content-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0;
-    }
-    .btn-primary {
-        background-color: #0C977F;
-        border-color: #0C977F;
-    }
-    .btn-primary:hover {
-        background-color: #0a7d6a;
-        border-color: #0a7d6a;
-    }
-    .summary-card {
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    }
-    .summary-card .card-body-icon {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 24px;
-        color: #fff;
-    }
-    .summary-card .summary-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #fff;
-        margin-bottom: 5px;
-    }
-    .summary-card .summary-value {
-        font-size: 24px;
-        font-weight: 600;
-        color: #fff;
-    }
-</style>
+    <style>
+        /* Dashboard-specific Styles */
+        .dashboard-container {
+            padding: 2rem;
+        }
 
-<div class="container-fluid p-4">
-    <div class="content-header">
-        <h2 class="content-title">Dashboard</h2>
-        <div>
-            <a href="/admin/sales-report" class="btn btn-primary">
-                <i class="fas fa-download me-2"></i>Generate Report
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .btn-gold {
+            background-color: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-gold:hover {
+            background-color: var(--accent-gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card-icon-wrap {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+        }
+
+        .icon-revenue {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .icon-orders {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .icon-users {
+            background: #fefce8;
+            color: #eab308;
+        }
+
+        .icon-products {
+            background: #f5f3ff;
+            color: #8b5cf6;
+        }
+
+        .card-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Status Accents */
+        .card-accent-revenue {
+            border-bottom: 4px solid #10b981;
+        }
+
+        .card-accent-orders {
+            border-bottom: 4px solid #3b82f6;
+        }
+
+        .card-accent-pending {
+            border-bottom: 4px solid #f59e0b;
+        }
+
+        .card-accent-completed {
+            border-bottom: 4px solid #8b5cf6;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .premium-select {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .premium-select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Top Lists Section */
+        .top-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .top-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .top-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 12px;
+            transition: background 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .top-list-item:hover {
+            background: #f8fafc;
+        }
+
+        .item-rank {
+            width: 28px;
+            height: 28px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .rank-1 {
+            background: #fefce8;
+            color: #854d0e;
+        }
+
+        .rank-2 {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .rank-3 {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        .item-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1e293b;
+            display: block;
+        }
+
+        .item-meta {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .item-value {
+            text-align: right;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .donut-container {
+            height: 150px;
+            margin-bottom: 1.25rem;
+        }
+    </style>
+
+    <div class="dashboard-container">
+        <div class="content-header">
+            <h2 class="header-title">Executive Overview</h2>
+            <a href="/admin/sales-report" class="btn-gold">
+                <i class="fas fa-file-invoice"></i> Sales Report
             </a>
         </div>
-    </div>
 
-    <!-- Order Statistics Section -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <!-- <div class="card text-white bg-primary summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Orders</h5>
-                        <div class="summary-value"><%= totalOrders %></div>
-                    </div>
+        <!-- Top Summary Cards -->
+        <div class="summary-grid">
+            <div class="premium-card card-accent-revenue">
+                <div class="card-icon-wrap icon-revenue">
+                    <i class="fas fa-coins"></i>
                 </div>
-            </div> -->
-            <div class="card text-white bg-success summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Active Revenue</h5>
-                        <div class="summary-value">₹<%= activeRevenue.toLocaleString('en-IN') %></div>
-                    </div>
+                <p class="card-label">Active Revenue</p>
+                <h3 class="card-value">₹<%= activeRevenue.toLocaleString('en-IN') %>
+                </h3>
+            </div>
+            <div class="premium-card card-accent-orders">
+                <div class="card-icon-wrap icon-orders">
+                    <i class="fas fa-truck-loading"></i>
                 </div>
+                <p class="card-label">Pending Orders</p>
+                <h3 class="card-value">
+                    <%= pendingOrders %>
+                </h3>
+            </div>
+            <div class="premium-card card-accent-pending">
+                <div class="card-icon-wrap icon-users">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <p class="card-label">Completed Orders</p>
+                <h3 class="card-value">
+                    <%= completedOrders %>
+                </h3>
+            </div>
+            <div class="premium-card card-accent-completed">
+                <div class="card-icon-wrap icon-products">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <p class="card-label">Total Revenue</p>
+                <h3 class="card-value">₹<%= totalRevenue?.toLocaleString('en-IN') || '0' %>
+                </h3>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <div class="card text-white bg-warning summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Pending Orders</h5>
-                        <div class="summary-value"><%= pendingOrders %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            <!-- <div class="card text-white bg-danger summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Total Revenue</h5>
-                        <div class="summary-value">₹<%= totalRevenue.toLocaleString('en-IN') %></div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="card text-white bg-info summary-card">
-                <div class="card-body">
-                    <div class="card-body-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="text-center">
-                        <h5 class="summary-title">Completed Orders</h5>
-                        <div class="summary-value"><%= completedOrders %></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-           
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-3">
-            
-        </div>
-    </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-icon bg-primary-light">
-                        <i class="fas fa-rupee-sign text-primary"></i>
-                    </div>
-                    <h6 class="card-title mb-2">Total Revenue</h6>
-                    <h3 class="mb-0">₹<%= totalRevenue?.toLocaleString('en-IN') || '0' %></h3>
-                </div>
+        <!-- Secondary Stats -->
+        <div class="summary-grid mb-5" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="premium-card">
+                <p class="card-label">Total Orders</p>
+                <h3 class="card-value" style="font-size: 1.25rem;">
+                    <%= totalOrders?.toLocaleString('en-IN') || '0' %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Total Users</p>
+                <h3 class="card-value" style="font-size: 1.25rem;">
+                    <%= totalUsers?.toLocaleString('en-IN') || '0' %>
+                </h3>
+            </div>
+            <div class="premium-card">
+                <p class="card-label">Total Products</p>
+                <h3 class="card-value" style="font-size: 1.25rem;">
+                    <%= totalProducts?.toLocaleString('en-IN') || '0' %>
+                </h3>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-icon bg-success-light">
-                        <i class="fas fa-shopping-cart text-success"></i>
-                    </div>
-                    <h6 class="card-title mb-2">Total Orders</h6>
-                    <h3 class="mb-0"><%= totalOrders?.toLocaleString('en-IN') || '0' %></h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-icon bg-warning-light">
-                        <i class="fas fa-users text-warning"></i>
-                    </div>
-                    <h6 class="card-title mb-2">Total Users</h6>
-                    <h3 class="mb-0"><%= totalUsers?.toLocaleString('en-IN') || '0' %></h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-icon bg-info-light">
-                        <i class="fas fa-box text-info"></i>
-                    </div>
-                    <h6 class="card-title mb-2">Total Products</h6>
-                    <h3 class="mb-0"><%= totalProducts?.toLocaleString('en-IN') || '0' %></h3>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Sales Chart -->
-    <div class="card dashboard-card mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="card-title">Sales Overview</h5>
-                <div class="filter-container d-flex gap-3">
-                    <select id="chartFilter" class="form-select">
+        <!-- Sales Analytics -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h5 class="chart-title">Sales Analytics</h5>
+                <div class="chart-filters">
+                    <select id="chartFilter" class="premium-select">
                         <option value="yearly">Yearly</option>
                         <option value="monthly" selected>Monthly</option>
                         <option value="weekly">Weekly</option>
                         <option value="daily">Daily</option>
                     </select>
-                    <select id="yearFilter" class="form-select">
-                        <!-- Will be populated dynamically -->
+                    <select id="yearFilter" class="premium-select">
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
             </div>
@@ -230,325 +362,176 @@
                 <canvas id="salesChart"></canvas>
             </div>
         </div>
-    </div>
 
-    <!-- Top Products, Categories, and Brands -->
-    <div class="row">
-        <!-- Top Products -->
-        <div class="col-lg-4 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Top Selling Products</h5>
-                    <div class="chart-container mb-3">
-                        <canvas id="topProductsChart"></canvas>
-                    </div>
-                    <div id="topProductsList" class="list-group list-group-flush">
-                        <!-- Will be populated dynamically -->
-                    </div>
+        <!-- Top Performers -->
+        <div class="top-grid">
+            <!-- Top Products -->
+            <div class="top-card">
+                <h5 class="top-card-title"><i class="fas fa-trophy text-warning"></i> Best Selling Products</h5>
+                <div class="donut-container">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+                <div id="topProductsList">
+                    <!-- Data here -->
                 </div>
             </div>
-        </div>
 
-        <!-- Top Categories -->
-        <div class="col-lg-4 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Top Categories</h5>
-                    <div class="chart-container mb-3">
-                        <canvas id="topCategoriesChart"></canvas>
-                    </div>
-                    <div id="topCategoriesList" class="list-group list-group-flush">
-                        <!-- Will be populated dynamically -->
-                    </div>
+            <!-- Top Categories -->
+            <div class="top-card">
+                <h5 class="top-card-title"><i class="fas fa-layer-group text-primary"></i> Top Categories</h5>
+                <div class="donut-container">
+                    <canvas id="topCategoriesChart"></canvas>
+                </div>
+                <div id="topCategoriesList">
+                    <!-- Data here -->
                 </div>
             </div>
-        </div>
 
-        <!-- Top Brands -->
-        <div class="col-lg-4 mb-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">
-                        <i class="fas fa-trademark me-2"></i>Top Brands
-                    </h5>
-                    <div class="chart-container mb-3">
-                        <canvas id="topBrandsChart"></canvas>
-                    </div>
-                    <div id="topBrandsList" class="list-group list-group-flush">
-                        <!-- Will be populated dynamically -->
-                    </div>
+            <!-- Top Brands -->
+            <div class="top-card">
+                <h5 class="top-card-title"><i class="fas fa-star text-info"></i> Dominant Brands</h5>
+                <div class="donut-container">
+                    <canvas id="topBrandsChart"></canvas>
+                </div>
+                <div id="topBrandsList">
+                    <!-- Data here -->
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-let salesChart, topProductsChart, topCategoriesChart, topBrandsChart;
+    <script>
+        let salesChart, topProductsChart, topCategoriesChart, topBrandsChart;
 
-// Initialize all charts
-function initializeCharts() {
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom'
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        let label = context.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        label += '₹' + context.raw.toLocaleString('en-IN');
-                        return label;
-                    }
-                }
-            }
-        }
-    };
+        const COLORS = ['#c5a059', '#1e293b', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9'];
 
-    // Initialize chart data
-    const chartData = {
-        products: <%- JSON.stringify(topProducts || []) %>,
-        categories: <%- JSON.stringify(topCategories || []) %>,
-        brands: <%- JSON.stringify(topBrands || []) %>
-    };
+        function initCharts() {
+            const chartData = {
+                products: <% - JSON.stringify(topProducts || []) %>,
+                categories: <% - JSON.stringify(topCategories || []) %>,
+                brands: <% - JSON.stringify(topBrands || []) %>
+            };
 
-    console.log('Chart Data:', chartData);
-
-    const colors = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        '#FF9F40', '#FF6B81', '#45AAF2', '#2ED573', '#FFA502'
-    ];
-
-    // Top Brands Chart
-    const brandsCtx = document.getElementById('topBrandsChart');
-    if (brandsCtx && chartData.brands && chartData.brands.length > 0) {
-        topBrandsChart = new Chart(brandsCtx, {
-            type: 'doughnut',
-            data: {
-                labels: chartData.brands.map(item => item.name),
-                datasets: [{
-                    data: chartData.brands.map(item => item.revenue),
-                    backgroundColor: colors.slice(0, chartData.brands.length)
-                }]
-            },
-            options: {
-                ...chartOptions,
-                plugins: {
-                    ...chartOptions.plugins,
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const brand = chartData.brands[context.dataIndex];
-                                return [
-                                    `${brand.name}: ₹${brand.revenue.toLocaleString('en-IN')}`,
-                                    `Orders: ${brand.totalOrderCount}`,
-                                    `Products: ${brand.uniqueProductCount}`
-                                ];
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        
-        // Update brand list
-        updateTopList('topBrandsList', chartData.brands);
-    } else if (brandsCtx) {
-        brandsCtx.parentElement.innerHTML = '<div class="text-center text-muted">No data available</div>';
-    }
-
-    // Initialize other charts...
-    // Sales Chart
-    const salesCtx = document.getElementById('salesChart');
-    if (salesCtx) {
-        salesChart = new Chart(salesCtx, {
-            type: 'line',
-            data: {
-                labels: <%- JSON.stringify(initialSalesData.labels) %>,
-                datasets: [{
-                    label: 'Sales',
-                    data: <%- JSON.stringify(initialSalesData.data) %>,
-                    borderColor: '#0C977F',
-                    backgroundColor: 'rgba(12, 151, 127, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                ...chartOptions,
-                plugins: {
-                    ...chartOptions.plugins,
-                    legend: {
-                        display: false
-                    }
+            // Standard Donut Config
+            const getDonutConfig = (labels, data) => ({
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: COLORS,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => '₹' + value.toLocaleString('en-IN')
-                        }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
+            });
+
+            // Sales Line Chart
+            const salesCtx = document.getElementById('salesChart');
+            salesChart = new Chart(document.getElementById('salesChart'), {
+                type: 'line',
+                data: {
+                    labels: <% - JSON.stringify(initialSalesData.labels) %>,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: <% - JSON.stringify(initialSalesData.data) %>,
+                        borderColor: '#c5a059',
+                        borderWidth: 3,
+                        background: 'rgba(197, 160, 89, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#c5a059',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { callback: val => '₹' + val.toLocaleString('en-IN') }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Products Donut
+            if (chartData.products.length) {
+                topProductsChart = new Chart(document.getElementById('topProductsChart'),
+                    getDonutConfig(chartData.products.map(p => p.name), chartData.products.map(p => p.revenue)));
+                renderList('topProductsList', chartData.products);
             }
-        });
-    }
 
-    // Top Products Chart
-    const productsCtx = document.getElementById('topProductsChart');
-    if (productsCtx && chartData.products && chartData.products.length > 0) {
-        topProductsChart = new Chart(productsCtx, {
-            type: 'doughnut',
-            data: {
-                labels: chartData.products.map(item => item.name),
-                datasets: [{
-                    data: chartData.products.map(item => item.revenue),
-                    backgroundColor: colors.slice(0, chartData.products.length)
-                }]
-            },
-            options: chartOptions
-        });
-        updateTopList('topProductsList', chartData.products);
-    } else if (productsCtx) {
-        productsCtx.parentElement.innerHTML = '<div class="text-center text-muted">No data available</div>';
-    }
+            // Categories Donut
+            if (chartData.categories.length) {
+                topCategoriesChart = new Chart(document.getElementById('topCategoriesChart'),
+                    getDonutConfig(chartData.categories.map(c => c.name), chartData.categories.map(c => c.revenue)));
+                renderList('topCategoriesList', chartData.categories);
+            }
 
-    // Top Categories Chart
-    const categoriesCtx = document.getElementById('topCategoriesChart');
-    if (categoriesCtx && chartData.categories && chartData.categories.length > 0) {
-        topCategoriesChart = new Chart(categoriesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: chartData.categories.map(item => item.name),
-                datasets: [{
-                    data: chartData.categories.map(item => item.revenue),
-                    backgroundColor: colors.slice(0, chartData.categories.length)
-                }]
-            },
-            options: chartOptions
-        });
-        updateTopList('topCategoriesList', chartData.categories);
-    } else if (categoriesCtx) {
-        categoriesCtx.parentElement.innerHTML = '<div class="text-center text-muted">No data available</div>';
-    }
-}
-
-// Update top items list
-function updateTopList(listId, data) {
-    const list = document.getElementById(listId);
-    if (!list || !data || data.length === 0) {
-        if (list) {
-            list.innerHTML = '<div class="text-center text-muted">No data available</div>';
+            // Brands Donut
+            if (chartData.brands.length) {
+                topBrandsChart = new Chart(document.getElementById('topBrandsChart'),
+                    getDonutConfig(chartData.brands.map(b => b.name), chartData.brands.map(b => b.revenue)));
+                renderList('topBrandsList', chartData.brands, true);
+            }
         }
-        return;
-    }
 
-    if (listId === 'topBrandsList') {
-        list.innerHTML = data.map((item, index) => `
-            <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                        <span class="badge bg-primary rounded-pill me-2">#${index + 1}</span>
-                        <strong>${item.name || 'Unknown'}</strong>
-                    </div>
-                    <div class="text-end">
-                        <div>₹${(item.revenue || 0).toLocaleString('en-IN')}</div>
-                    </div>
+        function renderList(id, data, isBrand = false) {
+            const container = document.getElementById(id);
+            container.innerHTML = data.slice(0, 5).map((item, i) => `
+            <div class="top-list-item">
+                <div class="item-rank rank-${i + 1}">${i + 1}</div>
+                <div class="item-info">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-meta">${isBrand ? item.totalOrderCount + ' Orders' : item.count + ' Units Sold'}</span>
                 </div>
-                <div class="row g-2 small text-muted">
-                    <div class="col-6">
-                        <i class="fas fa-box me-1"></i> Products: ${item.uniqueProductCount || 0}
-                    </div>
-                    <div class="col-6 text-end">
-                        <i class="fas fa-shopping-cart me-1"></i> Orders: ${item.totalOrderCount || 0}
-                    </div>
-                    <div class="col-6">
-                        <i class="fas fa-chart-line me-1"></i> Avg Order: ₹${(item.averageOrderValue || 0).toLocaleString('en-IN')}
-                    </div>
-                    <div class="col-6 text-end">
-                        <i class="fas fa-tag me-1"></i> Avg/Product: ₹${(item.averageRevenuePerProduct || 0).toLocaleString('en-IN')}
-                    </div>
-                </div>
+                <div class="item-value">₹${item.revenue.toLocaleString('en-IN')}</div>
             </div>
         `).join('');
-    } else {
-        list.innerHTML = data.map((item, index) => `
-            <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-primary rounded-pill me-2">#${index + 1}</span>
-                        <strong>${item.name || 'Unknown'}</strong>
-                    </div>
-                    <div class="text-end">
-                        <div class="small text-muted">Sales: ${item.count || 0}</div>
-                        <div>₹${(item.revenue || 0).toLocaleString('en-IN')}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-}
-
-// Update charts with new data
-async function updateCharts() {
-    const chartFilter = document.getElementById('chartFilter').value;
-    const yearFilter = document.getElementById('yearFilter').value;
-
-    try {
-        const response = await fetch(`/admin/dashboard/sales-data?filter=${chartFilter}&year=${yearFilter}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
         }
-        const data = await response.json();
-        
-        if (salesChart && data.labels && data.data) {
-            salesChart.data.labels = data.labels;
-            salesChart.data.datasets[0].data = data.data;
-            salesChart.update();
+
+        async function updateDashboardData() {
+            const filter = document.getElementById('chartFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            try {
+                const res = await fetch(`/admin/dashboard/sales-data?filter=${filter}&year=${year}`);
+                const data = await res.json();
+                salesChart.data.labels = data.labels;
+                salesChart.data.datasets[0].data = data.data;
+                salesChart.update();
+            } catch (err) { console.error(err); }
         }
-    } catch (error) {
-        console.error('Error updating charts:', error);
-    }
-}
 
-// Initialize year filter
-function initializeYearFilter() {
-    const yearFilter = document.getElementById('yearFilter');
-    if (!yearFilter) return;
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
 
-    const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= currentYear - 4; year--) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearFilter.appendChild(option);
-    }
-}
+            // Populate Year Filter
+            const yearSelect = document.getElementById('yearFilter');
+            const currYear = new Date().getFullYear();
+            for (let y = currYear; y >= currYear - 4; y--) {
+                yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+            }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    initializeCharts();
-    initializeYearFilter();
+            document.getElementById('chartFilter').onchange = updateDashboardData;
+            document.getElementById('yearFilter').onchange = updateDashboardData;
+        });
+    </script>
 
-    const chartFilter = document.getElementById('chartFilter');
-    const yearFilter = document.getElementById('yearFilter');
-
-    if (chartFilter) {
-        chartFilter.addEventListener('change', updateCharts);
-    }
-    if (yearFilter) {
-        yearFilter.addEventListener('change', updateCharts);
-    }
-});
-</script>
-
-<%- include("../partials/admin/footer") %>
+    <%- include("../partials/admin/footer") %>

@@ -1,440 +1,186 @@
-<%- include ("../../views/partials/user/header.ejs")  %>
-<head>  
-  <link rel="stylesheet" href="/styles/home.css">  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  
-  <link rel="preconnect" href="https://fonts.googleapis.com">  
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<%- include ("../../views/partials/user/header.ejs") %>
 
-<!-- Hero Section -->
-<section id="home-section" class="hero-section">  
-  <div class="hero-container">    
-    <div class="hero-content">      
-      <div class="hero-text">        
-        <h1 class="hero-title">          
-          <span class="title-line">CUSTOM WATCHES FOR</span>          
-          <span class="title-line accent">ANY OCCASION</span>        
-        </h1>                
-        <div class="hero-buttons">          
-          <a href="#collections" class="btn-primary">SHOP WATCHES</a>          
-          <a href="#story" class="btn-secondary">DISCOVER OUR STORY</a>        
-        </div>                
-        <!-- Navigation Dots -->        
-        <div class="hero-dots">          
-          <span class="dot active"></span>          
-          <span class="dot"></span>          
-          <span class="dot"></span>          
-          <span class="dot"></span>        
-        </div>      
-      </div>            
-      <div class="hero-watch">        
-        <div class="watch-showcase">          
-          <img src="/images/kylefromthenorth-TeOH1b-t3Nc-unsplash.jpg" alt="NextTick Premium Watch" class="hero-watch-img">          
-          <div class="watch-glow"></div>        
-        </div>      
-      </div>    
-    </div>        
-    <!-- Scroll Indicator -->    
-    <div class="scroll-indicator">      
-      <div class="scroll-arrow">        
-        <i class="fas fa-chevron-down"></i>      
-      </div>    
-    </div>  
-  </div>
-</section>
+  <head>
+    <link rel="stylesheet" href="/styles/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
+  </head>
 
-<!-- Story Section -->
-<section id="story" class="story-section">  
-  <div class="container">    
-    <div class="story-content">      
-      <div class="story-image">        
-        <img src="/images/watch-story.jpg" alt="NextTick Story" class="story-img">        
-        <div class="story-overlay">          
-          <div class="play-button">            
-            <i class="fas fa-play"></i>          
-          </div>        
-        </div>      
-      </div>            
-      <div class="story-text">        
-        <div class="navigation-arrows">          
-          <button class="nav-arrow prev">            
-            <i class="fas fa-chevron-left"></i>          
-          </button>          
-          <button class="nav-arrow next">            
-            <i class="fas fa-chevron-right"></i>          
-          </button>        
-        </div>                
-        <div class="story-info">          
-          <h2 class="story-title">OUR STORY</h2>          
-          <p class="story-description">            
-            At NextTick, we believe that every moment deserves a timepiece that reflects your unique style. Our master craftsmen are dedicated to creating exceptional watches that combine traditional Swiss precision with contemporary design. Each watch tells a story of passion, precision, and timeless elegance.          
-          </p>          
-          <p class="story-description">            
-            From the initial sketch to the final polish, every NextTick timepiece undergoes rigorous quality control and meticulous attention to detail, ensuring that you receive nothing less than perfection on your wrist.          
-          </p>        
-        </div>      
-      </div>    
-    </div>  
-  </div>
-</section>
+  <!-- Hero Section -->
+  <section id="home-section" class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text" style="text-align: center; max-width: 800px; margin: 0 auto;">
+          <h1 class="hero-title">
+            <span class="title-line">MODERN TIMEPIECES</span>
+            <span class="title-line accent">FOR THE CURATED LIFE</span>
+          </h1>
+          <div class="hero-buttons" style="justify-content: center;">
+            <a href="#collections" class="btn-primary">SHOP THE COLLECTION</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Collections Section -->
-<section id="collections" class="collections-section">  
-  <div class="container">    
-    <div class="section-header">      
-      <h2 class="section-title">COLLECTIONS</h2>      
-      <div class="collection-nav">        
-        <button class="collection-btn active" data-collection="minimal">MINIMAL</button>        
-        <button class="collection-btn" data-collection="popular">POPULAR</button>      
-      </div>    
-    </div>        
-    <div class="collections-grid">      
-      <% if (products && products.length > 0) { %>        
-        <% products.slice(0, 3).forEach((product, index) => { %>          
-          <div class="collection-item" data-collection="<%= index === 0 ? 'minimal' : 'popular' %>">            
-            <div class="collection-watch">              
-              <div class="watch-container">                
-                <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="collection-watch-img">                                
-                <% if (product.productVideo) { %>                  
-                  <video class="product-video" loop muted playsinline preload="metadata" style="display: none;">                    
-                    <source src="/uploads/videos/<%= product.productVideo %>" type="video/mp4">                  
-                  </video>                
-                <% } %>                                
-                <div class="watch-overlay">                  
-                  <div class="watch-actions">                    
-                    <button class="action-btn" onclick="addToCartHandler(event, '<%= product._id %>')">                      
-                      <i class="fas fa-shopping-cart"></i>                    
-                    </button>                    
-                    <button class="action-btn" onclick="addToWishlist('<%= product._id %>')">                      
-                      <i class="fas fa-heart"></i>                    
-                    </button>                    
-                    <a href="/productDetails?id=<%= product._id %>" class="action-btn">                      
-                      <i class="fas fa-eye"></i>                    
-                    </a>                  
-                  </div>                
-                </div>              
-              </div>                            
-              <div class="watch-info">                
-                <h3 class="watch-name"><%= product.productName %></h3>                
-                <div class="watch-price">                  
-                  <%                     
-                    let finalPrice = product.regularPrice;                    
-                    let maxOffer = Math.max(product.discount || 0, (product.category && product.category.offer) || 0, product.productOffer || 0);                    
-                    if (maxOffer > 0) {                      
-                      finalPrice = product.regularPrice - (product.regularPrice * maxOffer / 100);                  
-                  %>                    
-                    <span class="original-price">₹<%= product.regularPrice.toFixed(2) %></span>                    
-                    <span class="sale-price">₹<%= finalPrice.toFixed(2) %></span>                  
-                  <% } else { %>                    
-                    <span class="current-price">₹<%= product.salesPrice.toFixed(2) %></span>                  
-                  <% } %>                
-                </div>                                
-                <div class="watch-rating">                  
-                  <% for (let i = 0; i < 5; i++) { %>                    
-                    <i class="fas fa-star <%= i < product.rating ? 'filled' : '' %>"></i>                  
-                  <% } %>                
-                </div>              
-              </div>            
-            </div>          
-          </div>        
-        <% }); %>      
-      <% } else { %>        
-        <div class="no-products">          
-          <i class="fas fa-clock"></i>          
-          <h3>Coming Soon</h3>          
-          <p>Our exclusive timepiece collection is being curated.</p>        
-        </div>      
-      <% } %>    
-    </div>  
-  </div>
-</section>
+  <!-- Collections Section -->
+  <section id="collections" class="collections-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">EXCLUSIVE COLLECTIONS</h2>
+        <div class="collection-nav">
+          <button class="collection-btn active" data-collection="all">ALL</button>
+          <button class="collection-btn" data-collection="minimal">MINIMAL</button>
+          <button class="collection-btn" data-collection="popular">POPULAR</button>
+        </div>
+      </div>
+      <div class="collections-grid">
+        <% if (products && products.length> 0) { %>
+          <% products.slice(0, 6).forEach((product, index)=> { %>
+            <div class="collection-item" data-collection="<%= index % 2 === 0 ? 'minimal' : 'popular' %>">
+              <a href="/productDetails?id=<%= product._id %>" style="text-decoration: none; color: inherit;">
+                <div class="watch-container">
+                  <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
+                    class="collection-watch-img">
+                  <div class="watch-overlay"></div>
+                </div>
+                <div class="watch-info">
+                  <h3 class="watch-name">
+                    <%= product.productName %>
+                  </h3>
+                  <div class="watch-price">
+                    <% let finalPrice=product.regularPrice; let maxOffer=Math.max(product.discount || 0,
+                      (product.category && product.category.offer) || 0, product.productOffer || 0); if (maxOffer> 0) {
+                      finalPrice = product.regularPrice - (product.regularPrice * maxOffer / 100);
+                      %>
+                      <span class="sale-price">₹<%= finalPrice.toLocaleString() %></span>
+                      <span class="original-price" style="font-size: 0.8em; opacity: 0.5;">₹<%=
+                          product.regularPrice.toLocaleString() %></span>
+                      <% } else { %>
+                        <span class="current-price">₹<%= product.salesPrice.toLocaleString() %></span>
+                        <% } %>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <% }); %>
+              <% } else { %>
+                <div class="no-products">
+                  <h3>Coming Soon</h3>
+                  <p>Our exclusive timepiece collection is being curated.</p>
+                </div>
+                <% } %>
+      </div>
+    </div>
+  </section>
 
-<!-- Features Section -->
-<section class="features-section">  
-  <div class="container">    
-    <div class="features-grid">      
-      <div class="feature-item">        
-        <div class="feature-icon">          
-          <i class="fas fa-shipping-fast"></i>        
-        </div>        
-        <h3 class="feature-title">FREE WORLDWIDE SHIPPING</h3>        
-        <p class="feature-description">Complimentary shipping on all orders over $500</p>      
-      </div>            
-      <div class="feature-item">        
-        <div class="feature-icon">          
-          <i class="fas fa-shield-alt"></i>        
-        </div>        
-        <h3 class="feature-title">LIFETIME WARRANTY</h3>        
-        <p class="feature-description">Comprehensive coverage for all manufacturing defects</p>      
-      </div>            
-      <div class="feature-item">        
-        <div class="feature-icon">          
-          <i class="fas fa-clock"></i>        
-        </div>        
-        <h3 class="feature-title">SWISS MOVEMENT</h3>        
-        <p class="feature-description">Precision Swiss automatic movements in every timepiece</p>      
-      </div>            
-      <div class="feature-item">        
-        <div class="feature-icon">          
-          <i class="fas fa-headset"></i>        
-        </div>        
-        <h3 class="feature-title">24/7 SUPPORT</h3>        
-        <p class="feature-description">Expert assistance whenever you need it</p>      
-      </div>    
-    </div>  
-  </div>
-</section>
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-item">
+          <h3 class="feature-title">EXPRESS DELIVERY</h3>
+          <p class="feature-description">Complimentary worldwide shipping on premium orders.</p>
+        </div>
+        <div class="feature-item">
+          <h3 class="feature-title">AUTHENTICITY GUARANTEED</h3>
+          <p class="feature-description">Every timepiece is certified for 100% original craftsmanship.</p>
+        </div>
+        <div class="feature-item">
+          <h3 class="feature-title">CURATED SELECTION</h3>
+          <p class="feature-description">Only the finest designs make it into our exclusive boutique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Newsletter Section -->
-<section class="newsletter-section">  
-  <div class="container">    
-    <div class="newsletter-content">      
-      <h2 class="newsletter-title">STAY CONNECTED</h2>      
-      <p class="newsletter-subtitle">Be the first to discover our latest timepieces and exclusive offers</p>            
-      <form class="newsletter-form">        
-        <div class="input-group">          
-          <input type="email" placeholder="Enter your email address" required>          
-          <button type="submit" class="subscribe-btn">SUBSCRIBE</button>        
-        </div>      
-      </form>            
-      <div class="social-links">        
-        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>        
-        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>        
-        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>        
-        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>      
-      </div>    
-    </div>  
-  </div>
-</section>
+  <!-- Newsletter Section -->
+  <section class="newsletter-section">
+    <div class="container">
+      <div class="newsletter-content">
+        <h2 class="newsletter-title">JOIN THE ELITE</h2>
+        <p class="newsletter-subtitle">Subscribe to receive early access to our limited-release drops.</p>
+        <form class="newsletter-form">
+          <div class="input-group">
+            <input type="email" placeholder="Email address" required>
+            <button type="submit" class="subscribe-btn">JOIN</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// Hero Slider Animation
-document.addEventListener('DOMContentLoaded', function() {  
-  const dots = document.querySelectorAll('.dot');  
-  const heroWatchImg = document.querySelector('.hero-watch-img');  
-  const watchImages = [    
-    '/images/kylefromthenorth-TeOH1b-t3Nc-unsplash.jpg',    
-    '/images/watch-2.jpg',    
-    '/images/watch-3.jpg',    
-    '/images/watch-4.jpg'  
-  ];    
-  let currentSlide = 0;    
-  
-  function changeSlide(index) {    
-    dots.forEach(dot => dot.classList.remove('active'));    
-    dots[index].classList.add('active');    
-    heroWatchImg.style.opacity = '0';    
-    setTimeout(() => {      
-      heroWatchImg.src = watchImages[index];      
-      heroWatchImg.style.opacity = '1';    
-    }, 300);  
-  }    
-  
-  // Auto-slide  
-  setInterval(() => {    
-    currentSlide = (currentSlide + 1) % watchImages.length;    
-    changeSlide(currentSlide);  
-  }, 5000);    
-  
-  // Manual navigation  
-  dots.forEach((dot, index) => {    
-    dot.addEventListener('click', () => {      
-      currentSlide = index;      
-      changeSlide(index);    
-    });  
-  });
-});
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Collection Filter
+    document.addEventListener('DOMContentLoaded', () => {
+      const btns = document.querySelectorAll('.collection-btn');
+      const items = document.querySelectorAll('.collection-item');
 
-// Collection Filter
-document.addEventListener('DOMContentLoaded', function() {  
-  const collectionBtns = document.querySelectorAll('.collection-btn');  
-  const collectionItems = document.querySelectorAll('.collection-item');    
-  
-  collectionBtns.forEach(btn => {    
-    btn.addEventListener('click', () => {      
-      const filter = btn.getAttribute('data-collection');            
-      collectionBtns.forEach(b => b.classList.remove('active'));      
-      btn.classList.add('active');            
-      collectionItems.forEach(item => {        
-        if (filter === 'all' || item.getAttribute('data-collection') === filter) {          
-          item.style.display = 'block';          
-          item.style.animation = 'fadeIn 0.5s ease';        
-        } else {          
-          item.style.display = 'none';        
-        }      
-      });    
-    });  
-  });
-});
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          btns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.dataset.collection;
 
-// Smooth Scrolling
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {  
-  anchor.addEventListener('click', function (e) {    
-    e.preventDefault();    
-    document.querySelector(this.getAttribute('href')).scrollIntoView({      
-      behavior: 'smooth'    
-    });  
-  });
-});
+          items.forEach(item => {
+            if (filter === 'all' || item.dataset.collection === filter) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
 
-// Add to Cart Handler (Original Function Preserved)
-function addToCartHandler(event, productId) {  
-  event.preventDefault();  
-  fetch('/addToCart', {    
-    method: 'POST',    
-    headers: {      
-      'Content-Type': 'application/json',    
-    },    
-    body: JSON.stringify({      
-      productId: productId,      
-      quantity: 1    
-    })  
-  })  
-  .then(response => {    
-    if (!response.ok) {      
-      return response.json().then(data => {        
-        throw new Error(data.message || 'Failed to add product to cart');      
-      });    
-    }    
-    return response.json();  
-  })  
-  .then(data => {    
-    if (data.success) {      
-      Swal.fire({        
-        title: 'Success!',        
-        text: data.message || 'Product added to cart successfully!',        
-        icon: 'success',        
-        showConfirmButton: false,        
-        timer: 1500      
-      }).then(() => {        
-        if (data.cartCount !== undefined) {          
-          updateCartCount(data.cartCount);        
-        }        
-        if (data.redirect) {          
-          window.location.href = data.redirect;        
-        }      
-      });    
-    } else {      
-      throw new Error(data.message || 'Failed to add product to cart');    
-    }  
-  })  
-  .catch(error => {    
-    console.error('Error:', error);        
-    if (error.message.includes('Please login')) {      
-      Swal.fire({        
-        title: 'Login Required',        
-        text: 'Please login to add items to your cart',        
-        icon: 'info',        
-        showCancelButton: true,        
-        confirmButtonText: 'Login',        
-        cancelButtonText: 'Cancel'      
-      }).then((result) => {        
-        if (result.isConfirmed) {          
-          window.location.href = '/login';        
-        }      
-      });    
-    }     
-    else if (error.message.includes('Maximum quantity')) {      
-      Swal.fire({        
-        title: 'Quantity Limit Reached',        
-        text: error.message,        
-        icon: 'warning',        
-        confirmButtonText: 'OK'      
-      });    
-    }    
-    else if (error.message.includes('out of stock') || error.message.includes('available in stock')) {      
-      Swal.fire({        
-        title: 'Stock Limited',        
-        text: error.message,        
-        icon: 'warning',        
-        confirmButtonText: 'OK'      
-      });    
-    }    
-    else {      
-      Swal.fire({        
-        title: 'Error!',        
-        text: error.message || 'Something went wrong. Please try again.',        
-        icon: 'error',        
-        confirmButtonText: 'OK'      
-      });    
-    }  
-  });
-}
+    // Smooth Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
 
-function updateCartCount(count) {  
-  const cartCountElements = document.querySelectorAll('.cart-count');  
-  cartCountElements.forEach(element => {    
-    element.textContent = count;  
-  });
-}
+    // Cart Handler
+    function addToCartHandler(event, productId) {
+      event.preventDefault();
+      fetch('/addToCart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: 1 })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({ title: 'Added', icon: 'success', timer: 1000, showConfirmButton: false });
+            if (data.cartCount) document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
+          } else {
+            Swal.fire({ title: 'Error', text: data.message, icon: 'error' });
+          }
+        })
+        .catch(() => Swal.fire({ title: 'Please Login', icon: 'info' }));
+    }
 
-// Wishlist Function (Original Function Preserved)
-function addToWishlist(productId) {  
-  $.ajax({    
-    url: "/addToWishlist",     
-    method: "POST",    
-    data: { productId: productId },    
-    success: (response) => {      
-      if (response.status) {        
-        Swal.fire({          
-          title: "Added to wishlist",          
-          text: "The product has been added to your wishlist.",          
-          icon: "success",          
-          timer: 2000,        
-        });      
-      } else {        
-        Swal.fire({          
-          title: "Already in wishlist",          
-          text: response.message || "This product is already in your wishlist.",          
-          icon: "info",          
-          timer: 2000,        
-        });      
-      }    
-    },    
-    error: (xhr, status, error) => {      
-      console.error("AJAX Error: ", error, xhr.responseText);      
-      Swal.fire({        
-        title: "Error",        
-        text: "There was an error adding the product to your wishlist. Please try again.",        
-        icon: "error",        
-        timer: 2000,      
-      });    
-    },  
-  });
-}
+    // Wishlist Handler
+    function addToWishlist(productId) {
+      fetch('/addToWishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      })
+        .then(res => res.json())
+        .then(data => {
+          Swal.fire({ title: data.status ? 'Added to Wishlist' : 'Already in Wishlist', icon: 'info', timer: 1500 });
+        });
+    }
+  </script>
 
-// Original Functions Preserved
-function addToCart(productId) {}
-
-document.getElementById('sort')?.addEventListener('change', function() {  
-  const currentUrl = new URL(window.location.href);  
-  currentUrl.searchParams.set('sort', this.value);  
-  window.location.href = currentUrl.toString();
-});
-
-document.querySelector('input[name="inStock"]')?.addEventListener('change', function() {  
-  const currentUrl = new URL(window.location.href);  
-  if (this.checked) {    
-    currentUrl.searchParams.set('inStock', 'true');  
-  } else {    
-    currentUrl.searchParams.delete('inStock');  
-  }  
-  window.location.href = currentUrl.toString();
-});
-
-function toggleDropdown(id) {  
-  const dropdown = document.getElementById(id);  
-  dropdown.classList.toggle('show');  
-  const arrow = dropdown.previousElementSibling.querySelector('.dropdown-arrow');  
-  if (dropdown.classList.contains('show')) {    
-    arrow.style.transform = 'rotate(180deg)';  
-  } else {    
-    arrow.style.transform = 'rotate(0deg)';  
-  }
-}
-</script>
-
-<%- include ("../../views/partials/user/footer.ejs")  %>
+  <%- include ("../../views/partials/user/footer.ejs") %>

@@ -1,454 +1,353 @@
 <!DOCTYPE HTML>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>NexTick Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+        :root {
+            --admin-bg: #f4f7f6;
+            --sidebar-bg: #1a1a1a;
+            --sidebar-text: #94a3b8;
+            --sidebar-active: #ffffff;
+            --accent-gold: #c5a059;
+            --accent-gold-hover: #b38e4d;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --header-font: 'Cinzel', serif;
+            /* Changed to Cinzel for a more premium/luxury feel */
+            --body-font: 'Inter', sans-serif;
+            --title-font: 'Outfit', sans-serif;
         }
+
+        body {
+            font-family: var(--body-font);
+            background-color: var(--admin-bg);
+            color: #334155;
+            margin: 0;
+        }
+
+        /* Sidebar Sidebar */
         .navbar-aside {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 250px;
-            background-color: #ffffff;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
-            transition: all 0.3s;
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
-        .main-wrap {
-            margin-left: 250px;
-            transition: all 0.3s;
-        }
-        .navbar-aside .aside-top {
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .menu-aside {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .menu-aside .menu-item {
-            border-bottom: 1px solid #e9ecef;
-        }
-        .menu-aside .menu-link {
-            padding: 10px 1rem;
-            color: #495057;
+
+        .aside-top {
+            padding: 2.5rem 1.5rem;
             display: flex;
             align-items: center;
-            transition: all 0.3s;
+            justify-content: center;
+            position: relative;
         }
-        .menu-aside .menu-link:hover {
-            background-color: #f1f3f5;
-            color: #000;
+
+        .brand-wrap {
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
-        .menu-aside .icon {
-            margin-right: 10px;
-            font-size: 18px;
+
+        .brand-wrap h6 {
+            font-family: var(--header-font);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 0;
+            text-transform: uppercase;
         }
+
+        .brand-icon {
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+        }
+
+        .btn-aside-minimize {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .menu-aside {
+            list-style: none;
+            padding: 0 1rem;
+            margin: 0;
+            flex: 1;
+        }
+
+        .menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.25rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+            font-family: var(--title-font);
+        }
+
+        .menu-link i {
+            font-size: 1.1rem;
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .menu-link:hover {
+            color: var(--sidebar-active);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .menu-link:hover i {
+            color: var(--accent-gold);
+        }
+
+        .menu-item.active .menu-link {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+
+        .menu-item.active .menu-link i {
+            color: white;
+        }
+
+        /* Main Content Styling */
+        .main-wrap {
+            margin-left: 260px;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Header Styling */
         .main-header {
-            /* background-color: #ffffff; */
-            border-bottom: 1px solid #e9ecef;
-            padding: 0.5rem 1rem;
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            height: 80px;
         }
-        .main-header .col-search .input-group {
-            background-color: #f1f3f5;
-            border-radius: 25px;
+
+        .user-profile {
+            width: 45px !important;
+            height: 45px !important;
+            border-radius: 50%;
+            border: 2px solid #f1f5f9;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s;
             overflow: hidden;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
         }
-        .main-header .col-search input {
+
+        .user-profile:hover {
+            border-color: var(--accent-gold);
+            transform: scale(1.05);
+        }
+
+        .profile-image {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            /* Changed to cover for better fit */
+            display: block;
+        }
+
+        .custom-dropdown {
             border: none;
-            background-color: transparent;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 0.5rem;
+            min-width: 180px;
         }
-        .main-header .col-search button {
-            background-color: #000;
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: var(--accent-gold);
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        /* Tables Styling */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .table thead th {
+            background: transparent;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
             border: none;
-            color: #ffffff;
+            padding: 1rem;
+            font-family: var(--title-font);
         }
-        .dropdown-menu {
+
+        .table tbody tr {
+            background: white;
+            box-shadow: var(--card-shadow);
+            border-radius: 12px;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1rem;
             border: none;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            vertical-align: middle;
         }
-        .content-main {
-            padding: 2rem;
+
+        .table tbody tr td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
         }
+
+        .table tbody tr td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
         @media (max-width: 992px) {
             .navbar-aside {
-                margin-left: -250px;
+                transform: translateX(-100%);
             }
+
             .navbar-aside.show {
-                margin-left: 0;
+                transform: translateX(0);
             }
+
             .main-wrap {
                 margin-left: 0;
             }
         }
-        .menu-link {
-    display: inline-block;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: #000000; /* Black text */
-    background-color: #f8f8f8; /* Off-white background */
-    border-radius: 5px;
-    border: 2px solid #000000; /* Black border */
-    outline: 2px solid #cccccc; /* Light gray outline */
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-    text-align: center;
-    margin: 0 10px 10px 0; /* Adds space between buttons */
-}
-
-.menu-link:hover {
-    background-color: #eaeaea; /* Slightly darker off-white on hover */
-    transform: scale(1.05); /* Slightly enlarges */
-    outline-color: #999999; /* Darker outline on hover */
-}
-
-.menu-link:active {
-    background-color: #dcdcdc; /* Even darker off-white for active state */
-    transform: scale(0.95); /* Slightly compresses */
-    outline-color: #666666; /* Even darker outline for active state */
-}
-
-h6 {
-    font-family: 'Arial', sans-serif; /* Modern, clean font */
-    font-size: 18px; /* Larger size for emphasis */
-    font-weight: bold; /* Bold for prominence */
-    color: #333333; /* Dark gray text for a sleek look */
-    letter-spacing: 1px; /* Slightly spaced letters */
-    text-transform: uppercase; /* Converts text to uppercase */
-    margin: 10px 0; /* Adds spacing around the heading */
-    text-align: center; /* Centers the text */
-    border-bottom: 2px solid #000; /* Adds an underline in blue */
-    padding-bottom: 5px; /* Adds spacing under the text */
-    display: inline-block; /* Makes the underline fit the text width */
-}
-.dropdown-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px; /* Adjust the button size */
-    height: 50px; /* Adjust the button size */
-    background-color: #000000; /* Black background */
-    border-radius: 50%; /* Circle shape */
-    transition: transform 0.2s, background-color 0.3s;
-    border: 2px solid #000000; /* Black border */
-    cursor: pointer;
-}
-
-.dropdown-toggle img {
-    width: 130%; /* Reduces the size of the image */
-    height: auto;
-    border-radius: 50%; /* Makes the image circular */
-    transition: opacity 0.3s;
-    margin-bottom: 11px;
-    
-}
-
-.dropdown-toggle:hover {
-    background-color: #333333; /* Dark gray on hover */
-    transform: scale(1.1); /* Slightly enlarges on hover */
-}
-
-.dropdown-toggle:active {
-    background-color: #555555; /* Lighter gray for active state */
-    transform: scale(0.95); /* Slightly compresses on click */
-}
-
-.dropdown-toggle img:hover {
-    opacity: 0.8; /* Slightly fades the image on hover */
-}
-
-/* Dropdown container styling */
-.nav-item {
-    position: relative;
-}
-
-/*/* Dropdown container styling */
-.nav-item {
-    position: relative;
-}
-
-/* Profile button styling */
-.user-profile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px; /* Circular button width */
-    height: 50px; /* Circular button height */
-    background-color: #000000; /* Black background */
-    border-radius: 50%; /* Ensures circular shape */
-    overflow: hidden; /* Ensures the image fits within the circle */
-    border: 2px solid #ffffff; /* Optional: White border for contrast */
-    transition: transform 0.3s;
-    cursor: pointer;
-    margin-top: -32px;
-}
-
-.user-profile:hover {
-    transform: scale(1.1); /* Slight enlargement on hover */
-}
-
-/* Profile image styling */
-.profile-image {
-    width: 100%; /* Ensures the image fills the container */
-    height: 100%; /* Ensures the image fills the container */
-    object-fit: cover; /* Ensures proper aspect ratio and cropping */
-    object-position: center; /* Centers the image */
-    border-radius: 50%; /* Keeps the image circular */
-}
-
-/* Dropdown menu styling */
-.custom-dropdown {
-    background-color: #f8f8f8; /* Light off-white background */
-    border: 1px solid #e0e0e0; /* Subtle border */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    border-radius: 8px; /* Rounded corners */
-    margin-top: 10px; /* Slight spacing from the profile */
-    padding: 10px 0;
-    min-width: 150px; /* Adjust dropdown width */
-}
-
-/* Dropdown item styling */
-.dropdown-item {
-    font-size: 14px;
-    padding: 8px 15px;
-    display: flex;
-    align-items: center;
-    color: #000000; /* Black text */
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.dropdown-item:hover {
-    background-color: #e0e0e0; /* Light gray hover */
-    color: #d9534f; /* Red text on hover for contrast */
-}
-
-.dropdown-item i {
-    margin-right: 8px; /* Spacing between icon and text */
-}
-
-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 16px;
-        text-align: left;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    thead {
-        background-color: #000;
-        color: #ffffff;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: bold;
-    }
-
-    th, td {
-        padding: 15px;
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    th {
-        text-align: center;
-    }
-
-    td {
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .btn-small {
-        padding: 8px 12px;
-        font-size: 14px;
-        color: #ffffff;
-        background-color: #000;
-        border: none;
-        border-radius: 5px;
-        transition: background-color 0.3s, transform 0.2s;
-        cursor: pointer;
-    }
-
-    .btn-small:hover {
-        background-color: #000;
-        transform: scale(1.05);
-    }
-
-    @media (max-width: 992px) {
-        table {
-            font-size: 14px;
-        }
-
-        th, td {
-            padding: 10px;
-        }
-    }
-    body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
-}
-
-.navbar-aside {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 250px;
-    background-color: #ffffff;
-    box-shadow: 0 0 15px rgba(0,0,0,0.05);
-    transition: all 0.3s;
-    z-index: 1000;
-    padding: 1rem; /* Added padding for better spacing */
-}
-
-.main-wrap {
-    margin-left: 250px;
-    transition: all 0.3s;
-    padding: 1rem; /* Added padding for better spacing */
-}
-
-.menu-aside {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.menu-aside .menu-item {
-    border-bottom: 1px solid #e9ecef;
-}
-
-.menu-aside .menu-link {
-    padding: 10px 1rem;
-    color: #495057;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s;
-    margin: 0 5px; /* Adjusted margin for better spacing */
-}
-
-.menu-aside .menu-link:hover {
-    background-color: #f1f3f5;
-    color: #000;
-    text-decoration: none;
-}
-
-/* Other existing styles remain unchanged */
-
-.btn-small {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #ffffff;
-    background-color: #000;
-    border: none;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.2s;
-    cursor: pointer;
-    margin: 5px; /* Added margin for better spacing */
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px auto; /* Center the table */
-    font-size: 16px;
-    text-align: left;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-h6 {
-    font-family: 'Arial', sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333333;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 10px 0;
-    text-align: center; /* Center the heading text */
-    border-bottom: 2px solid #000;
-    padding-bottom: 5px;
-    display: inline-block;
-}
-
-
     </style>
 </head>
+
 <body>
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
-            <a href="#" class="brand-wrap">
-                <!-- <img src="images/Watches photo idea.jpeg" height="46" class="logo" alt="NextTick Dashboard"> -->
-                 <h6>NexTick Dashboard</h6>
+            <a href="/admin" class="brand-wrap">
+                <i class="fas fa-clock brand-icon"></i>
+                <h6>NexTick</h6>
             </a>
-            <div>
+            <div style="position: absolute; right: 20px;">
                 <button class="btn btn-icon btn-aside-minimize"> <i class="material-icons md-menu_open"></i> </button>
             </div>
         </div>
         <nav>
             <ul class="menu-aside">
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin"> <i class="icon material-icons md-home"></i>
+                    <a class="menu-link" href="/admin">
+                        <i class="fas fa-th-large"></i>
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/users"> <i class="icon material-icons md-person"></i>
+                    <a class="menu-link" href="/admin/users">
+                        <i class="fas fa-users"></i>
                         <span class="text">Customers</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
+                    <a class="menu-link" href="/admin/category">
+                        <i class="fas fa-folder"></i>
                         <span class="text">Category</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
+                    <a class="menu-link" href="/admin/brands">
+                        <i class="fas fa-tag"></i>
                         <span class="text">Brands</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/addProducts"> <i class="icon material-icons md-add_box"></i>
+                    <a class="menu-link" href="/admin/addProducts">
+                        <i class="fas fa-plus-square"></i>
                         <span class="text">Add product</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
+                    <a class="menu-link" href="/admin/products">
+                        <i class="fas fa-box"></i>
                         <span class="text">Products</span>
                     </a>
                 </li>
-                <li class="menu-item"> 
-                    <a class="menu-link" href="/admin/coupon"> <i class="icon material-icons md-class"></i>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/coupon">
+                        <i class="fas fa-ticket-alt"></i>
                         <span class="text">Coupon</span>
                     </a>
                 </li>
-              
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/orderList"> <i class="icon material-icons md-shopping_cart"></i>
+                    <a class="menu-link" href="/admin/orderList">
+                        <i class="fas fa-shopping-cart"></i>
                         <span class="text">Orders</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/salesReport">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="text">Sales Report</span>
+                    </a>
+                </li>
+                <br>
+                <br>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="text">Logout</span>
                     </a>
                 </li>
             </ul>
@@ -457,27 +356,19 @@ h6 {
     <main class="main-wrap">
         <header class="main-header navbar">
             <div class="col-search">
-               
+
             </div>
             <div class="col-nav">
-                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i
+                        class="material-icons md-apps"></i> </button>
                 <ul class="nav">
-                  
+
                     <li class="nav-item">
-                        <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
-                    </li>
-                    <li class="dropdown nav-item">
-                        <a class="dropdown-toggle user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
-                            <img class="profile-image" src="/images/adminlogo.png" style="" >
+                        <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end custom-dropdown" aria-labelledby="dropdownAccount">
-                            <a class="dropdown-item text-danger" href="/admin/logout">
-                                <i class="material-icons md-exit_to_app"></i> Logout
-                            </a>
-                        </div>
                     </li>
-                    
+
+
                 </ul>
             </div>
         </header>
-      

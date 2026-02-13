@@ -1,129 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Page</title>
+  <title>LOGIN</title>
   <link rel="stylesheet" href="/styles/login.css">
 </head>
-<body>
-  <div class="container">
-    <div class="image-section">
-    </div>
-    <div class="login-section">
-      <h2>Welcome Back</h2>
-      <form action="/login" method="POST" class="login-form" id="loginForm" novalidate>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-          <div id="emailError" class="error-message"></div>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
-          <div id="passwordError" class="error-message"></div>
-        </div>
-       
-        
-        <% if(locals.message && message.length > 0) { %>
-          <div class="alert alert-danger text-center">
-            <%= message %>
-          </div>
-        <% } %>
 
-        <button type="submit" class="btn">Login</button>
-        <div class="form-group d-flex">
-          <a href="/forgot-password" class="forgot-password-link ms-auto">Forgot Password</a>
-        </div>
-        <div class="divider">or</div>
-        <a href="/auth/google" class="google-btn">
-          <img src="images/icon.jpg" alt="Google Icon">
-          Sign up with Google
-        </a>
-        
-      </form>
-      <p class="register-text">
-        Not registered? <a href="/signup">Signup</a>
-      </p>
+<body>
+  <div class="page-container">
+    <div class="auth-card">
+      <div class="form-side">
+        <h1 class="auth-title">LOGIN</h1>
+
+        <form action="/login" method="POST" class="auth-form" id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="email">Email or Phone Number *</label>
+            <input type="email" id="email" name="email" placeholder="Email or Phone Number" required>
+            <div id="emailError" class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" name="password" placeholder="Password" required>
+              <span class="toggle-password">👁️</span>
+            </div>
+            <div id="passwordError" class="error-message"></div>
+          </div>
+
+          <div class="form-options">
+            <div class="remember-me">
+              <input type="checkbox" id="remember">
+              <label for="remember">Remember me</label>
+            </div>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <p class="privacy-note">
+            Your personal data will be used to support your experience throughout this website, to manage access to your
+            account, and for other purposes described in our <a href="#">privacy policy</a>.
+          </p>
+
+          <% if(locals.message && message.length> 0) { %>
+            <div class="alert">
+              <%= message %>
+            </div>
+            <% } %>
+
+              <button type="submit" class="auth-btn">SIGN IN</button>
+
+              <div class="social-login">
+                <a href="/auth/google" class="social-btn">
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                  Sign in with Google
+                </a>
+              </div>
+        </form>
+
+        <p class="switch-auth">
+          Doesn't have an account? <a href="/signup">Sign Up</a>
+        </p>
+      </div>
+
+      <div class="image-side">
+        <!-- Background image via CSS -->
+      </div>
     </div>
   </div>
 
   <script src="/js/login-validation.js"></script>
 </body>
+
 </html>
 <script>
 
-  
-document.addEventListener("DOMContentLoaded", function () {
-  const loginForm = document.getElementById("loginForm");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const emailError = document.getElementById("emailError");
-  const passwordError = document.getElementById("passwordError");
 
-  function validateEmail(email) {
-    const emailPattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
-    return emailPattern.test(email);
-  }
+  document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
 
-  function showError(element, message) {
-    element.textContent = message;
-    element.style.display = "block";
-  }
-
-  function clearError(element) {
-    element.textContent = "";
-    element.style.display = "none";
-  }
-
-  function validateForm(e) {
-    let isValid = true;
-
-    // Email validation
-    if (!emailInput.value.trim()) {
-      showError(emailError, "Email is required");
-      isValid = false;
-    } else if (!validateEmail(emailInput.value)) {
-      showError(emailError, "Invalid email format");
-      isValid = false;
-    } else {
-      clearError(emailError);
+    function validateEmail(email) {
+      const emailPattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+      return emailPattern.test(email);
     }
 
-    // Password validation
-    if (!passwordInput.value) {
-      showError(passwordError, "Password is required");
-      isValid = false;
-    } else if (passwordInput.value.length < 8) {
-      showError(passwordError, "Password should be at least 8 characters long");
-      isValid = false;
-    } else {
-      clearError(passwordError);
+    function showError(element, message) {
+      element.textContent = message;
+      element.style.display = "block";
     }
 
-    if (!isValid) {
-      e.preventDefault();
+    function clearError(element) {
+      element.textContent = "";
+      element.style.display = "none";
     }
-  }
 
-  loginForm.addEventListener("submit", validateForm);
+    function validateForm(e) {
+      let isValid = true;
 
-  // Real-time validation
-  emailInput.addEventListener("input", function() {
-    if (this.value && !validateEmail(this.value)) {
-      showError(emailError, "Invalid email format");
-    } else {
-      clearError(emailError);
+      // Email validation
+      if (!emailInput.value.trim()) {
+        showError(emailError, "Email is required");
+        isValid = false;
+      } else if (!validateEmail(emailInput.value)) {
+        showError(emailError, "Invalid email format");
+        isValid = false;
+      } else {
+        clearError(emailError);
+      }
+
+      // Password validation
+      if (!passwordInput.value) {
+        showError(passwordError, "Password is required");
+        isValid = false;
+      } else if (passwordInput.value.length < 8) {
+        showError(passwordError, "Password should be at least 8 characters long");
+        isValid = false;
+      } else {
+        clearError(passwordError);
+      }
+
+      if (!isValid) {
+        e.preventDefault();
+      }
     }
+
+    loginForm.addEventListener("submit", validateForm);
+
+    // Real-time validation
+    emailInput.addEventListener("input", function () {
+      if (this.value && !validateEmail(this.value)) {
+        showError(emailError, "Invalid email format");
+      } else {
+        clearError(emailError);
+      }
+    });
+
+    passwordInput.addEventListener("input", function () {
+      if (this.value && this.value.length < 8) {
+        showError(passwordError, "Password should be at least 8 characters long");
+      } else {
+        clearError(passwordError);
+      }
+    });
   });
-
-  passwordInput.addEventListener("input", function() {
-    if (this.value && this.value.length < 8) {
-      showError(passwordError, "Password should be at least 8 characters long");
-    } else {
-      clearError(passwordError);
-    }
-  });
-});
 
 </script>

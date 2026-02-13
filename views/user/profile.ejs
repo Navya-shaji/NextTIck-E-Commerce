@@ -1,1828 +1,584 @@
 <%- include("../../views/partials/user/header.ejs") %>
-<head>
-  <link rel="stylesheet" href="/styles/profile.css">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <style>
-    /* Profile Information Styling */
-    .profile-info-row {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.2s;
-    }
 
-    .profile-info-row:last-child {
-      border-bottom: none;
-    }
+  <head>
+    <link rel="stylesheet" href="/styles/profile.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.14/dist/sweetalert2.min.css">
+  </head>
 
-    .profile-info-row:hover {
-      background-color: #f8f9fa;
-    }
+  <main class="main">
+    <div class="breadcrumb-wrap">
+      <div class="container">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">My Account</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
 
-    .profile-info-label {
-      width: 140px;
-      font-weight: 600;
-      color: #495057;
-      font-size: 0.9rem;
-    }
-
-    .profile-info-value {
-      flex: 1;
-      color: #6c757d;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .profile-info-value input {
-      flex: 1;
-      max-width: 300px;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      padding: 6px 12px;
-      font-size: 0.9rem;
-    }
-
-    .profile-info-value input:disabled {
-      background-color: #f8f9fa;
-      cursor: not-allowed;
-    }
-
-    .edit-btn {
-      padding: 4px 8px;
-      color: #6c757d;
-      border: none;
-      background: none;
-      transition: color 0.2s;
-    }
-
-    .edit-btn:hover {
-      color: #000;
-    }
-
-    .edit-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* Table Styling */
-    .table-container {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      margin-bottom: 1rem;
-      overflow: hidden;
-    }
-
-    .table {
-      margin-bottom: 0;
-    }
-
-    .table th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      color: #495057;
-      padding: 12px 15px;
-      border-bottom: 2px solid #dee2e6;
-    }
-
-    .table td {
-      padding: 12px 15px;
-      vertical-align: middle;
-      color: #6c757d;
-      font-size: 0.875rem;
-      border-bottom: 1px solid #dee2e6;
-    }
-
-    .table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .table tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    /* Status Badge Styling */
-    .status-badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .status-pending {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-
-    .status-delivered {
-      background-color: #d4edda;
-      color: #155724;
-    }
-
-    .status-cancelled {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-
-    /* Action Buttons */
-    .btn-action {
-      padding: 4px 12px;
-      font-size: 0.75rem;
-      border-radius: 4px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 2px 0;
-      width: 100%;
-      text-align: center;
-    }
-
-    .btn-view {
-      background-color: #e9ecef;
-      color: #495057;
-      border: none;
-    }
-
-    .btn-view:hover {
-      background-color: #dee2e6;
-      color: #212529;
-    }
-
-    .btn-cancel {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-    }
-
-    .btn-cancel:hover {
-      background-color: #c82333;
-    }
-
-    .btn-return {
-      background-color: #ffc107;
-      color: #212529;
-      border: none;
-    }
-
-    .btn-return:hover {
-      background-color: #e0a800;
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: #6c757d;
-    }
-
-    .empty-state i {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      color: #dee2e6;
-    }
-
-    .empty-state p {
-      margin: 0;
-      font-size: 0.9rem;
-    }
-
-    /* Modal Styling */
-    .modal-content {
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .modal-header {
-      background-color: #f8f9fa;
-      border-bottom: 1px solid #dee2e6;
-      padding: 15px 20px;
-    }
-
-    .modal-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #212529;
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .modal-footer {
-      border-top: 1px solid #dee2e6;
-      padding: 15px 20px;
-    }
-
-    .form-label {
-      font-weight: 500;
-      color: #495057;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-select, .form-control {
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      color: #495057;
-    }
-
-    .form-select:focus, .form-control:focus {
-      border-color: #80bdff;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-      .profile-info-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-
-      .profile-info-label {
-        width: 100%;
-      }
-
-      .profile-info-value {
-        width: 100%;
-      }
-
-      .table th, .table td {
-        padding: 8px 10px;
-        font-size: 0.8rem;
-      }
-
-      .btn-action {
-        padding: 3px 8px;
-        font-size: 0.7rem;
-      }
-    }
-  </style>
-</head>
-
-<main class="main">
-  <div class="container py-5">
-    <div class="row">
-      <div class="col-lg-3">
+    <div class="profile-container">
+      <div class="row">
         <!-- Sidebar -->
-        <div class="card profile-card">
-          <div class="card-body p-2">
-            <div class="d-flex flex-column align-items-center text-center">
-              <div class="position-relative">
-                <% 
-                  const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/4128/4128176.png";
-                  const avatarUrl = user.profileImage ? `/uploads/profile-images/${user.profileImage}` : defaultAvatar;
-                %>
-                <img src="<%= avatarUrl %>" alt="User Avatar" class="rounded-circle p-2" width="150" height="150" 
-                     style="object-fit: cover; background-color: #f8f9fa;" id="profileImage" 
-                     onerror="this.src='<%= defaultAvatar %>'; console.log('Failed to load image:', this.src);">
-                
-                <div class="position-absolute bottom-0 end-0 mb-2 me-2 d-flex gap-2">
-                  <!-- Upload Button -->
-                  <form id="profileImageForm" enctype="multipart/form-data" style="display: inline;">
-                    <label for="profileImageInput" class="btn btn-sm btn-light rounded-circle shadow-sm" 
-                           style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera" viewBox="0 0 16 16">
-                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
-                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
-                      </svg>
-                    </label>
-                    <input type="file" id="profileImageInput" name="profileImage" accept="image/*" style="display: none;">
-                  </form>
-                  
-                  <!-- Delete Button -->
-                  <% if (user.profileImage && user.profileImage !== defaultAvatar) { %>
-                    <button onclick="deleteProfileImage()" class="btn btn-sm btn-light rounded-circle shadow-sm"
-                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1zM4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>
-                      </svg>
-                    </button>
-                  <% } %>
-                </div>
+        <div class="col-lg-3">
+          <div class="profile-sidebar">
+            <div class="user-avatar-section">
+              <div class="avatar-wrapper">
+                <% const defaultAvatar="https://cdn-icons-png.flaticon.com/512/4128/4128176.png" ; const
+                  avatarUrl=user.profileImage ? `/uploads/profile-images/${user.profileImage}` : defaultAvatar; %>
+                  <img src="<%= avatarUrl %>" alt="User Avatar" class="avatar-image" id="profileImage"
+                    onerror="this.src='<%= defaultAvatar %>'">
+
+                  <div class="avatar-actions">
+                    <form id="profileImageForm" enctype="multipart/form-data">
+                      <label for="profileImageInput" class="avatar-btn" title="Update Image">
+                        <i class="fas fa-camera"></i>
+                      </label>
+                      <input type="file" id="profileImageInput" name="profileImage" accept="image/*"
+                        style="display: none;">
+                    </form>
+                    <% if (user.profileImage && user.profileImage !=='default-profile.jpg' && user.profileImage
+                      !==defaultAvatar) { %>
+                      <button onclick="deleteProfileImage()" class="avatar-btn" title="Delete Image">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                      <% } %>
+                  </div>
               </div>
-              <div class="mt-3">
-                <h4 id="userName"><%= user.name %></h4>
-                <p class="text-secondary mb-1"><%= user.email %></p>
-                <p class="text-muted font-size-sm"><%= user.phone || 'No phone number added' %></p>
-              </div>
+              <h4 class="user-name">
+                <%= user.name %>
+              </h4>
+              <p class="user-email">
+                <%= user.email %>
+              </p>
             </div>
-            <hr class="my-4">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                <h6 class="mb-0">Wallet Balance</h6>
-                <span class="text-secondary">₹<%= wallet.totalBalance.toFixed(2) %></span>
-              </li>
-            </ul>
+
+            <div class="profile-nav nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+              aria-orientation="vertical">
+              <a class="profile-nav-link active" id="v-pills-profile-tab" data-bs-toggle="pill" href="#v-pills-profile"
+                role="tab">
+                <i class="fas fa-user-circle"></i> Profile Overview
+              </a>
+              <a class="profile-nav-link" id="v-pills-orders-tab" data-bs-toggle="pill" href="#v-pills-orders"
+                role="tab">
+                <i class="fas fa-box"></i> My Orders
+              </a>
+              <a class="profile-nav-link" id="v-pills-address-tab" data-bs-toggle="pill" href="#v-pills-address"
+                role="tab">
+                <i class="fas fa-map-marker-alt"></i> Addresses
+              </a>
+              <a class="profile-nav-link" id="v-pills-wallet-tab" data-bs-toggle="pill" href="#v-pills-wallet"
+                role="tab">
+                <i class="fas fa-wallet"></i> My Wallet
+              </a>
+              <a class="profile-nav-link logout" href="/logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
           </div>
         </div>
-        
-        <!-- Navigation -->
-        <div class="side-nav">
-          <nav class="nav flex-column">
-            <a class="nav-link active" data-bs-toggle="pill" href="#dashboard">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Profile
-            </a>
-            <a class="nav-link" data-bs-toggle="pill" href="#orders">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H5z" />
-              </svg>
-              Orders
-            </a>
-            <a class="nav-link" data-bs-toggle="pill" href="#address">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0zM4 11a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-              Addresses
-            </a>
-            <a class="nav-link" data-bs-toggle="pill" href="#wallet-history">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              Wallet
-            </a>
-            <a class="nav-link logout" href="/logout">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
-            </a>
-          </nav>
-        </div>
-      </div>
-      
-      <div class="col-lg-9">
-        <div class="card">
-          <div class="card-body">
-            <div class="tab-content">
-              <!-- Dashboard Tab -->
-              <div class="tab-pane fade show active" id="dashboard">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title mb-4">Profile Information</h5>
-                    <div class="profile-info-row">
-                      <div class="profile-info-label">Full Name</div>
-                      <div class="profile-info-value">
-                        <input type="text" class="form-control" id="editName" value="<%= user.name %>" disabled>
-                        <button class="btn btn-link ms-2 edit-btn" onclick="toggleEdit('editName')">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
-                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                          </svg>
-                        </button>
-                      </div>
+
+        <!-- Content Area -->
+        <div class="col-lg-9">
+          <div class="profile-content-card">
+            <div class="tab-content" id="v-pills-tabContent">
+
+              <!-- Profile Tab -->
+              <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
+                <div class="section-title">
+                  <span>Profile Information</span>
+                  <button class="btn-gold" id="saveButton" onclick="saveProfileChanges()" disabled>Save Changes</button>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">
+                      <input type="text" class="form-control-plaintext" id="editName" value="<%= user.name %>" disabled>
+                      <button class="edit-trigger" onclick="toggleEdit('editName')"><i class="fas fa-edit"></i></button>
                     </div>
-                    <div class="profile-info-row">
-                      <div class="profile-info-label">Email</div>
-                      <div class="profile-info-value">
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">
+                      <span>
                         <%= user.email %>
-                      </div>
+                      </span>
+                      <span class="text-muted" style="font-size: 0.7rem;">Primary</span>
                     </div>
-                    <div class="profile-info-row">
-                      <div class="profile-info-label">Phone</div>
-                      <div class="profile-info-value">
-                        <input type="tel" class="form-control" id="editPhone" value="<%= user.phone || '' %>" disabled placeholder="Add phone number">
-                        <button class="btn btn-link ms-2 edit-btn" onclick="toggleEdit('editPhone')">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
-                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                          </svg>
-                        </button>
-                      </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">
+                      <input type="tel" class="form-control-plaintext" id="editPhone" value="<%= user.phone || '' %>"
+                        disabled placeholder="Add phone">
+                      <button class="edit-trigger" onclick="toggleEdit('editPhone')"><i
+                          class="fas fa-edit"></i></button>
                     </div>
-                    <div class="profile-info-row">
-                      <div class="profile-info-label">Password</div>
-                      <div class="profile-info-value">
-                        <input type="password" class="form-control" value="********" disabled>
-                        <button class="btn btn-link ms-2" onclick="showChangePasswordModal()">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-key" viewBox="0 0 16 16">
-                            <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5z"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-sm-12">
-                        <button class="btn btn-primary px-4" onclick="saveProfileChanges()" id="saveButton" disabled>Save Changes</button>
-                      </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Security</div>
+                    <div class="info-value">
+                      <span>••••••••</span>
+                      <button class="edit-trigger" onclick="showChangePasswordModal()">Change</button>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <!-- Orders Tab -->
-              <div class="tab-pane fade" id="orders" role="tabpanel">
-                <h3 class="mb-4">Your Orders</h3>
-                <div class="orders-section">
-                  <div class="table-container">
-                    <div class="table-responsive">
-                      <table class="table">
-                        <thead>
+              <div class="tab-pane fade" id="v-pills-orders" role="tabpanel">
+                <div class="section-title">Your Orders</div>
+                <div class="table-responsive">
+                  <table class="premium-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                      <% if (typeof orders !=='undefined' && orders.length> 0) { %>
+                        <% orders.forEach(order=> { %>
                           <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Total</th>
-                            <th>Payment</th>
-                            <th>Actions</th>
+                            <td>#<%= order.orderId %>
+                            </td>
+                            <td>
+                              <%= new Date(order.createdOn).toLocaleDateString() %>
+                            </td>
+                            <td>
+                              <span class="badge-premium <%= 
+                                                            order.status.toLowerCase() === 'pending' ? 'badge-pending' : 
+                                                            order.status.toLowerCase() === 'delivered' ? 'badge-success' : 
+                                                            'badge-danger' 
+                                                        %>">
+                                <%= order.status %>
+                              </span>
+                            </td>
+                            <td class="fw-bold">₹<%= (order.finalAmount || 0).toFixed(2) %>
+                            </td>
+                            <td>
+                              <span
+                                class="text-<%= order.paymentStatus.toLowerCase() === 'paid' ? 'success' : 'warning' %>"
+                                style="font-size: 0.8rem;">
+                                <%= order.paymentStatus %>
+                              </span>
+                            </td>
+                            <td>
+                              <div class="d-flex gap-2">
+                                <a href="/orders/view/<%= order._id %>" class="btn-outline-gold btn-sm"><i
+                                    class="fas fa-eye"></i></a>
+                                <% if (order.status==='Pending' ) { %>
+                                  <button onclick="cancelOrder('<%= order._id %>')"
+                                    class="btn-outline-gold btn-sm text-danger border-danger"><i
+                                      class="fas fa-times"></i></button>
+                                  <% } %>
+                                    <% if (order.paymentStatus==='Pending' ) { %>
+                                      <button onclick="retryPayment('<%= order._id %>')" class="btn-gold btn-sm"><i
+                                          class="fas fa-redo"></i></button>
+                                      <% } %>
+                              </div>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          <% if (typeof orders !== 'undefined' && orders && orders.length > 0) { %>
-                            <% orders.forEach(order => { %>
+                          <% }); %>
+                            <% } else { %>
                               <tr>
-                                <td class="order-id-cell">#<%= order.orderId %></td>
-                                <td class="date-cell"><%= new Date(order.createdOn).toLocaleDateString() %></td>
-                                <td>
-                                  <span class="status-badge <%= order.status.toLowerCase() === 'pending' ? 'status-pending' : 
-                                             order.status.toLowerCase() === 'delivered' ? 'status-delivered' : 
-                                             'status-cancelled' %>">
-                                    <%= order.status %>
-                                  </span>
-                                </td>
-                                <td>
-                                  <span class="amount-text">₹<%= order.finalAmount ? order.finalAmount.toFixed(2) : '0.00' %></span>
-                                </td>
-                                <td>
-                                  <span class="status-badge <%= order.paymentStatus.toLowerCase() === 'pending' ? 'status-pending' : 
-                                             order.paymentStatus.toLowerCase() === 'paid' ? 'status-delivered' : 
-                                             'status-cancelled' %>">
-                                    <%= order.paymentStatus %>
-                                  </span>
-                                </td>
-                                <td class="actions-cell">
-                                  <div class="d-flex flex-column">
-                                    <form action="/orders/view/<%= order._id %>" method="GET" class="mb-1">
-                                      <button type="submit" class="btn btn-action btn-view">View</button>
-                                    </form>
-                                    <% if (order.status === 'Pending') { %>
-                                      <button type="button" class="btn btn-action btn-cancel" onclick="cancelOrder('<%= order._id %>')">
-                                        Cancel
-                                      </button>
-                                    <% } %>
-                                    <% if (order.status === 'Delivered') { %>
-                                      <button type="button" class="btn btn-action btn-return" onclick="redirectToReturnReason('<%= order._id %>')">
-                                        Return
-                                      </button>
-                                    <% } %>
-                                    <% if (order.paymentStatus === 'Pending') { %>
-                                      <button type="button" class="btn btn-action btn-retry" onclick="retryPayment('<%= order._id %>')">
-                                        Retry
-                                      </button>
-                                    <% } %>
+                                <td colspan="6" class="text-center py-5">
+                                  <div class="text-muted">
+                                    <i class="fas fa-shopping-bag fa-3x mb-3"></i>
+                                    <p>No orders yet.</p>
+                                    <a href="/shop" class="btn-gold mt-3">Start Shopping</a>
                                   </div>
                                 </td>
                               </tr>
-                            <% }); %>
-                          <% } else { %>
-                            <tr>
-                              <td colspan="6" class="empty-state">
-                                <i class="fas fa-shopping-bag"></i>
-                                <p>No orders found.</p>
-                              </td>
-                            </tr>
-                          <% } %>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Pagination -->
-                <nav aria-label="Orders pagination" class="mt-3">
-                  <ul class="pagination">
-                    <% if (typeof currentPage !== 'undefined' && typeof totalPages !== 'undefined') { %>
-                      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                        <a class="page-link" href="?page=<%= currentPage - 1 %>" <%= currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : '' %>>
-                          <i class="fas fa-chevron-left"></i>
-                        </a>
-                      </li>
-                      
-                      <% for(let i = 1; i <= totalPages; i++) { %>
-                        <% if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
-                          <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                          </li>
-                        <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
-                          <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                          </li>
-                        <% } %>
-                      <% } %>
-                      
-                      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                        <a class="page-link" href="?page=<%= currentPage + 1 %>" <%= currentPage === totalPages ? 'tabindex="-1" aria-disabled="true"' : '' %>>
-                          <i class="fas fa-chevron-right"></i>
-                        </a>
-                      </li>
+                              <% } %>
+                    </tbody>
+                  </table>
+                  <!-- Server-side Pagination for Orders -->
+                  <% if (typeof pagination !=='undefined' && pagination.totalPages> 1) { %>
+                    <nav aria-label="Orders pagination" class="mt-4">
+                      <ul class="pagination pagination-sm justify-content-center">
+                        <li class="page-item <%= pagination.currentPage === 1 ? 'disabled' : '' %>">
+                          <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&tab=v-pills-orders-tab"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                          </a>
+                        </li>
+                        <% for(let i=1; i <=pagination.totalPages; i++) { %>
+                          <% if (i===1 || i===pagination.totalPages || (i>= pagination.currentPage - 1 && i <=
+                              pagination.currentPage + 1)) { %>
+                              <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>&tab=v-pills-orders-tab">
+                                  <%= i %>
+                                </a>
+                              </li>
+                              <% } else if (i===pagination.currentPage - 2 || i===pagination.currentPage + 2) { %>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <% } %>
+                                  <% } %>
+                                    <li
+                                      class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
+                                      <a class="page-link"
+                                        href="?page=<%= pagination.currentPage + 1 %>&tab=v-pills-orders-tab"
+                                        aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                      </a>
+                                    </li>
+                      </ul>
+                    </nav>
                     <% } %>
-                  </ul>
-                </nav>
-              </div>
-              
-              <!-- Address Tab -->
-              <div class="tab-pane fade" id="address" role="tabpanel">
-                <h3 class="mb-4">Your Addresses</h3>
-                <div class="row">
-                  <% if (userAddress && userAddress.address) { %>
-                    <% userAddress.address.forEach((address) => { %>
-                      <div class="col-md-6 mb-3">
-                        <div class="card">
-                          <div class="card-header">
-                            <h5 class="mb-0"><%= address.addressType %></h5>
-                          </div>
-                          <div class="card-body">
-                            <address>
-                              <strong><%= address.name %></strong><br />
-                              <%= address.city %><br />
-                              <%= address.landmark %><br />
-                              <%= address.state %><br />
-                            </address>
-                            <p><strong>Pincode:</strong> <%= address.pincode %></p>
-                            <p><strong>Phone:</strong> <%= address.phone %></p>
-                            <p><strong>Alt Phone:</strong> <%= address.altPhone %></p>
-                            <div class="d-flex justify-content-between">
-                              <a href="/edit-address/<%= address.id %>" class="btn btn-primary btn-sm">Edit</a>
-                              <a href="/delete-address/<%= address.id %>" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+
+                <!-- Address Tab -->
+                <div class="tab-pane fade" id="v-pills-address" role="tabpanel">
+                  <div class="section-title">
+                    <span>Saved Addresses</span>
+                    <a href="/add-address" class="btn-gold">Add New</a>
+                  </div>
+                  <div class="row">
+                    <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
+                      <% userAddress.address.forEach((addr)=> { %>
+                        <div class="col-md-6 mb-4">
+                          <div class="info-item h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                              <span class="badge-premium badge-success" style="font-size: 0.65rem;">
+                                <%= addr.addressType %>
+                              </span>
+                              <div class="gap-2">
+                                <a href="/edit-address/<%= addr.id %>" class="text-primary me-2"><i
+                                    class="fas fa-edit"></i></a>
+                                <a href="/delete-address/<%= addr.id %>" class="text-danger"><i
+                                    class="fas fa-trash-alt"></i></a>
+                              </div>
                             </div>
+                            <h6 class="mb-1">
+                              <%= addr.name %>
+                            </h6>
+                            <p class="text-muted small mb-1">
+                              <%= addr.city %>, <%= addr.state %>
+                            </p>
+                            <p class="text-muted small mb-1">
+                              <%= addr.landMark %>
+                            </p>
+                            <p class="text-muted small mb-1">PIN: <%= addr.pincode %>
+                            </p>
+                            <p class="text-muted small mb-0">Phone: <%= addr.phone %>
+                            </p>
                           </div>
                         </div>
-                      </div>
-                    <% }) %>
-                  <% } else { %>
-                    <div class="col-12">
-                      <p>No addresses available. Please add one.</p>
-                    </div>
-                  <% } %>
+                        <% }) %>
+                          <% } else { %>
+                            <div class="col-12 text-center py-5">
+                              <p class="text-muted">No addresses saved.</p>
+                            </div>
+                            <% } %>
+                  </div>
                 </div>
-                <div class="mt-3">
-                  <a href="/add-address" class="btn btn-primary">Add New Address</a>
-                </div>
-              </div>
-              
-              <!-- Wallet History Tab -->
-              <div class="tab-pane fade" id="wallet-history" role="tabpanel">
-                <h3 class="mb-4">Wallet Transactions</h3>
-                <div class="table-container">
+
+                <!-- Wallet Tab -->
+                <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel">
+                  <div class="section-title">Wallet Overview</div>
+                  <div class="wallet-premium-card">
+                    <div class="wallet-label">Available Balance</div>
+                    <h1 class="wallet-amount">₹<%= (wallet.totalBalance || 0).toFixed(2) %>
+                    </h1>
+                  </div>
+
+                  <h5 class="mb-3 font-outfit fw-bold">Recent Transactions</h5>
                   <div class="table-responsive">
-                    <table class="table">
+                    <table class="premium-table">
                       <thead>
                         <tr>
                           <th>Date</th>
-                          <th>Type</th>
                           <th>Description</th>
+                          <th>Type</th>
                           <th>Amount</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        <% if (wallet && wallet.transactions && wallet.transactions.length > 0) { %>
-                          <% wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(transaction => { %>
+                      <tbody id="walletTableBody">
+                        <% if (wallet && wallet.transactions && wallet.transactions.length> 0) { %>
+                          <% wallet.transactions.forEach(tx=> { %>
                             <tr>
-                              <td><%= new Date(transaction.date).toLocaleDateString() %></td>
                               <td>
-                                <span class="badge <%= transaction.type === 'Deposit' ? 'bg-success' : 
-                                                    transaction.type === 'Refund' ? 'bg-info' : 
-                                                    'bg-danger' %>">
-                                  <%= transaction.type.toUpperCase() %>
+                                <%= new Date(tx.date).toLocaleDateString() %>
+                              </td>
+                              <td class="text-muted small">
+                                <%= tx.description || 'Wallet Tx' %>
+                              </td>
+                              <td>
+                                <span
+                                  class="badge-premium <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'badge-danger' : 'badge-success' %>">
+                                  <%= tx.type %>
                                 </span>
                               </td>
-                              <td><%= transaction.description || 'Wallet Transaction' %></td>
-                              <td class="<%= transaction.type === 'Withdrawal' || transaction.type === 'Purchase' ? 'text-danger' : 'text-success' %>">
-                                <%= transaction.type === 'Withdrawal' || transaction.type === 'Purchase' ? '-' : '+' %>₹<%= transaction.amount %>
+                              <td
+                                class="fw-bold <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'text-danger' : 'text-success' %>">
+                                <%= tx.type==='Withdrawal' || tx.type==='Purchase' ? '-' : '+' %>₹<%= tx.amount %>
                               </td>
                             </tr>
-                          <% }) %>
-                        <% } else { %>
-                          <tr>
-                            <td colspan="4" class="text-center">No transactions found.</td>
-                          </tr>
-                        <% } %>
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="4" class="text-center py-4 text-muted">No transactions found.</td>
+                                </tr>
+                                <% } %>
                       </tbody>
                     </table>
-                  </div>
-                </div>
-                <nav aria-label="Wallet history pagination" class="mt-3">
-                  <ul class="pagination">
-                    <% if (typeof walletCurrentPage !== 'undefined' && typeof walletTotalPages !== 'undefined') { %>
-                      <li class="page-item <%= walletCurrentPage === 1 ? 'disabled' : '' %>">
-                        <a class="page-link" href="?walletPage=<%= walletCurrentPage - 1 %>" <%= walletCurrentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : '' %>>Previous</a>
-                      </li>
-                      
-                      <% for(let i = 1; i <= walletTotalPages; i++) { %>
-                        <% if (i === 1 || i === walletTotalPages || (i >= walletCurrentPage - 1 && i <= walletCurrentPage + 1)) { %>
-                          <li class="page-item <%= walletCurrentPage === i ? 'active' : '' %>">
-                            <a class="page-link" href="?walletPage=<%= i %>"><%= i %></a>
+                    <!-- Wallet History Pagination -->
+                    <% if (typeof pagination !=='undefined' && pagination.totalWalletPages> 1) { %>
+                      <nav aria-label="Wallet pagination" class="mt-4">
+                        <ul class="pagination pagination-sm justify-content-center">
+                          <li class="page-item <%= pagination.currentWalletPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link"
+                              href="?walletPage=<%= pagination.currentWalletPage - 1 %>&tab=v-pills-wallet-tab"
+                              aria-label="Previous">
+                              <span aria-hidden="true">&laquo;</span>
+                            </a>
                           </li>
-                        <% } else if (i === walletCurrentPage - 2 || i === walletCurrentPage + 2) { %>
-                          <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                          </li>
-                        <% } %>
+                          <% for(let i=1; i <=pagination.totalWalletPages; i++) { %>
+                            <li class="page-item <%= pagination.currentWalletPage === i ? 'active' : '' %>">
+                              <a class="page-link" href="?walletPage=<%= i %>&tab=v-pills-wallet-tab">
+                                <%= i %>
+                              </a>
+                            </li>
+                            <% } %>
+                              <li
+                                class="page-item <%= pagination.currentWalletPage === pagination.totalWalletPages ? 'disabled' : '' %>">
+                                <a class="page-link"
+                                  href="?walletPage=<%= pagination.currentWalletPage + 1 %>&tab=v-pills-wallet-tab"
+                                  aria-label="Next">
+                                  <span aria-hidden="true">&raquo;</span>
+                                </a>
+                              </li>
+                        </ul>
+                      </nav>
                       <% } %>
-                      
-                      <li class="page-item <%= walletCurrentPage === walletTotalPages ? 'disabled' : '' %>">
-                        <a class="page-link" href="?walletPage=<%= walletCurrentPage + 1 %>" <%= walletCurrentPage === walletTotalPages ? 'tabindex="-1" aria-disabled="true"' : '' %>>Next</a>
-                      </li>
-                    <% } %>
-                  </ul>
-                </nav>
+                  </div>
+
+                </div>
               </div>
             </div>
           </div>
         </div>
+  </main>
+
+  <!-- Modals -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">New Password</label>
+              <input type="password" class="form-control" id="newPassword" required minlength="6">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn-gold" onclick="changePassword()">Update Password</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</main>
 
-<!-- Add Modal for Order Details -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Order details will be loaded here dynamically -->
-      </div>
-    </div>
-  </div>
-</div>
+  <%- include("../../views/partials/user/footer.ejs") %>
 
-<!-- Add Modal for Address Edit -->
-<div class="modal fade" id="addressEditModal" tabindex="-1" aria-labelledby="addressEditModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addressEditModalLabel">Edit Address</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Address edit form will be loaded here dynamically -->
-      </div>
-    </div>
-  </div>
-</div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      let hasChanges = false;
 
-<!-- Cancel Order Modal -->
-<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="cancelOrderForm">
-          <input type="hidden" id="orderIdInput" name="orderId">
-          <div class="mb-3">
-            <label for="cancelReason" class="form-label">Reason for Cancellation</label>
-            <select class="form-select" id="cancelReason" name="cancellationReason" required>
-              <option value="">Select a reason</option>
-              <option value="Changed my mind">Changed my mind</option>
-              <option value="Ordered wrong item">Ordered wrong item</option>
-              <option value="Found better price">Found better price elsewhere</option>
-              <option value="Delivery time too long">Delivery time too long</option>
-              <option value="Other">Other reason</option>
-            </select>
-          </div>
-          <div class="mb-3" id="otherReasonDiv" style="display: none;">
-            <label for="otherReason" class="form-label">Please specify</label>
-            <textarea class="form-control" id="otherReason" rows="2"></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-danger" id="confirmCancelBtn">Cancel Order</button>
-      </div>
-    </div>
-  </div>
-</div>
+      function toggleEdit(inputId) {
+        const input = document.getElementById(inputId);
+        const saveButton = document.getElementById('saveButton');
 
-<!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="changePasswordForm">
-          <div class="mb-3">
-            <label for="currentPassword" class="form-label">Current Password</label>
-            <input type="password" class="form-control" id="currentPassword" required>
-          </div>
-          <div class="mb-3">
-            <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" class="form-control" id="newPassword" required minlength="6">
-            <small class="text-muted">Password must be at least 6 characters long</small>
-          </div>
-          <div class="mb-3">
-            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPassword" required>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="changePassword()">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<%- include("../../views/partials/user/footer.ejs") %>
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.14/dist/sweetalert2.all.min.js"></script>
-<script>
- document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent form submission
-
-  const formData = new FormData(e.target); // Get form data
-  const data = Object.fromEntries(formData.entries()); // Convert FormData to an object
-
-  try {
-    const response = await fetch('/updateProfile', {
-      method: 'POST', // HTTP method
-      headers: {
-        'Content-Type': 'application/json', // Specify JSON content
-      },
-      body: JSON.stringify(data), // Send JSON data
-    });
-
-    const result = await response.json(); // Parse JSON response
-
-    if (result.success) {
-      // Show success notification
-      Swal.fire({
-        icon: 'success',
-        title: 'Profile Updated!',
-        text: result.message,
-        timer: 2000,
-        showConfirmButton: false,
-      });
-
-      // Optionally update the UI with the new data
-      document.getElementById('name').value = data.name;
-      document.getElementById('phone').value = data.phone;
-    } else {
-      // Handle error case
-      Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: result.message,
-      });
-    }
-  } catch (error) {
-    // Handle unexpected errors
-    console.error('Error updating profile:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'An unexpected error occurred.',
-    });
-  }
-});
-
-
-  async function retryPayment(orderId) {
-    try {
-      const response = await fetch('/orders/retry-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ orderId })
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to create order');
-      }
-
-      const options = {
-        key: data.data.key_id,
-        amount: data.data.amount,
-        currency: data.data.currency,
-        name: data.data.name,
-        description: data.data.description,
-        order_id: data.data.order_id,
-        handler: function (response) {
-          const orderDetails = {
-            orderId: orderId,
-            userId: '<%= user._id %>'
-          };
-          verifyRazorpayPayment(response, orderDetails);
-        },
-        prefill: data.data.prefill,
-        theme: {
-          color: '#3399cc'
-        }
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.on('payment.failed', function (response) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Payment Failed',
-          text: response.error.description
-        });
-      });
-
-      rzp.open();
-    } catch (error) {
-      console.error('Error during payment:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'An error occurred during payment. Please try again.'
-      });
-    }
-  }
-
-  function verifyRazorpayPayment(response, orderDetails) {
-    fetch('/verify-payment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_signature: response.razorpay_signature,
-        orderDetails: orderDetails,
-        retryPayment: true,
-        orderId: orderDetails.orderId,
-        userId: orderDetails.userId
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Payment Successful!',
-          text: 'Your payment has been processed successfully',
-          showConfirmButton: false,
-          timer: 1500
-        }).then(() => {
-          window.location.reload();
-        });
-      } else {
-        throw new Error(data.message || 'Payment verification failed');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Payment Verification Failed',
-        text: error.message || 'Failed to verify payment'
-      });
-    });
-  }
-
-  function cancelOrder(orderId) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to cancel this order?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, cancel it!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch('/orders/cancel', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            orderId: orderId,
-            status: "Cancelled"
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire({
-              title: "Cancelled!",
-              text: data.message || "Order has been cancelled successfully.",
-              icon: "success",
-              timer: 1500,
-              showConfirmButton: false
-            }).then(() => {
-              location.reload();
-            });
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: data.message || "Failed to cancel the order.",
-              icon: "error"
-            });
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          Swal.fire({
-            title: "Error",
-            text: "An error occurred while cancelling the order.",
-            icon: "error"
-          });
-        });
-      }
-    });
-  }
-
-  function redirectToReturnReason(orderId) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to proceed to return this order?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, proceed!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = `/return-reason?orderId=${orderId}`;
-      }
-    });
-  }
-</script>
-
-<script>
-  document.getElementById('profileImageInput').addEventListener('change', async function(event) {
-    event.preventDefault();
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid File Type',
-        text: 'Please select a valid image file (JPEG, PNG, or GIF)'
-      });
-      return;
-    }
-
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      Swal.fire({
-        icon: 'error',
-        title: 'File Too Large',
-        text: 'Please select an image smaller than 5MB'
-      });
-      return;
-    }
-
-    // Show loading state
-    const loadingAlert = Swal.fire({
-      title: 'Uploading...',
-      text: 'Please wait while we upload your image',
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      willOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-
-      const response = await fetch('/update-profile-image', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      });
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        console.error('Failed to parse response:', e);
-        throw new Error('Invalid server response');
-      }
-
-      console.log('Upload response:', data); // Debug log
-
-      if (response.ok && data.success) {
-        // Close loading alert
-        loadingAlert.close();
-        
-        // Show success message
-        await Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'Profile image updated successfully',
-          timer: 1500,
-          showConfirmButton: false
-        });
-
-        // Update the image in the UI
-        const profileImage = document.getElementById('profileImage');
-        if (profileImage && data.imageUrl) {
-          // Add timestamp to prevent caching
-          profileImage.src = data.imageUrl + '?t=' + new Date().getTime();
-        }
-        
-        // Reload the page to update all instances of the profile image
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        throw new Error(data.message || 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Upload error:', error); // Debug log
-      loadingAlert.close();
-      
-      Swal.fire({
-        icon: 'error',
-        title: 'Upload Failed',
-        text: error.message || 'Failed to upload image. Please try again.',
-      });
-    }
-  });
-</script>
-
-<script>
-  async function deleteProfileImage() {
-    try {
-      const result = await Swal.fire({
-        title: 'Delete Profile Image?',
-        text: "This action cannot be undone!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      });
-
-      if (result.isConfirmed) {
-        const response = await fetch('/delete-profile-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to delete profile image');
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          await Swal.fire(
-            'Deleted!',
-            'Your profile image has been deleted.',
-            'success'
-          );
-          // Refresh the page to show default image
-          window.location.reload();
+        if (input.disabled) {
+          input.disabled = false;
+          input.classList.remove('form-control-plaintext');
+          input.classList.add('form-control');
+          input.focus();
+          saveButton.disabled = false;
         } else {
-          throw new Error(data.message || 'Failed to delete profile image');
+          input.disabled = true;
+          input.classList.add('form-control-plaintext');
+          input.classList.remove('form-control');
+          if (!hasChanges) saveButton.disabled = true;
         }
       }
-    } catch (error) {
-      console.error('Error:', error);
-      Swal.fire(
-        'Error!',
-        error.message || 'Failed to delete profile image',
-        'error'
-      );
-    }
-  }
-</script>
 
-<script>
-  async function changePassword() {
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Validate inputs
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'All fields are required'
-      });
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'New password must be at least 6 characters long'
-      });
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'New passwords do not match'
-      });
-      return;
-    }
-
-    try {
-      // Show loading state
-      Swal.fire({
-        title: 'Changing password...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-
-      const response = await fetch('/change-password-direct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Clear form
-        document.getElementById('changePasswordForm').reset();
-        
-        // Close modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
-        modal.hide();
-
-        // Show success message
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Password changed successfully',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      } else {
-        throw new Error(data.message || 'Failed to change password');
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message || 'Something went wrong'
-      });
-    }
-  }
-
-  function showChangePasswordModal() {
-    const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
-    modal.show();
-  }
-</script>
-
-<script>
-  function toggleEdit(inputId) {
-    const input = document.getElementById(inputId);
-    const saveButton = document.getElementById('saveButton');
-    
-    if (input.disabled) {
-      // Enable editing
-      input.disabled = false;
-      input.focus();
-      saveButton.disabled = false;
-    } else {
-      // Disable editing
-      input.disabled = true;
-      if (!hasChanges) {
-        saveButton.disabled = true;
-      }
-    }
-  }
-
-  async function saveProfileChanges() {
-    const name = document.getElementById('editName').value;
-    const phone = document.getElementById('editPhone').value;
-
-    if (!name || name.trim().length === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Name is required'
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch('/update-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: name.trim(), phone: phone.trim() })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Update header name
-        const headerName = document.getElementById('headerUserName');
-        if (headerName) {
-          headerName.textContent = data.user.name;
-        }
-
-        // Disable inputs and save button
-        document.getElementById('editName').disabled = true;
-        document.getElementById('editPhone').disabled = true;
-        document.getElementById('saveButton').disabled = true;
-        hasChanges = false;
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Profile Updated!',
-          text: 'Your profile has been updated successfully',
-          confirmButtonColor: '#3085d6'
-        });
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message,
-        confirmButtonColor: '#3085d6'
-      });
-    }
-  }
-
-  // Add input event listeners
-  document.getElementById('editName').addEventListener('input', function() {
-    hasChanges = true;
-    document.getElementById('saveButton').disabled = false;
-  });
-
-  document.getElementById('editPhone').addEventListener('input', function() {
-    hasChanges = true;
-    document.getElementById('saveButton').disabled = false;
-  });
-</script>
-
-<style>
-  .edit-btn {
-    padding: 0;
-    color: #6c757d;
-  }
-  .edit-btn:hover {
-    color: #0d6efd;
-  }
-  input:disabled {
-    background-color: transparent;
-    border: none;
-    padding: 0;
-  }
-  input:not(:disabled) {
-    border: 1px solid #ced4da;
-    padding: .375rem .75rem;
-  }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Pagination configuration
-    const itemsPerPage = 5;
-    let currentPage = 1;
-
-    // Initialize pagination for orders
-    function initOrdersPagination() {
-      const orderRows = document.querySelectorAll('#orders table tbody tr');
-      const totalPages = Math.ceil(orderRows.length / itemsPerPage);
-      
-      // Create pagination
-      const paginationHtml = createPaginationHtml(totalPages, currentPage);
-      document.querySelector('#orders nav ul.pagination').innerHTML = paginationHtml;
-      
-      // Show first page
-      showPage(orderRows, currentPage, itemsPerPage);
-      
-      // Add click events to pagination
-      document.querySelectorAll('#orders .page-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const page = this.dataset.page;
-          if (page === 'prev') {
-            if (currentPage > 1) currentPage--;
-          } else if (page === 'next') {
-            if (currentPage < totalPages) currentPage++;
-          } else {
-            currentPage = parseInt(page);
-          }
-          showPage(orderRows, currentPage, itemsPerPage);
-          updatePaginationState(totalPages, currentPage);
+      document.querySelectorAll('#editName, #editPhone').forEach(input => {
+        input.addEventListener('input', () => {
+          hasChanges = true;
+          document.getElementById('saveButton').disabled = false;
         });
       });
-    }
 
-    // Initialize pagination for wallet history
-    function initWalletHistoryPagination() {
-      const walletRows = document.querySelectorAll('#wallet-history table tbody tr');
-      const totalPages = Math.ceil(walletRows.length / itemsPerPage);
-      
-      // Create pagination
-      const paginationHtml = createPaginationHtml(totalPages, currentPage);
-      document.querySelector('#wallet-history nav ul.pagination').innerHTML = paginationHtml;
-      
-      // Show first page
-      showPage(walletRows, currentPage, itemsPerPage);
-      
-      // Add click events to pagination
-      document.querySelectorAll('#wallet-history .page-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const page = this.dataset.page;
-          if (page === 'prev') {
-            if (currentPage > 1) currentPage--;
-          } else if (page === 'next') {
-            if (currentPage < totalPages) currentPage++;
-          } else {
-            currentPage = parseInt(page);
-          }
-          showPage(walletRows, currentPage, itemsPerPage);
-          updatePaginationState(totalPages, currentPage);
-        });
-      });
-    }
+      async function saveProfileChanges() {
+        const name = document.getElementById('editName').value;
+        const phone = document.getElementById('editPhone').value;
 
-    // Helper function to show specific page
-    function showPage(items, page, perPage) {
-      const start = (page - 1) * perPage;
-      const end = start + perPage;
-      
-      items.forEach((item, index) => {
-        if (index >= start && index < end) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    }
+        if (!name.trim()) return Swal.fire('Error', 'Name is required', 'error');
 
-    // Helper function to create pagination HTML
-    function createPaginationHtml(totalPages, currentPage) {
-      let html = `
-        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-          <a class="page-link" href="#" data-page="prev">Previous</a>
-        </li>
-      `;
-      
-      for (let i = 1; i <= totalPages; i++) {
-        html += `
-          <li class="page-item ${currentPage === i ? 'active' : ''}">
-            <a class="page-link" href="#" data-page="${i}">${i}</a>
-          </li>
-        `;
-      }
-      
-      html += `
-        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-          <a class="page-link" href="#" data-page="next">Next</a>
-        </li>
-      `;
-      
-      return html;
-    }
-
-    // Helper function to update pagination state
-    function updatePaginationState(totalPages, currentPage) {
-      document.querySelectorAll('.page-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      
-      const currentPageItem = document.querySelector(`[data-page="${currentPage}"]`).parentElement;
-      currentPageItem.classList.add('active');
-      
-      const prevButton = document.querySelector('[data-page="prev"]').parentElement;
-      const nextButton = document.querySelector('[data-page="next"]').parentElement;
-      
-      prevButton.classList.toggle('disabled', currentPage === 1);
-      nextButton.classList.toggle('disabled', currentPage === totalPages);
-    }
-
-    // Initialize both paginations
-    initOrdersPagination();
-    initWalletHistoryPagination();
-
-    // Handle tab changes to reinitialize pagination
-    document.querySelectorAll('a[data-bs-toggle="pill"]').forEach(tab => {
-      tab.addEventListener('shown.bs.tab', function(e) {
-        if (e.target.id === 'orders-tab') {
-          initOrdersPagination();
-        } else if (e.target.id === 'wallet-history-tab') {
-          initWalletHistoryPagination();
-        }
-      });
-    });
-  });
-</script>
-
-<style>
-  .side-nav {
-    background: white;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-
-  .side-nav .nav-link {
-    color: #6c757d;
-    padding: 10px 15px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .side-nav .nav-link:hover {
-    background-color: #f8f9fa;
-    color: #000;
-  }
-
-  .side-nav .nav-link.active {
-    background-color: #f8f9fa;
-    color: #000;
-    font-weight: 500;
-  }
-
-  .side-nav .nav-link svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .side-nav .nav-link.logout {
-    color: #e53e3e;
-    margin-top: 10px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-  }
-
-  .edit-btn {
-    padding: 0;
-    color: #6c757d;
-  }
-
-  .edit-btn:hover {
-    color: #0d6efd;
-  }
-
-  input:disabled {
-    background-color: transparent;
-    border: none;
-    padding: 0;
-  }
-
-  input:not(:disabled) {
-    border: 1px solid #ced4da;
-    padding: .375rem .75rem;
-  }
-
-  .card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  }
-
-  .tab-content > .tab-pane {
-    padding: 20px;
-  }
-</style>
-
-<style>
-  /* Orders Table Styling */
-  .orders-section {
-    margin: 20px 0;
-  }
-
-  .table-container {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    margin: 15px 0;
-  }
-
-  .table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    margin-bottom: 0;
-  }
-
-  .table thead th {
-    border: none;
-    background-color: #f8f9fa;
-    color: #6c757d;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    padding: 12px;
-    white-space: nowrap;
-  }
-
-  .table tbody tr {
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    transition: transform 0.2s;
-  }
-
-  .table tbody tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  .table td {
-    border: none;
-    padding: 12px;
-    vertical-align: middle;
-  }
-
-  /* Cell specific styles */
-  .order-id-cell {
-    font-weight: 600;
-    color: #2c3e50;
-  }
-
-  .date-cell {
-    color: #6c757d;
-    font-size: 0.9rem;
-  }
-
-  .status-badge {
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-transform: capitalize;
-    display: inline-block;
-    min-width: 100px;
-    text-align: center;
-  }
-
-  .status-pending {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-
-  .status-delivered {
-    background-color: #d4edda;
-    color: #155724;
-  }
-
-  .status-cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-
-  .amount-text {
-    font-weight: 600;
-    color: #2c3e50;
-  }
-
-  .actions-cell {
-    width: 120px;
-  }
-
-  .btn-action {
-    width: 100%;
-    padding: 6px 12px;
-    margin: 2px 0;
-    font-size: 0.85rem;
-    border-radius: 5px;
-    border: none;
-    transition: all 0.2s;
-  }
-
-  .btn-view {
-    background-color: #e9ecef;
-    color: #495057;
-  }
-
-  .btn-view:hover {
-    background-color: #dee2e6;
-    color: #212529;
-  }
-
-  .btn-cancel {
-    background-color: #dc3545;
-    color: white;
-  }
-
-  .btn-cancel:hover {
-    background-color: #c82333;
-  }
-
-  .btn-return {
-    background-color: #17a2b8;
-    color: white;
-  }
-
-  .btn-return:hover {
-    background-color: #138496;
-  }
-
-  .btn-retry {
-    background-color: #ffc107;
-    color: #000;
-  }
-
-  .btn-retry:hover {
-    background-color: #e0a800;
-  }
-
-  /* Pagination styling */
-  .pagination {
-    margin-top: 20px;
-    justify-content: center;
-    gap: 5px;
-  }
-
-  .page-link {
-    border: none;
-    padding: 8px 16px;
-    color: #6c757d;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    transition: all 0.2s;
-  }
-
-  .page-link:hover {
-    background-color: #e9ecef;
-    color: #495057;
-    transform: translateY(-1px);
-  }
-
-  .page-item.active .page-link {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .page-item.disabled .page-link {
-    background-color: #f8f9fa;
-    color: #adb5bd;
-  }
-
-  /* Empty state styling */
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #6c757d;
-  }
-
-  .empty-state i {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #dee2e6;
-  }
-</style>
-
-<script>
-function getStatusBadgeClass(status) {
-    switch (status) {
-        case 'Pending': return 'bg-warning text-dark';
-        case 'Processing': return 'bg-info text-dark';
-        case 'Shipped': return 'bg-primary';
-        case 'Delivered': return 'bg-success';
-        case 'Cancelled': return 'bg-danger';
-        case 'Return Request': return 'bg-warning';
-        case 'Returned': return 'bg-secondary';
-        default: return 'bg-secondary';
-    }
-}
-
-function cancelOrder(orderId) {
-    // Set the order ID in the hidden input
-    document.getElementById('orderIdInput').value = orderId;
-    
-    // Reset the form
-    document.getElementById('cancelOrderForm').reset();
-    document.getElementById('otherReasonDiv').style.display = 'none';
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
-    modal.show();
-}
-
-// Show/hide other reason textarea based on selection
-document.getElementById('cancelReason').addEventListener('change', function() {
-    const otherReasonDiv = document.getElementById('otherReasonDiv');
-    otherReasonDiv.style.display = this.value === 'Other' ? 'block' : 'none';
-});
-
-document.getElementById('confirmCancelBtn').addEventListener('click', async function() {
-    try {
-        const orderId = document.getElementById('orderIdInput').value;
-        const reasonSelect = document.getElementById('cancelReason');
-        const reason = reasonSelect.value;
-        
-        if (!orderId) {
-            throw new Error('Order ID is missing');
-        }
-        
-        if (!reason) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Please select a cancellation reason'
-            });
-            return;
-        }
-
-        const finalReason = reason === 'Other' 
-            ? document.getElementById('otherReason').value.trim() 
-            : reason;
-
-        if (reason === 'Other' && !finalReason) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Please specify the other reason'
-            });
-            return;
-        }
-
-        // Show loading state
-        Swal.fire({
-            title: 'Cancelling Order...',
-            text: 'Please wait while we process your request',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        const response = await fetch('/orders/cancel', {
+        try {
+          const response = await fetch('/update-profile', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                orderId: orderId,
-                cancellationReason: finalReason
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            // Close the modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
-            modal.hide();
-
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'Order Cancelled',
-                text: data.message || 'Your order has been cancelled successfully',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                window.location.reload();
-            });
-        } else {
-            throw new Error(data.message || 'Failed to cancel order');
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name.trim(), phone: phone.trim() })
+          });
+          const data = await response.json();
+          if (data.success) {
+            Swal.fire({ icon: 'success', title: 'Updated!', text: 'Profile changes saved.', timer: 1500, showConfirmButton: false });
+            setTimeout(() => location.reload(), 1500);
+          } else throw new Error(data.message);
+        } catch (error) {
+          Swal.fire('Error', error.message, 'error');
         }
-    } catch (error) {
-        console.error('Error cancelling order:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Something went wrong'
-        });
-    }
-});
-</script>
+      }
+
+      // Avatar Logic
+      document.getElementById('profileImageInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+          const res = await fetch('/update-profile-image', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (data.success) {
+            Swal.fire({ icon: 'success', title: 'Success', text: 'Image updated!', timer: 1000, showConfirmButton: false });
+            setTimeout(() => location.reload(), 1000);
+          } else throw new Error(data.message);
+        } catch (err) {
+          Swal.fire('Error', err.message, 'error');
+        }
+      });
+
+      async function deleteProfileImage() {
+        const res = await Swal.fire({ title: 'Delete image?', icon: 'warning', showCancelButton: true });
+        if (res.isConfirmed) {
+          try {
+            const response = await fetch('/delete-profile-image', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) location.reload();
+            else throw new Error(data.message);
+          } catch (err) { Swal.fire('Error', err.message, 'error'); }
+        }
+      }
+
+      // Order Actions
+      async function cancelOrder(orderId) {
+        const res = await Swal.fire({ title: 'Cancel Order?', text: 'Are you sure you want to cancel?', icon: 'warning', showCancelButton: true });
+        if (res.isConfirmed) {
+          try {
+            const response = await fetch('/orders/cancel', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId, status: "Cancelled" })
+            });
+            const data = await response.json();
+            if (data.success) location.reload();
+            else throw new Error(data.message);
+          } catch (err) { Swal.fire('Error', err.message, 'error'); }
+        }
+      }
+
+      async function retryPayment(orderId) {
+        try {
+          const response = await fetch('/orders/retry-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId })
+          });
+          const data = await response.json();
+          if (!data.success) throw new Error(data.message);
+
+          const options = {
+            key: data.data.key_id,
+            amount: data.data.amount,
+            currency: data.data.currency,
+            name: "NextTick",
+            description: "Order Payment Retry",
+            order_id: data.data.order_id,
+            handler: function (response) {
+              verifyRazorpayPayment(response, { orderId, userId: '<%= user._id %>' });
+            },
+            theme: { color: '#c5a059' }
+          };
+          new Razorpay(options).open();
+        } catch (err) { Swal.fire('Error', err.message, 'error'); }
+      }
+
+      function verifyRazorpayPayment(response, details) {
+        fetch('/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...response, orderDetails: details, retryPayment: true, orderId: details.orderId })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) location.reload();
+            else throw new Error(data.message);
+          })
+          .catch(err => Swal.fire('Error', err.message, 'error'));
+      }
+
+      // Password
+      function showChangePasswordModal() {
+        new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+      }
+
+      async function changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) return Swal.fire('Error', 'Passwords mismatch', 'error');
+
+        try {
+          const response = await fetch('/change-password-direct', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword, newPassword })
+          });
+          const data = await response.json();
+          if (data.success) {
+            Swal.fire('Success', 'Password updated!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+          } else throw new Error(data.message);
+        } catch (err) { Swal.fire('Error', err.message, 'error'); }
+      }
+
+      // Handle tab persistence from URL
+      document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTabId = urlParams.get('tab');
+        if (activeTabId) {
+          const tabEl = document.getElementById(activeTabId);
+          if (tabEl) {
+            const tab = new bootstrap.Tab(tabEl);
+            tab.show();
+          }
+        }
+      });
+    </script>

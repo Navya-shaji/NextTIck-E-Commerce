@@ -193,154 +193,36 @@ const loadDashboard = async (req, res) => {
             .select('orderId userId orderDate totalPrice status paymentMethod')
             .limit(10);
 
-        const stats = await Order.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    totalSalesCount: { $sum: 1 },
-                    totalOrderAmount: { $sum: { $toDouble: { $ifNull: ["$finalAmount", 0] } } },
-                    totalDiscount: { $sum: { $toDouble: { $ifNull: ["$discount", 0] } } }
-                }
-            }
+        // Summary Stats
+        const [
+            activeRevenueResult,
+            totalRevenueResult,
+            pendingOrdersCount,
+            completedOrdersCount,
+            totalOrdersCount,
+            totalUsersCount,
+            totalProductsCount
+        ] = await Promise.all([
+            Order.aggregate([
+                { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
+            ]),
+            Order.aggregate([
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
+            ]),
+            Order.countDocuments({ status: 'Pending' }),
+            Order.countDocuments({ status: 'Delivered' }),
+            Order.countDocuments({}),
+            User.countDocuments({ isAdmin: false }),
+            Product.countDocuments({ isBlocked: false })
         ]);
 
-        const { totalSalesCount = 0, totalOrderAmount = 0, totalDiscount = 0 } = stats[0] || {};
+        const activeRevenue = activeRevenueResult[0]?.total || 0;
+        const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-        // Daily Sales Data (Last 7 days)
-        const dailySales = await Order.aggregate([
-            {
-                $match: {
-                    createdOn: {
-                        $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                    },
-                    status: { $ne: "Cancelled" }
-                }
-            },
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdOn" } },
-                    sales: { $sum: { $toDouble: "$finalAmount" } },
-                    orderCount: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]);
-
-        // Weekly Sales Data
-        const weeklySales = await Order.aggregate([
-            {
-                $match: {
-                    createdOn: {
-                        $gte: dateRanges.startOfWeek,
-                        $lte: dateRanges.endOfWeek
-                    },
-                    status: { $ne: "Cancelled" }
-                }
-            },
-            {
-                $group: {
-                    _id: { $dayOfWeek: "$createdOn" },
-                    sales: { $sum: { $toDouble: "$finalAmount" } },
-                    orderCount: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]);
-
-        // Monthly Sales Data
-        const monthlySales = await Order.aggregate([
-            {
-                $match: {
-                    createdOn: { $gte: dateRanges.startOfYear },
-                    status: { $ne: "Cancelled" }
-                }
-            },
-            {
-                $group: {
-                    _id: { month: { $month: "$createdOn" } },
-                    sales: { $sum: { $toDouble: "$finalAmount" } },
-                    orderCount: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id.month": 1 } }
-        ]);
-
-        // Yearly Sales Data
-        const yearlySales = await Order.aggregate([
-            {
-                $match: { status: { $ne: "Cancelled" } }
-            },
-            {
-                $group: {
-                    _id: { $year: "$createdOn" },
-                    sales: { $sum: { $toDouble: "$finalAmount" } },
-                    orderCount: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id": -1 } },
-            { $limit: 5 }
-        ]);
-
-        // Get top selling products with revenue
+        // Top Performers (Consolidated)
         const topProducts = await Order.aggregate([
-            {
-                $match: {
-                    status: { $ne: "Cancelled" }
-                }
-            },
-            { $unwind: "$orderItems" },
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "orderItems.productId",
-                    foreignField: "_id",
-                    as: "productDetails"
-                }
-            },
-            { $unwind: "$productDetails" },
-            {
-                $group: {
-                    _id: "$orderItems.productId",
-                    name: { $first: "$productDetails.name" },
-                    image: { $first: { $arrayElemAt: ["$productDetails.images", 0] } },
-                    category: { $first: "$productDetails.category" },
-                    brand: { $first: "$productDetails.brand" },
-                    totalSalesCount: { $sum: "$orderItems.quantity" },
-                    totalRevenue: {
-                        $sum: {
-                            $multiply: ["$orderItems.quantity", "$orderItems.price"]
-                        }
-                    }
-                }
-            },
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "category",
-                    foreignField: "_id",
-                    as: "categoryDetails"
-                }
-            },
-            {
-                $lookup: {
-                    from: "brands",
-                    localField: "brand",
-                    foreignField: "_id",
-                    as: "brandDetails"
-                }
-            },
-            {
-                $addFields: {
-                    categoryName: { $arrayElemAt: ["$categoryDetails.name", 0] },
-                    brandName: { $arrayElemAt: ["$brandDetails.name", 0] }
-                }
-            },
-            { $sort: { totalSalesCount: -1 } },
-            { $limit: 10 }
-        ]);
-
-        // Get best selling brands with proper aggregation
-        const bestSellingBrands = await Order.aggregate([
+            { $match: { status: { $ne: "Cancelled" } } },
             { $unwind: "$orderItems" },
             {
                 $lookup: {
@@ -352,47 +234,19 @@ const loadDashboard = async (req, res) => {
             },
             { $unwind: "$product" },
             {
-                $lookup: {
-                    from: "brands",
-                    localField: "product.brand",
-                    foreignField: "_id",
-                    as: "brandInfo"
-                }
-            },
-            { $unwind: "$brandInfo" },
-            {
                 $group: {
-                    _id: "$brandInfo._id",
-                    name: { $first: "$brandInfo.name" },
-                    totalSalesCount: { $sum: "$orderItems.quantity" },
-                    totalRevenue: {
-                        $sum: {
-                            $multiply: ["$orderItems.quantity", "$orderItems.price"]
-                        }
-                    },
-                    productCount: { $addToSet: "$product._id" }
+                    _id: "$orderItems.productId",
+                    name: { $first: "$product.name" },
+                    revenue: { $sum: { $multiply: ["$orderItems.quantity", "$orderItems.price"] } },
+                    count: { $sum: "$orderItems.quantity" }
                 }
             },
-            {
-                $project: {
-                    _id: 1,
-                    name: 1,
-                    totalSalesCount: 1,
-                    totalRevenue: 1,
-                    productCount: { $size: "$productCount" }
-                }
-            },
-            { $sort: { totalSalesCount: -1 } },
-            { $limit: 10 }
+            { $sort: { revenue: -1 } },
+            { $limit: 5 }
         ]);
 
-        // Get top selling categories
         const topCategories = await Order.aggregate([
-            {
-                $match: {
-                    status: { $ne: "Cancelled" }
-                }
-            },
+            { $match: { status: { $ne: "Cancelled" } } },
             { $unwind: "$orderItems" },
             {
                 $lookup: {
@@ -408,104 +262,79 @@ const loadDashboard = async (req, res) => {
                     from: "categories",
                     localField: "product.category",
                     foreignField: "_id",
-                    as: "categoryDetails"
+                    as: "cat"
                 }
             },
-            { $unwind: "$categoryDetails" },
+            { $unwind: "$cat" },
             {
                 $group: {
-                    _id: "$product.category",
-                    name: { $first: "$categoryDetails.name" },
-                    totalSalesCount: { $sum: "$orderItems.quantity" },
-                    totalRevenue: {
-                        $sum: {
-                            $multiply: ["$orderItems.quantity", "$orderItems.price"]
-                        }
-                    },
-                    products: {
-                        $addToSet: "$product._id"
-                    }
+                    _id: "$cat._id",
+                    name: { $first: "$cat.name" },
+                    revenue: { $sum: { $multiply: ["$orderItems.quantity", "$orderItems.price"] } },
+                    count: { $sum: "$orderItems.quantity" }
                 }
             },
-            {
-                $addFields: {
-                    productCount: { $size: "$products" }
-                }
-            },
-            { $sort: { totalSalesCount: -1 } },
-            { $limit: 10 }
+            { $sort: { revenue: -1 } },
+            { $limit: 5 }
         ]);
 
+        const topBrands = await Order.aggregate([
+            { $match: { status: { $ne: "Cancelled" } } },
+            { $unwind: "$orderItems" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "orderItems.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $group: {
+                    _id: "$product.brand",
+                    name: { $first: "$product.brand" },
+                    revenue: { $sum: { $multiply: ["$orderItems.quantity", "$orderItems.price"] } },
+                    totalOrderCount: { $sum: 1 }
+                }
+            },
+            { $sort: { revenue: -1 } },
+            { $limit: 5 }
+        ]);
 
-
-        // Prepare chart data
-        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        // Monthly Chart Data (Initial)
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-        // Get last 7 days
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            return d.toISOString().split('T')[0];
-        }).reverse();
-
-        const daily = {
-            labels: last7Days.map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short' })),
-            data: last7Days.map(date => {
-                const dayData = dailySales.find(item => item._id === date);
-                return formatCurrency(dayData ? dayData.sales : 0);
-            })
-        };
-
-        const weekly = {
-            labels: daysOfWeek,
-            data: Array(7).fill(0).map((_, index) => {
-                const dayData = weeklySales.find(item => item._id === index + 1);
-                return formatCurrency(dayData ? dayData.sales : 0);
-            })
-        };
-
-        const monthly = {
-            labels: monthNames,
-            data: Array(12).fill(0).map((_, index) => {
-                const monthData = monthlySales.find(item => item._id.month === index + 1);
-                return formatCurrency(monthData ? monthData.sales : 0);
-            })
-        };
-
-        const yearly = {
-            labels: yearlySales.map(item => item._id.toString()),
-            data: yearlySales.map(item => formatCurrency(item.sales))
-        };
-
-        // Get order status stats
-        const orderStatusStats = await Order.aggregate([
+        const monthlySales = await Order.aggregate([
+            { $match: { status: { $ne: "Cancelled" } } },
             {
                 $group: {
-                    _id: "$status",
-                    count: { $sum: 1 }
+                    _id: { month: { $month: "$createdOn" } },
+                    sales: { $sum: { $toDouble: "$finalAmount" } }
                 }
-            }
+            },
+            { $sort: { "_id.month": 1 } }
         ]);
 
-        const totalOrders = orderStatusStats.reduce((acc, curr) => acc + curr.count, 0);
-        const successfulOrders = orderStatusStats.find(stat => stat._id === "Delivered")?.count || 0;
-        const orderSuccessRate = totalOrders ? ((successfulOrders / totalOrders) * 100).toFixed(2) : 0;
+        const initialSalesData = {
+            labels: monthNames,
+            data: Array(12).fill(0).map((_, i) => {
+                const monthInfo = monthlySales.find(m => m._id.month === i + 1);
+                return monthInfo ? monthInfo.sales : 0;
+            })
+        };
 
         return res.render("dashboard", {
-            orders,
-            totalSalesCount,
-            totalOrderAmount,
-            totalDiscount,
-            orderSuccessRate,
-            bestSellingProducts: topProducts,
-            bestSellingCategories: topCategories,
-            bestSellingBrands: bestSellingBrands,
-            daily,
-            weekly,
-            monthly,
-            yearly,
-            paymentStats: orderStatusStats
+            activeRevenue,
+            totalRevenue,
+            pendingOrders: pendingOrdersCount,
+            completedOrders: completedOrdersCount,
+            totalOrders: totalOrdersCount,
+            totalUsers: totalUsersCount,
+            totalProducts: totalProductsCount,
+            topProducts,
+            topCategories,
+            topBrands,
+            initialSalesData
         });
 
     } catch (error) {

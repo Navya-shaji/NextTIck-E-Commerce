@@ -1,314 +1,489 @@
 <%- include("../../views/partials/admin/header") %>
-<head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        th{
-            font-size: 15px;
-            font-weight: bold;
-            font-family: monospace;
+        .content-wrapper {
+            padding: 2.5rem;
+            background-color: var(--admin-bg);
         }
-        h2{
-            font-size: 30px;
-            font-weight: bold;
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        .chart-section {
-            margin: 20px 0;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        .content-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
         }
-        .chart-container {
-            width: 100%;
+
+        /* Search Section */
+        .search-container {
             max-width: 500px;
-            margin: 0 auto;
+            position: relative;
         }
-        .chart-title {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* Table Styling */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-active {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .badge-blocked {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        /* Action Buttons */
+        .action-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-offer {
+            background: #f5f3ff;
+            color: #8b5cf6;
+            border: 1px solid #ddd6fe;
+        }
+
+        .btn-offer:hover {
+            background: #ede9fe;
+        }
+
+        .btn-remove-offer {
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #ffe4e6;
+        }
+
+        .btn-remove-offer:hover {
+            background: #ffe4e6;
+        }
+
+        .btn-block {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+        }
+
+        .btn-block:hover {
+            background: #ffedd5;
+        }
+
+        .btn-unblock {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #dcfce7;
+        }
+
+        .btn-unblock:hover {
+            background: #dcfce7;
+        }
+
+        .btn-edit {
+            background: #eff6ff;
+            color: #3b82f6;
+            border: 1px solid #dbeafe;
+        }
+
+        .btn-edit:hover {
+            background: #dbeafe;
+        }
+
+        /* Pagination */
+        .pagination-wrap {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-link {
+            border: none;
+            color: #64748b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .page-item.active .page-link {
+            background: var(--accent-gold);
+            color: white;
         }
     </style>
-</head>
-<div class="content-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="content-title card-title">Products</h2>
-       
-    </div>
-</div>
-<header class="card-header text-center mb-20">
-    <form action="" method="get" class="d-inline">
-        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
-            <button class="btn  border-0" type="submit">Search</button>
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <h2 class="content-title">Product Inventory</h2>
+            <div class="search-container">
+                <form action="" method="get">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search by name or brand..." name="search"
+                        value="<%= typeof search !== 'undefined' ? search : '' %>">
+                </form>
+            </div>
         </div>
-    </form>
-</header>
-<div class="right mt-5">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col"><b>Product name</b></th>
-                <th scope="col"><b>Brand</b></th>
-                <th scope="col"><b>Category</b></th>
-                <th scope="col"><b>Sale Price</b></th>
-                <th scope="col"><b>Offer Price</b></th>
-                <th scope="col"><b>Offer</b></th>
-                <th scope="col"><b>Quantity</b></th>
-                <th scope="col"><b>Action</b></th>
-                <th scope="col"><b>Edit</b></th>
-            </tr>
-        </thead>
-        <tbody>
-            <%for(let i=data.length-1;i>=0;i--) { %>
-            <tr>
-                <td><%= data[i].productName %></td>
-                <td><%= data[i].brand && data[i].brand.brandName ? data[i].brand.brandName : 'No Brand' %></td>
-                <td><%= data[i].category ? data[i].category.name : 'No Category' %></td>
-                <td><%= data[i].salesPrice %></td>
-                <td><%= data[i].productOffer || '0%' %></td>
-                <td class="text-center">
-                  <% if (locals.data[i].productOffer===0) { %>
-                    
-                    <button class="btn btn-info btn-sm" onclick="addProductOffer('<%= data[i]._id %>')">Add Offer</button>
-                   
 
-                    <% } else { %>
-                    <button class="btn btn-danger btn-sm" onclick="removeOffer('<%= data[i]._id %>')">Remove Offer</button>
-                  <% } %>
-                </td>
-                
-                <td>
-                    <%=data[i]. quantity%>
-                </td>
-                
-                <td>
-                    <%if(data[i].isBlocked === false) { %>
-                        <button class="btn btn-danger" style="width: 80px;">
-                            <a href="/admin/blockProduct?id=<%=data[i]._id %>" class="text-white" style="text-decoration: none;">Block</a>
-                        </button>
-                    <% } else { %>
-                        <button class="btn btn-success" style="width: 80px;">
-                            <a href="/admin/unblockProduct?id=<%=data[i]._id %>" class="text-white" style="text-decoration: none;">Unblock</a>
-                        </button>
-                    <% } %>
-                    
-                </td>
+        <div class="product-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Brand</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Offer</th>
+                            <th>Stock</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i=data.length-1; i>=0; i--) { %>
+                            <tr>
+                                <td class="fw-bold">
+                                    <%= data[i].productName %>
+                                </td>
+                                <td>
+                                    <%= data[i].brand && data[i].brand.brandName ? data[i].brand.brandName : 'No Brand'
+                                        %>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">
+                                        <%= data[i].category ? data[i].category.name : 'No Category' %>
+                                    </span></td>
+                                <td>₹<%= data[i].salesPrice.toLocaleString('en-IN') %>
+                                </td>
+                                <td>
+                                    <% if (data[i].productOffer) { %>
+                                        <span class="badge bg-primary">
+                                            <%= data[i].productOffer %>% Off
+                                        </span>
+                                        <% } else { %>
+                                            <span class="text-muted small">None</span>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <span class="<%= data[i].quantity < 5 ? 'text-danger fw-bold' : '' %>">
+                                        <%= data[i].quantity %> units
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-group">
+                                        <% if (locals.data[i].productOffer===0) { %>
+                                            <button class="action-btn btn-offer"
+                                                onclick="addProductOffer('<%= data[i]._id %>')">
+                                                <i class="fas fa-tag me-1"></i> Offer
+                                            </button>
+                                            <% } else { %>
+                                                <button class="action-btn btn-remove-offer"
+                                                    onclick="removeOffer('<%= data[i]._id %>')">
+                                                    <i class="fas fa-times me-1"></i> Offer
+                                                </button>
+                                                <% } %>
 
-                <td>
-                    <button class="btn btn-info" style="width: 80px;">
-                        <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
-                    </button>
-                </td>
-            </tr>
+                                                    <% if(data[i].isBlocked===false) { %>
+                                                        <a href="/admin/blockProduct?id=<%=data[i]._id %>"
+                                                            class="action-btn btn-block">
+                                                            <i class="fas fa-ban me-1"></i> Block
+                                                        </a>
+                                                        <% } else { %>
+                                                            <a href="/admin/unblockProduct?id=<%=data[i]._id %>"
+                                                                class="action-btn btn-unblock">
+                                                                <i class="fas fa-check me-1"></i> Active
+                                                            </a>
+                                                            <% } %>
+
+                                                                <a href="/admin/editProduct?id=<%=data[i]._id%>"
+                                                                    class="action-btn btn-edit">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <% if (totalPages> 1) { %>
+            <div class="pagination-wrap">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <% for (let i=1; i <=totalPages; i++) { %>
+                            <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                    </ul>
+                </nav>
+            </div>
             <% } %>
-        </tbody>
-
-    </table>
-</div>
-</div>
-</div>
-
-    <!-- Pagination -->
-
-<div class="container mt-3">
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
- 
-            <% for (let i = 1; i <= totalPages; i++) { %>
-            <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-            </li>
-            <% } %>
-
-        </ul>
-    </nav>
-</div>
+    </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script>
-  async function addProductOffer(productId) {
-    const { value: amount } = await Swal.fire({
-        title: "Offer in Percentage",
-        input: "number",
-        inputLabel: "Percentage",
-        inputPlaceholder: "%",
-        inputAttributes: {
-            min: 0,
-            max: 100,
-            step: 1
-        }
-    });
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        async function addProductOffer(productId) {
+            const { value: amount } = await Swal.fire({
+                title: "Offer in Percentage",
+                input: "number",
+                inputLabel: "Percentage",
+                inputPlaceholder: "%",
+                inputAttributes: {
+                    min: 0,
+                    max: 100,
+                    step: 1
+                }
+            });
 
-    $.ajax({
-        url:"/admin/addProductOffer",
-        method:"post",
-        data:{
-            percentage:amount,
-            productId:productId
-        },
-        success:(response)=>{
-            if(response.status===true){
-                location.reload();
-                Swal.fire("Offer added","the offer has been removed","Success")
-            }else{
-                alert("failed")
-            }
-        }
-    })
-
-  }
-    function removeOffer(productId){
-        try{
-            Swal.fire({
-                title:"Remove offer",
-                text:"Are you sure you want to remove this offer",
-                icon:"Warning",
-                showCancelButton:true,
-                confirmButtonColor:"#3085d6",
-                cancelButtonColor:"d33",
-                confirmButtonText:"Yes,remove it!",
-                timer:5000,
-                timerProgressBar:true
-
-            }).then(async(result)=>{
-                if(result.isConfirmed){
-                    $.ajax({
-                        url:"/admin/removeProductOffer",
-                        method:"post",
-                        data:{
-                            productId:productId
-                        },
-                        success:(response)=>{
-                            if(response.status===true){
-                                Swal.fire("Removed!","The offer has been removed","success");
-                                location.reload()
-                            }else if(response.status===false){
-                                Swal.fire("failed")
-                            }else{
-                                alert("failed")
-                            }
-                        }
-                    })
+            $.ajax({
+                url: "/admin/addProductOffer",
+                method: "post",
+                data: {
+                    percentage: amount,
+                    productId: productId
+                },
+                success: (response) => {
+                    if (response.status === true) {
+                        location.reload();
+                        Swal.fire("Offer added", "the offer has been removed", "Success")
+                    } else {
+                        alert("failed")
+                    }
                 }
             })
-        }catch(error){
-            console.error(error)
+
         }
-    }
+        function removeOffer(productId) {
+            try {
+                Swal.fire({
+                    title: "Remove offer",
+                    text: "Are you sure you want to remove this offer",
+                    icon: "Warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "d33",
+                    confirmButtonText: "Yes,remove it!",
+                    timer: 5000,
+                    timerProgressBar: true
+
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/admin/removeProductOffer",
+                            method: "post",
+                            data: {
+                                productId: productId
+                            },
+                            success: (response) => {
+                                if (response.status === true) {
+                                    Swal.fire("Removed!", "The offer has been removed", "success");
+                                    location.reload()
+                                } else if (response.status === false) {
+                                    Swal.fire("failed")
+                                } else {
+                                    alert("failed")
+                                }
+                            }
+                        })
+                    }
+                })
+            } catch (error) {
+                console.error(error)
+            }
+        }
 
 
 
 
 
-//     if (amount) {
-//         if (amount < 0 || amount > 100 || isNaN(amount)) {
-//             Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
-//             return;
-//         }
+        //     if (amount) {
+        //         if (amount < 0 || amount > 100 || isNaN(amount)) {
+        //             Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
+        //             return;
+        //         }
 
-//         try {
-//             Swal.fire({
-//                 title: "Adding Offer...",
-//                 text: "Please wait while the offer is being added",
-//                 allowOutsideClick: false,
-//                 didOpen: () => {
-//                     Swal.showLoading();
-//                 },
-//             });
+        //         try {
+        //             Swal.fire({
+        //                 title: "Adding Offer...",
+        //                 text: "Please wait while the offer is being added",
+        //                 allowOutsideClick: false,
+        //                 didOpen: () => {
+        //                     Swal.showLoading();
+        //                 },
+        //             });
 
-//             const response = await fetch("/admin/addProductOffer", {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: JSON.stringify({
-//                     percentage: amount,
-//                     productId: productId,
-//                 }),
-//             });
+        //             const response = await fetch("/admin/addProductOffer", {
+        //                 method: "POST",
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 body: JSON.stringify({
+        //                     percentage: amount,
+        //                     productId: productId,
+        //                 }),
+        //             });
 
-//             const data = await response.json();
+        //             const data = await response.json();
 
-//             Swal.close();
+        //             Swal.close();
 
-//             if (response.ok && data.status === true) {
-//                 Swal.fire("Offer Added", "The offer has been added successfully", "success").then(() => {
-//                     location.reload();
-//                 });
-//             } else {
-//                 Swal.fire("Failed", data.message || "Adding offer failed", "error");
-//             }
-//         } catch (error) {
-//             Swal.fire(
-//                 "Error",
-//                 "An error occurred while adding the offer. Please try again.",
-//                 "error"
-//             );
-//             console.error("Error adding offer:", error);
-//         }
-//     }
-// }
-// async function removeProductOffer(productId) {
-//     const confirm = await Swal.fire({
-//         title: "Remove Offer",
-//         text: "Are you sure you want to remove the offer from this product?",
-//         icon: "warning",
-//         showCancelButton: true,
-//         confirmButtonText: "Yes, Remove",
-//         cancelButtonText: "Cancel",
-//     });
+        //             if (response.ok && data.status === true) {
+        //                 Swal.fire("Offer Added", "The offer has been added successfully", "success").then(() => {
+        //                     location.reload();
+        //                 });
+        //             } else {
+        //                 Swal.fire("Failed", data.message || "Adding offer failed", "error");
+        //             }
+        //         } catch (error) {
+        //             Swal.fire(
+        //                 "Error",
+        //                 "An error occurred while adding the offer. Please try again.",
+        //                 "error"
+        //             );
+        //             console.error("Error adding offer:", error);
+        //         }
+        //     }
+        // }
+        // async function removeProductOffer(productId) {
+        //     const confirm = await Swal.fire({
+        //         title: "Remove Offer",
+        //         text: "Are you sure you want to remove the offer from this product?",
+        //         icon: "warning",
+        //         showCancelButton: true,
+        //         confirmButtonText: "Yes, Remove",
+        //         cancelButtonText: "Cancel",
+        //     });
 
-//     if (confirm.isConfirmed) {
-//         try {
-//             Swal.fire({
-//                 title: "Removing Offer...",
-//                 text: "Please wait while the offer is being removed",
-//                 allowOutsideClick: false,
-//                 didOpen: () => {
-//                     Swal.showLoading();
-//                 },
-//             });
+        //     if (confirm.isConfirmed) {
+        //         try {
+        //             Swal.fire({
+        //                 title: "Removing Offer...",
+        //                 text: "Please wait while the offer is being removed",
+        //                 allowOutsideClick: false,
+        //                 didOpen: () => {
+        //                     Swal.showLoading();
+        //                 },
+        //             });
 
-//             const response = await fetch("/admin/removeProductOffer", {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: JSON.stringify({
-//                     productId: productId,
-//                 }),
-//             });
+        //             const response = await fetch("/admin/removeProductOffer", {
+        //                 method: "POST",
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 body: JSON.stringify({
+        //                     productId: productId,
+        //                 }),
+        //             });
 
-//             const data = await response.json();
+        //             const data = await response.json();
 
-//             Swal.close();
+        //             Swal.close();
 
-//             if (response.ok && data.status === true) {
-//                 Swal.fire("Offer Removed", "The offer has been successfully removed", "success").then(() => {
-//                     location.reload();
-//                 });
-//             } else {
-//                 Swal.fire("Failed", data.message || "Removing offer failed", "error");
-//             }
-//         } catch (error) {
-//             Swal.fire(
-//                 "Error",
-//                 "An error occurred while removing the offer. Please try again.",
-//                 "error"
-//             );
-//             console.error("Error removing offer:", error);
-//         }
-//     }
-// }
+        //             if (response.ok && data.status === true) {
+        //                 Swal.fire("Offer Removed", "The offer has been successfully removed", "success").then(() => {
+        //                     location.reload();
+        //                 });
+        //             } else {
+        //                 Swal.fire("Failed", data.message || "Removing offer failed", "error");
+        //             }
+        //         } catch (error) {
+        //             Swal.fire(
+        //                 "Error",
+        //                 "An error occurred while removing the offer. Please try again.",
+        //                 "error"
+        //             );
+        //             console.error("Error removing offer:", error);
+        //         }
+        //     }
+        // }
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<%- include("../../views/partials/admin/footer") %>
+    <%- include("../../views/partials/admin/footer") %>
