@@ -173,6 +173,14 @@
         display: flex;
         border: 1px solid var(--border-color);
         background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: 0.3s;
+      }
+
+      .search-form-lite:focus-within {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
       }
 
       .search-form-lite input {
@@ -209,21 +217,28 @@
 
       .product-card-premium {
         background: #fff;
-        transition: all 0.4s ease;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        border: 1px solid var(--border-color);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 24px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
       }
 
       .product-card-premium:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border-color: transparent;
       }
 
       .image-wrapper {
         position: relative;
-        padding-top: 100%;
+        padding-top: 110%;
+        /* Slightly taller for more elegance */
         overflow: hidden;
-        background: #ffffff;
+        background: #fdfdfd;
       }
 
       .image-wrapper img {
@@ -232,12 +247,14 @@
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        transition: 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        object-fit: contain;
+        /* Better for luxury products than cover */
+        padding: 20px;
+        transition: 1s cubic-bezier(0.165, 0.84, 0.44, 1);
       }
 
       .product-card-premium:hover .image-wrapper img {
-        transform: scale(1.08);
+        transform: scale(1.1) translateY(-5px);
       }
 
       /* Collapsible Sidebar Styles */
@@ -286,14 +303,16 @@
 
       .badge-status {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        padding: 6px 15px;
-        font-size: 0.7rem;
-        font-weight: 700;
+        top: 15px;
+        left: 15px;
+        padding: 5px 12px;
+        font-size: 0.65rem;
+        font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 1px;
         z-index: 10;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
 
       .badge-new {
@@ -308,95 +327,122 @@
 
       .wishlist-pill {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        background: #fff;
+        top: 15px;
+        right: 15px;
+        width: 38px;
+        height: 38px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         cursor: pointer;
         z-index: 10;
         transition: 0.3s;
-        color: var(--primary-color);
+        border: 1px solid rgba(0, 0, 0, 0.03);
       }
 
       .wishlist-pill:hover {
-        background: var(--primary-color);
-        color: #fff;
+        background: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
       }
 
-      .wishlist-pill i.fa-solid {
-        color: #ff4d4d;
+      .wishlist-pill i {
+        font-size: 1.1rem;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
 
-      .wishlist-pill:hover i.fa-solid {
-        color: #fff;
+      .wishlist-pill:active i {
+        transform: scale(0.8);
       }
 
       .item-details-premium {
-        padding: 30px 20px;
-        text-align: center;
+        padding: 20px 24px 24px;
+        text-align: left;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
       }
 
       .brand-label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--accent-color);
         text-transform: uppercase;
         letter-spacing: 2px;
-        margin-bottom: 10px;
-        font-weight: 600;
+        margin-bottom: 8px;
+        font-weight: 700;
+        opacity: 0.8;
       }
 
       .product-name-premium {
-        font-family: var(--font-heading);
-        font-size: 1.25rem;
+        font-family: var(--font-body);
+        font-size: 1.1rem;
         color: var(--primary-color);
         text-decoration: none;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         display: block;
-        font-weight: 700;
+        font-weight: 600;
+        line-height: 1.4;
+        height: 2.8em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
       }
 
       .price-display-premium {
-        font-size: 1.15rem;
-        font-weight: 500;
-        margin-bottom: 25px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .original-price {
         text-decoration: line-through;
-        color: var(--light-text);
-        font-size: 0.95rem;
-        margin-left: 10px;
+        color: #b0b0b0;
+        font-size: 0.9rem;
+        font-weight: 400;
       }
 
       .action-btn-premium {
         width: 100%;
-        padding: 16px;
+        padding: 14px;
+        background: #f8f8f8;
+        color: var(--primary-color);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-top: auto;
+      }
+
+      .product-card-premium:hover .action-btn-premium {
         background: var(--primary-color);
         color: #fff;
-        border: none;
-        font-family: var(--font-heading);
-        font-size: 0.8rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: 0.3s;
+        border-color: var(--primary-color);
       }
 
       .action-btn-premium:hover:not(:disabled) {
-        background: var(--accent-color);
-        color: var(--primary-color);
+        background: var(--accent-color) !important;
+        color: var(--primary-color) !important;
+        transform: translateY(-2px);
       }
 
       .action-btn-premium:disabled {
-        background: #f0f0f0;
-        color: #999;
+        background: #fdfdfd;
+        color: #ccc;
+        border-color: #eee;
         cursor: not-allowed;
       }
 
@@ -695,19 +741,48 @@
         }
 
         function handleWishlistToggle(productId, el) {
+          if (!el) return;
           const i = el.querySelector('i');
-          $.post("/addToWishlist", { productId }, (r) => {
-            if (r.success || r.status) {
-              const isAdd = r.action === 'added' || (r.message && r.message.includes('added'));
-              i.className = isAdd ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-              Swal.fire({
-                icon: 'success',
-                title: isAdd ? 'Saved to Wishlist' : 'Removed from Wishlist',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1500
-              });
+
+          $.ajax({
+            url: "/addToWishlist",
+            method: "POST",
+            data: { productId },
+            success: function (r) {
+              if (r.status) {
+                const isAdded = r.action === 'added';
+                i.className = isAdded ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+
+                Swal.fire({
+                  icon: 'success',
+                  title: isAdded ? 'Saved' : 'Removed',
+                  text: isAdded ? 'Added to your favorites' : 'Removed from favorites',
+                  toast: true,
+                  position: 'top-end',
+                  showConfirmButton: false,
+                  timer: 2000,
+                  background: '#fff',
+                  color: '#1a1a1a',
+                  iconColor: isAdded ? '#ff4d4d' : '#ccc'
+                });
+              } else {
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Login Required',
+                  text: 'Please sign in to manage your wishlist',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sign In',
+                  confirmButtonColor: '#1a1a1a'
+                }).then(res => {
+                  if (res.isConfirmed) window.location.href = '/login';
+                });
+              }
+            },
+            error: function (err) {
+              console.error('Wishlist error:', err);
+              if (err.status === 401) {
+                window.location.href = '/login';
+              }
             }
           });
         }

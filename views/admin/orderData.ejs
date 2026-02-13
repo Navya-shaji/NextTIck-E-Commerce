@@ -10,94 +10,246 @@
             object-fit: cover;
         }
     </style>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
+    <style>
+        .content-wrapper {
+            padding: 2rem;
+            background-color: #f8fafc;
+        }
 
-                <h3 style="font-family:math; margin-left: 6px; margin-top: 15px; font-size: 35px " class="card-title">
-                    Order Details</h3>
-            </div>
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header-premium {
+            padding: 1.25rem 1.5rem;
+            background: #fff;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header-premium h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            color: #334155;
+        }
+
+        .card-body-premium {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .badge-processing {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .badge-shipped {
+            background: #fdf4ff;
+            color: #86198f;
+        }
+
+        .badge-delivered {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .badge-cancelled {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .badge-returned {
+            background: #f8fafc;
+            color: #475569;
+        }
+
+        .items-table {
+            width: 100%;
+        }
+
+        .items-table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem;
+            border: none;
+        }
+
+        .items-table tbody td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #f1f5f9;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 1.5rem;
+            gap: 4rem;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .summary-item {
+            text-align: right;
+        }
+
+        .summary-item label {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-item span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .summary-item.total span {
+            font-size: 1.5rem;
+            color: #c5a059;
+        }
+
+        .btn-back {
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #f8fafc;
+            color: #1e293b;
+            transform: translateX(-3px);
+        }
+
+        .action-select {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .action-select:focus {
+            border-color: #c5a059;
+        }
+    </style>
+
+    <div class="content-wrapper">
+        <div class="order-header">
             <div>
-                <a style="font-family:math; margin-right: 116px; margin-top: 15px; font-size: 15px "
-                    href="/admin/orderList" class="btn btn-secondary float-right">Back to Orders</a>
+                <a href="/admin/orderList" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Fleet
+                </a>
+                <h2 class="page-title mt-3">Order #<%= order.orderId %>
+                </h2>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h4
-                            style="font-family:math; margin-left: 0px; margin-top: 15px; font-size: 35px ; color:rgb(39, 72, 16)">
-                            Order Information</h4>
-                        <p><strong>Order ID:</strong>
-                            <%= order.orderId %>
-                        </p>
-                        <p><strong>Date:</strong>
-                            <%= new Date(order.createdOn).toLocaleString() %>
-                        </p>
-                        <p><strong>Status:</strong>
-                            <%= order.status %>
-                        </p>
-                        <p><strong>Total Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %>
-                        </p>
-                        <% if (order.discount> 0) { %>
-                            <p>Discount Applied: ₹<%= order.discount.toFixed(2) %>
-                            </p>
-                            <% } %>
+            <div class="text-end">
+                <span class="status-badge badge-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                    <%= order.status %>
+                </span>
+                <p class="text-muted small mt-2">Placed on <%= new Date(order.createdOn).toLocaleString('en-IN', {
+                        dateStyle: 'full' , timeStyle: 'short' }) %>
+                </p>
+            </div>
+        </div>
 
-                                <% if (order.couponApplied) { %>
-                                    <p>Coupon Applied: Yes</p>
-                                    <% if (order.couponDetails) { %>
-                                        <p>Coupon Code: <%= order.couponCode %>
-                                        </p>
-                                        <p>Coupon Discount: ₹<%= order.couponDetails.discount.toFixed(2) %>
-                                        </p>
-                                        <% } %>
-                                            <% } %>
-
-                                                <% if (order.offerApplied) { %>
-                                                    <p>Offer Applied: Yes</p>
-                                                    <% if (order.offerDetails) { %>
-                                                        <p>Offer Details: <%= order.offerDetails.description %>
-                                                        </p>
-                                                        <p>Offer Discount: ₹<%= order.offerDetails.discount.toFixed(2)
-                                                                %>
-                                                        </p>
-                                                        <% } %>
-                                                            <% } %>
-
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Order Items -->
+                <div class="premium-card">
+                    <div class="card-header-premium">
+                        <h4>Consignment Details</h4>
                     </div>
-                    <div class="col-md-6">
-                        <h4 style="font-family:math;  margin-top: 15px; font-size: 35px ; color:rgb(39, 72, 16)">
-                            Customer Information</h4>
-                        <p><strong>Name:</strong>
-                            <%= order.userId.name %>
-                        </p>
-                        <p><strong>Email:</strong>
-                            <%= order.userId.email %>
-                        </p>
-                        <% if (order.paymentId) { %>
-                            <p><strong>Payment ID:</strong>
-                                <%= order.paymentId %>
-                            </p>
-                            <% } %>
-                                <% if (order.paymentMethod) { %>
-                                    <p><strong>Payment Method:</strong>
-                                        <%= order.paymentMethod %>
-                                    </p>
-                                    <% } %>
-                    </div>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <h4>Order Items</h4>
-                        <table class="table table-bordered">
+                    <div class="table-responsive">
+                        <table class="table items-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>image</th>
-                                    <th>Product</th>
+                                    <th>Item</th>
+                                    <th>Specifications</th>
                                     <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Subtotal</th>
-                                    <th>Status</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Total</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -105,83 +257,151 @@
                                 <% order.orderItems.forEach(item=> { %>
                                     <tr>
                                         <td>
-                                            <% if (item.product && item.product.productImage &&
-                                                item.product.productImage[0]) { %>
-                                                <img src="/uploads/re-image/<%= item.product.productImage[0] %>"
-                                                    alt="Product" class="product-img me-3">
-                                                <% } else { %>
-                                                    <img src="/uploads/re-image/default-product-image.jpg"
-                                                        alt="Default Product" class="product-img me-3">
-                                                    <% } %>
+                                            <img src="/uploads/re-image/<%= item.product?.productImage[0] || 'default-product-image.jpg' %>"
+                                                alt="Product" class="product-img">
                                         </td>
                                         <td>
-                                            <%= item.product.name %>
+                                            <div class="fw-bold text-dark">
+                                                <%= item.product?.name || 'Deleted Product' %>
+                                            </div>
+                                            <div class="text-muted small">Status: <%= item.status %>
+                                            </div>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <%= item.quantity %>
                                         </td>
-                                        <td>₹<%= item.price.toFixed(2) %>
+                                        <td class="text-end">₹<%= item.price.toLocaleString('en-IN') %>
                                         </td>
-                                        <td>₹<%= (item.quantity * item.price).toFixed(2) %>
-                                        </td>
-                                        <td>
-                                            <span class="badge <%= 
-                                                item.status === 'Cancelled' ? 'bg-danger' : 
-                                                item.status === 'Return Request' ? 'bg-warning' : 
-                                                item.status === 'Returned' ? 'bg-success' : 
-                                                'bg-info' %> text-white">
-                                                <%= item.status %>
-                                            </span>
+                                        <td class="text-end fw-bold">₹<%= (item.quantity *
+                                                item.price).toLocaleString('en-IN') %>
                                         </td>
                                         <td>
-                                            <select class="form-select form-select-sm"
-                                                onchange="updateItemStatus('<%= order._id %>', '<%= item.product._id %>', this.value)">
+                                            <select class="action-select"
+                                                onchange="updateItemStatus('<%= order._id %>', '<%= item.product?._id %>', this.value)">
                                                 <option value="" disabled selected>Update</option>
                                                 <option value="Processing">Processing</option>
                                                 <option value="Shipped">Shipped</option>
                                                 <option value="Delivered">Delivered</option>
                                                 <option value="Cancelled">Cancelled</option>
-                                                <option value="Return Request">Return Request</option>
                                                 <option value="Returned">Returned</option>
                                             </select>
                                         </td>
                                     </tr>
                                     <% }); %>
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                                    <td>₹<%= order.totalPrice.toFixed(2) %>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end"><strong>Discount:</strong></td>
-                                    <td>₹<%= (order.totalPrice - order.finalAmount).toFixed(2) %>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-right"><strong>Final Amount:</strong></td>
-                                    <td>₹<%= order.finalAmount.toFixed(2) %>
-                                    </td>
-                                </tr>
-                            </tfoot>
                         </table>
+                    </div>
+                    <div class="summary-row">
+                        <div class="summary-item">
+                            <label>Subtotal</label>
+                            <span>₹<%= order.totalPrice.toLocaleString('en-IN') %></span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Discount</label>
+                            <span class="text-success">-₹<%= (order.totalPrice -
+                                    order.finalAmount).toLocaleString('en-IN') %></span>
+                        </div>
+                        <div class="summary-item total">
+                            <label>Final Value</label>
+                            <span>₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Display User's Return Reason -->
                 <% if (order.status==='Return Request' || order.status==='Returned' ) { %>
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h4>Return Reason (User's Reason)</h4>
-                            <p><strong>Reason: </strong>
-                                <%= order.returnReason || 'No reason provided' %>
-                            </p>
+                    <div class="premium-card">
+                        <div class="card-header-premium">
+                            <h4 class="text-warning">Resolution Request</h4>
+                        </div>
+                        <div class="card-body-premium">
+                            <div class="info-item">
+                                <label>Client's Reasoning</label>
+                                <p class="bg-light p-3 rounded" style="font-style: italic;">"<%= order.returnReason
+                                        || 'No specific details provided.' %>"</p>
+                            </div>
                         </div>
                     </div>
                     <% } %>
+            </div>
 
+            <div class="col-lg-4">
+                <!-- Customer Details -->
+                <div class="premium-card">
+                    <div class="card-header-premium">
+                        <h4>Client Profile</h4>
+                    </div>
+                    <div class="card-body-premium">
+                        <div class="info-item mb-4">
+                            <label>Full Name</label>
+                            <p>
+                                <%= order.userId?.name %>
+                            </p>
+                        </div>
+                        <div class="info-item mb-4">
+                            <label>Email Access</label>
+                            <p>
+                                <%= order.userId?.email %>
+                            </p>
+                        </div>
+                        <div class="info-item">
+                            <label>Shipping Identity</label>
+                            <p>
+                                <%= order.address?.street %>, <%= order.address?.city %>
+                            </p>
+                            <p class="text-muted small">
+                                <%= order.address?.postalCode %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Logistics & Payment -->
+                <div class="premium-card">
+                    <div class="card-header-premium">
+                        <h4>Transaction Logistics</h4>
+                    </div>
+                    <div class="card-body-premium">
+                        <div class="info-item mb-4">
+                            <label>Payment Method</label>
+                            <p class="text-uppercase">
+                                <%= order.paymentMethod %>
+                            </p>
+                        </div>
+                        <% if (order.paymentId) { %>
+                            <div class="info-item mb-4">
+                                <label>Transaction Reference</label>
+                                <p class="small text-break">
+                                    <%= order.paymentId %>
+                                </p>
+                            </div>
+                            <% } %>
+                                <div class="info-item">
+                                    <label>Consignment Status</label>
+                                    <form id="mainStatusForm" class="mt-2">
+                                        <select id="orderStatus" class="form-select action-select w-100 mb-3"
+                                            <%=['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)
+                                            ? 'disabled' : '' %>>
+                                            <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>
+                                                >Pending</option>
+                                            <option value="Processing" <%=order.status==='Processing' ? 'selected' : ''
+                                                %>>Processing</option>
+                                            <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>
+                                                >Shipped</option>
+                                            <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                                >Delivered</option>
+                                            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                                >Cancelled</option>
+                                            <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
+                                                >Returned</option>
+                                        </select>
+                                        <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) { %>
+                                            <button type="submit" class="btn btn-dark w-100"
+                                                style="border-radius: 10px;">Update Logistics</button>
+                                            <% } %>
+                                    </form>
+                                </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -190,46 +410,36 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const updateStatusForm = document.getElementById('updateStatusForm');
-            updateStatusForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-                const status = document.getElementById('orderStatus').value;
-                try {
-                    const response = await fetch('/admin/orders/update-status', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ orderId: '<%= order._id %>', status: status })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Status Updated',
-                            text: 'Order status updated successfully!',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            location.reload();
+            const mainStatusForm = document.getElementById('mainStatusForm');
+            if (mainStatusForm) {
+                mainStatusForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const status = document.getElementById('orderStatus').value;
+                    try {
+                        const response = await fetch('/admin/orders/update-status', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: '<%= order._id %>', status: status })
                         });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Update Failed',
-                            text: 'Failed to update order status: ' + data.message,
-                            confirmButtonText: 'Try Again'
-                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Logistics Updated',
+                                confirmButtonColor: '#1e293b'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed',
+                                text: data.message
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Communication failure', 'error');
                     }
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while updating the order status.',
-                        confirmButtonText: 'Close'
-                    });
-                    console.error('Error updating order status:', error);
-                }
-            });
+                });
+            }
         });
 
         async function updateItemStatus(orderId, productId, status) {

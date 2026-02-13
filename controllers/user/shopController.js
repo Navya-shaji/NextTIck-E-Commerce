@@ -13,32 +13,32 @@ const loadshoppingPage = async (req, res) => {
     const categories = await Category.find({ isListed: true });
     const categoryIds = categories.map((category) => category._id);
     const page = parseInt(req.query.page) || 1;
-    const limit = 6; 
+    const limit = 6;
     const skip = (page - 1) * limit;
 
     let query = {
       isBlocked: false,
       category: { $in: categoryIds },
     };
-    let sort = { createdOn: -1 }; 
+    let sort = { createdOn: -1 };
 
     const sortOption = req.query.sort;
     if (sortOption) {
       switch (sortOption) {
         case 'popularity':
-          sort = { quantity: -1 }; 
+          sort = { quantity: -1 };
           break;
         case 'price_asc':
-          sort = { regularPrice: 1 }; 
+          sort = { regularPrice: 1 };
           break;
         case 'price_desc':
-          sort = { regularPrice: -1 }; 
+          sort = { regularPrice: -1 };
           break;
         case 'rating':
           sort = { averageRating: -1 };
           break;
         case 'a_to_z':
-          sort = { productName: 1 }; 
+          sort = { productName: 1 };
           break;
         case 'z_to_a':
           sort = { productName: -1 };
@@ -93,7 +93,7 @@ const loadshoppingPage = async (req, res) => {
     }
 
     const brands = await Brand.find({ isBlocked: false });
-    
+
     res.render("shop", {
       user: userData,
       products,
@@ -122,14 +122,14 @@ const searchProducts = async (req, res) => {
     const query = {
       $or: [
         { productName: { $regex: searchTerm, $options: "i" } }
-        
+
       ],
       isBlocked: false,
       quantity: { $gt: 0 },
     };
 
     const products = await Product.find(query)
-      .collation({ locale: "en", strength: 2 }) 
+      .collation({ locale: "en", strength: 2 })
       .sort({ createdOn: -1 })
       .skip(skip)
       .limit(limit);
@@ -140,7 +140,19 @@ const searchProducts = async (req, res) => {
     const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
 
+    let wishlistItems = [];
+    const user = req.session.user;
+    let userData = null;
+    if (user) {
+      userData = await User.findById(user);
+      const wishlist = await Wishlist.findOne({ userId: user });
+      if (wishlist) {
+        wishlistItems = wishlist.products.map(item => item.productId.toString());
+      }
+    }
+
     res.render("shop", {
+      user: userData,
       products,
       categories,
       brands,
@@ -149,6 +161,7 @@ const searchProducts = async (req, res) => {
       totalPages,
       searchTerm,
       query: req.query,
+      wishlistItems
     });
   } catch (error) {
     console.error("Error searching products:", error);

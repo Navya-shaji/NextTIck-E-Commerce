@@ -33,10 +33,10 @@ const addProducts = async (req, res) => {
 
         // Validate required fields
         if (!products.productName || !products.description || !products.brand ||
-            !products.category || !products.regularPrice || !products.quantity || images.length === 0) {
+            !products.category || !products.regularPrice || !products.quantity || images.length < 3) {
             return res.status(400).json({
                 success: false,
-                error: "All fields are required, including at least one image"
+                error: "All fields are required, including at least 3 images"
             });
         }
 
@@ -423,6 +423,9 @@ const updateProduct = async (req, res) => {
         };
 
         if (image.length > 0) {
+            if (image.length < 3) {
+                return res.status(400).json({ success: false, message: "Please provide at least 3 images" });
+            }
             updateFields.productImage = image;
         }
 
@@ -470,6 +473,14 @@ const deleteSingleImage = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 error: "Image not found in product"
+            });
+        }
+
+        // Enforce minimum 3 images
+        if (product.productImage.length <= 3) {
+            return res.status(400).json({
+                success: false,
+                error: "Product must have at least 3 images"
             });
         }
 

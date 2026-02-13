@@ -168,42 +168,37 @@ const updateOrderStatus = async (req, res) => {
         }
 
 
-        // Update product quantities
-        const orderItems = order.orderItems;
-        if (Array.isArray(orderItems)) {
-            for (const item of orderItems) {
-                try {
-                    const product = await Product.findById(item.product);
-                    if (product) {
-                        const oldQuantity = product.quantity;
-                        product.quantity = oldQuantity + item.quantity;
-                        await product.save();
+        // Stock management logic
+        const needsRestoration = ["Cancelled", "Returned"].includes(status);
+        const alreadyRestored = ["Cancelled", "Returned"].includes(order.status);
+
+        if (needsRestoration && !alreadyRestored) {
+            const orderItems = order.orderItems;
+            if (Array.isArray(orderItems)) {
+                for (const item of orderItems) {
+                    try {
+                        const product = await Product.findById(item.product);
+                        if (product) {
+                            product.quantity += item.quantity;
+                            await product.save();
+                        }
+                    } catch (error) {
+                        console.error('Error updating product quantity:', error);
                     }
-                } catch (error) {
-                    console.error('Error updating product quantity:', error);
                 }
             }
-        }
 
-        if (status === "Returned") {
-            if (order.paymentStatus === 'Completed') {
-                const userId = order.userId;
-                const amount = order.finalAmount;
-
-                try {
-                    await addRefundToWallet(userId, amount, orderId);
-                } catch (refundError) {
-                    console.error('Error processing refund:', refundError);
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Order status updated to Returned but refund failed'
-                    });
+            // Also handle refund if paid
+            if (status === "Returned" || status === "Cancelled") {
+                if (order.paymentStatus === 'Completed' || order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
+                    try {
+                        await addRefundToWallet(order.userId, order.finalAmount, orderId);
+                        order.paymentStatus = 'Refunded';
+                    } catch (refundError) {
+                        console.error('Error processing refund:', refundError);
+                        // Optional: you might want to return here, but usually status update should proceed
+                    }
                 }
-            } else {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Refund not applicable for unpaid or incomplete orders'
-                });
             }
         }
 
