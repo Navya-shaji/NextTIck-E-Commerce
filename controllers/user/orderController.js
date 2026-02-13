@@ -10,12 +10,37 @@ const mongoose = require('mongoose');
 
 const getOrderHistory = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const orders = await Order.find({ userId }).sort({ createdOn: -1 }).lean();
+        const user = req.session.user;
+        if (!user) {
+            return res.redirect("/login");
+        }
+        const userId = user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments({ userId });
+        const totalPages = Math.ceil(totalOrders / limit);
+        const orders = await Order.find({ userId })
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
 
         res.render('profile', {
+            user: user,
             orders: orders,
-            activeTab: 'orders'
+            activeTab: 'orders',
+            userAddress: {},
+            wallet: { transactions: [], totalBalance: 0 },
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                currentAddressPage: 1,
+                totalAddressPages: 1,
+                currentWalletPage: 1,
+                totalWalletPages: 1
+            }
         });
     } catch (error) {
         console.error('Error fetching order history:', error);

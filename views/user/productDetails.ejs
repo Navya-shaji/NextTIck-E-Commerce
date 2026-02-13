@@ -429,7 +429,8 @@
                     <div class="main-image-wrapper" id="imageContainer" onmousemove="magnify(event)"
                         onmouseleave="removeMagnify()">
                         <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
-                            class="main-image" id="mainImage">
+                            class="main-image" id="mainImage"
+                            onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'">
                         <div class="magnifying-glass" id="magnifyingGlass"></div>
                     </div>
 
@@ -558,7 +559,8 @@
                                 <a href="/productDetails?id=<%= related._id %>" class="text-decoration-none">
                                     <div class="card-img-wrapper">
                                         <img src="/uploads/re-image/<%= related.productImage[0] %>"
-                                            alt="<%= related.productName %>" class="card-img">
+                                            alt="<%= related.productName %>" class="card-img"
+                                            onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'">
                                     </div>
                                     <div class="card-info">
                                         <h5 class="card-title">

@@ -10,18 +10,18 @@
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
-  <link rel="stylesheet" href="css/animate.css">
-  <link rel="stylesheet" href="css/owl.carousel.min.css">
-  <link rel="stylesheet" href="css/owl.theme.default.min.css">
-  <link rel="stylesheet" href="css/magnific-popup.css">
-  <link rel="stylesheet" href="css/aos.css">
-  <link rel="stylesheet" href="css/ionicons.min.css">
-  <link rel="stylesheet" href="css/bootstrap-datepicker.css">
-  <link rel="stylesheet" href="css/jquery.timepicker.css">
-  <link rel="stylesheet" href="css/flaticon.css">
-  <link rel="stylesheet" href="css/icomoon.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css">
+  <link rel="stylesheet" href="/css/animate.css">
+  <link rel="stylesheet" href="/css/owl.carousel.min.css">
+  <link rel="stylesheet" href="/css/owl.theme.default.min.css">
+  <link rel="stylesheet" href="/css/magnific-popup.css">
+  <link rel="stylesheet" href="/css/aos.css">
+  <link rel="stylesheet" href="/css/ionicons.min.css">
+  <link rel="stylesheet" href="/css/bootstrap-datepicker.css">
+  <link rel="stylesheet" href="/css/jquery.timepicker.css">
+  <link rel="stylesheet" href="/css/flaticon.css">
+  <link rel="stylesheet" href="/css/icomoon.css">
+  <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/styles/header.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -142,6 +142,20 @@
     .action-icon:hover {
       color: var(--header-accent);
       transform: translateY(-2px);
+    }
+
+    .user-name-text {
+      font-size: 13px;
+      font-weight: 500;
+      margin-left: 5px;
+      color: var(--header-text);
+      display: inline-block;
+      vertical-align: middle;
+      max-width: 80px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: var(--header-font);
     }
 
     .badge {
@@ -337,28 +351,38 @@
       </nav>
 
       <div class="header-actions">
-        <a href="#" class="action-icon"><i class="fas fa-search"></i></a>
         <a href="/wishlist" class="action-icon">
           <i class="fas fa-heart"></i>
         </a>
         <a href="/cart" class="action-icon cart-icon">
           <i class="fas fa-shopping-bag"></i>
-          <span class="badge cart-count">0</span>
+          <span class="badge cart-count">
+            <%= locals.cartCount || 0 %>
+          </span>
         </a>
 
         <div class="dropdown">
-          <a href="#" class="action-icon">
-            <i class="fas fa-user-circle"></i>
-          </a>
-          <div class="dropdown-menu">
-            <% if (locals.user) { %>
-              <a href="/userProfile" class="dropdown-item">Profile</a>
-              <a href="/logout" class="dropdown-item">Logout</a>
-              <% } else { %>
-                <a href="/login" class="dropdown-item">Sign In</a>
-                <a href="/signup" class="dropdown-item">Register</a>
-                <% } %>
-          </div>
+          <% if (locals.user) { %>
+            <a href="/userProfile" class="action-icon d-flex align-items-center">
+              <i class="fas fa-user-circle"></i>
+              <span class="user-name-text">
+                <%= user.name %>
+              </span>
+            </a>
+            <% } else { %>
+              <a href="/login" class="action-icon">
+                <i class="fas fa-user-circle"></i>
+              </a>
+              <% } %>
+                <div class="dropdown-menu">
+                  <% if (locals.user) { %>
+                    <a href="/userProfile" class="dropdown-item">Profile</a>
+                    <a href="/logout" class="dropdown-item">Logout</a>
+                    <% } else { %>
+                      <a href="/login" class="dropdown-item">Sign In</a>
+                      <a href="/signup" class="dropdown-item">Register</a>
+                      <% } %>
+                </div>
         </div>
 
         <button class="mobile-toggle" onclick="toggleMobileMenu()">

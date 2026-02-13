@@ -117,6 +117,23 @@
             border-color: #cbd5e1;
         }
 
+        .btn-cancel {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #fffafa;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+            transition: all 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .btn-cancel:hover {
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
         /* Pagination */
         .pagination-wrap {
             margin-top: 2rem;
@@ -227,6 +244,11 @@
                                     <a href="/admin/orders/<%= order._id %>" class="btn-view">
                                         Details
                                     </a>
+                                    <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) { %>
+                                        <button onclick="cancelOrder('<%= order._id %>')" class="btn-cancel">
+                                            Cancel
+                                        </button>
+                                        <% } %>
                                 </td>
                             </tr>
                             <% }); %>
@@ -342,6 +364,55 @@
                 });
             });
         });
+
+        async function cancelOrder(orderId) {
+            const { value: reason } = await Swal.fire({
+                title: 'Cancel Order?',
+                input: 'textarea',
+                inputLabel: 'Reason for cancellation',
+                inputPlaceholder: 'Enter reason here...',
+                inputAttributes: {
+                    'aria-label': 'Enter reason here'
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Confirm Cancellation',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to provide a reason!'
+                    }
+                }
+            });
+
+            if (reason) {
+                try {
+                    const response = await fetch('/admin/orders/cancel-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId, reason })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Cancelled!',
+                            text: 'Order has been cancelled.',
+                            icon: 'success',
+                            confirmButtonColor: '#1e293b'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Network error occurred', 'error');
+                }
+            }
+        }
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

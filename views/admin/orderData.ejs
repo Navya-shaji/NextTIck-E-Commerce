@@ -38,26 +38,32 @@
                         </p>
                         <p><strong>Total Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %>
                         </p>
-                        <% if (order.discount > 0) { %>
-                            <p>Discount Applied: ₹<%= order.discount.toFixed(2) %></p>
-                        <% } %>
-                        
-                        <% if (order.couponApplied) { %>
-                            <p>Coupon Applied: Yes</p>
-                            <% if (order.couponDetails) { %>
-                                <p>Coupon Code: <%= order.couponCode %></p>
-                                <p>Coupon Discount: ₹<%= order.couponDetails.discount.toFixed(2) %></p>
+                        <% if (order.discount> 0) { %>
+                            <p>Discount Applied: ₹<%= order.discount.toFixed(2) %>
+                            </p>
                             <% } %>
-                        <% } %>
-                        
-                        <% if (order.offerApplied) { %>
-                            <p>Offer Applied: Yes</p>
-                            <% if (order.offerDetails) { %>
-                                <p>Offer Details: <%= order.offerDetails.description %></p>
-                                <p>Offer Discount: ₹<%= order.offerDetails.discount.toFixed(2) %></p>
-                            <% } %>
-                        <% } %>
-                        
+
+                                <% if (order.couponApplied) { %>
+                                    <p>Coupon Applied: Yes</p>
+                                    <% if (order.couponDetails) { %>
+                                        <p>Coupon Code: <%= order.couponCode %>
+                                        </p>
+                                        <p>Coupon Discount: ₹<%= order.couponDetails.discount.toFixed(2) %>
+                                        </p>
+                                        <% } %>
+                                            <% } %>
+
+                                                <% if (order.offerApplied) { %>
+                                                    <p>Offer Applied: Yes</p>
+                                                    <% if (order.offerDetails) { %>
+                                                        <p>Offer Details: <%= order.offerDetails.description %>
+                                                        </p>
+                                                        <p>Offer Discount: ₹<%= order.offerDetails.discount.toFixed(2)
+                                                                %>
+                                                        </p>
+                                                        <% } %>
+                                                            <% } %>
+
                     </div>
                     <div class="col-md-6">
                         <h4 style="font-family:math;  margin-top: 15px; font-size: 35px ; color:rgb(39, 72, 16)">
@@ -87,11 +93,12 @@
                             <thead>
                                 <tr>
                                     <th>image</th>
-
                                     <th>Product</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Subtotal</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,6 +123,27 @@
                                         <td>₹<%= item.price.toFixed(2) %>
                                         </td>
                                         <td>₹<%= (item.quantity * item.price).toFixed(2) %>
+                                        </td>
+                                        <td>
+                                            <span class="badge <%= 
+                                                item.status === 'Cancelled' ? 'bg-danger' : 
+                                                item.status === 'Return Request' ? 'bg-warning' : 
+                                                item.status === 'Returned' ? 'bg-success' : 
+                                                'bg-info' %> text-white">
+                                                <%= item.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm"
+                                                onchange="updateItemStatus('<%= order._id %>', '<%= item.product._id %>', this.value)">
+                                                <option value="" disabled selected>Update</option>
+                                                <option value="Processing">Processing</option>
+                                                <option value="Shipped">Shipped</option>
+                                                <option value="Delivered">Delivered</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                                <option value="Return Request">Return Request</option>
+                                                <option value="Returned">Returned</option>
+                                            </select>
                                         </td>
                                     </tr>
                                     <% }); %>
@@ -203,6 +231,37 @@
                 }
             });
         });
+
+        async function updateItemStatus(orderId, productId, status) {
+            try {
+                const result = await Swal.fire({
+                    title: 'Update Item Status?',
+                    text: `Are you sure you want to change this item's status to ${status}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, update it!'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch('/admin/orders/update-item-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId, productId, status })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Updated!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to update status', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating item status:', error);
+                Swal.fire('Error', 'An internal error occurred', 'error');
+            }
+        }
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

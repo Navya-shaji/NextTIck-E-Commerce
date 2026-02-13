@@ -303,6 +303,36 @@
                           </div>
                           <% } %>
                 </div>
+
+                <!-- Address Pagination -->
+                <% if (typeof pagination !=='undefined' && pagination.totalAddressPages> 1) { %>
+                  <nav aria-label="Address pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                      <li class="page-item <%= pagination.currentAddressPage === 1 ? 'disabled' : '' %>">
+                        <a class="page-link"
+                          href="?addressPage=<%= pagination.currentAddressPage - 1 %>&tab=v-pills-address-tab"
+                          aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                        </a>
+                      </li>
+                      <% for(let i=1; i <=pagination.totalAddressPages; i++) { %>
+                        <li class="page-item <%= pagination.currentAddressPage === i ? 'active' : '' %>">
+                          <a class="page-link" href="?addressPage=<%= i %>&tab=v-pills-address-tab">
+                            <%= i %>
+                          </a>
+                        </li>
+                        <% } %>
+                          <li
+                            class="page-item <%= pagination.currentAddressPage === pagination.totalAddressPages ? 'disabled' : '' %>">
+                            <a class="page-link"
+                              href="?addressPage=<%= pagination.currentAddressPage + 1 %>&tab=v-pills-address-tab"
+                              aria-label="Next">
+                              <span aria-hidden="true">&raquo;</span>
+                            </a>
+                          </li>
+                    </ul>
+                  </nav>
+                  <% } %>
               </div>
 
               <!-- Wallet Tab -->

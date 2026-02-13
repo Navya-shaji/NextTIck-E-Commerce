@@ -5,7 +5,7 @@ const addressSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true, 
+        required: true,
     },
     address: [
         {
@@ -14,11 +14,11 @@ const addressSchema = new Schema({
             },
             name: {
                 type: String,
-                required: true, 
+                required: true,
             },
             city: {
-                type: String, 
-                required: true, 
+                type: String,
+                required: true,
             },
             landMark: {
                 type: String,
@@ -26,19 +26,19 @@ const addressSchema = new Schema({
             },
             state: {
                 type: String,
-                required: true, 
+                required: true,
             },
             pincode: {
                 type: String,
-                required: true, 
+                required: true,
             },
             phone: {
-                type: String,   
-                required: true, 
+                type: String,
+                required: true,
             },
             altPhone: {
                 type: String,
-                required: true, 
+                required: false,
             },
         },
     ],

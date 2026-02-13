@@ -368,9 +368,15 @@
             <div class="product-card" data-category="all">
               <a href="/productDetails?id=<%= product._id %>" style="text-decoration: none;">
                 <div class="product-image-wrapper">
-                  <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
-                    class="product-img" onerror="this.src='/images/placeholder-watch.jpg'"> <!-- Fallback image -->
-                  <div class="product-overlay"></div>
+                  <% if (product.productImage && product.productImage[0] && product.productImage[0] !=='undefined' ) {
+                    %>
+                    <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
+                      class="product-img" onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'">
+                    <% } else { %>
+                      <img src="/images/pexels-brett-sayles-1186851.jpg" alt="<%= product.productName %>"
+                        class="product-img">
+                      <% } %>
+                        <div class="product-overlay"></div>
                 </div>
                 <div class="product-info">
                   <% if(product.category) { %>

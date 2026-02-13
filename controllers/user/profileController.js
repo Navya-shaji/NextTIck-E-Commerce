@@ -16,32 +16,32 @@ const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile-images'
 
 // Create upload directory if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
-  }
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
 const fileFilter = (req, file, cb) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Only image files are allowed!'), false);
-  }
-  cb(null, true);
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
 };
 
 const uploadMiddleware = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: fileFilter
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: fileFilter
 }).single('profileImage');
 
 function generateOtp() {
@@ -100,7 +100,7 @@ const forgotEmailValid = async (req, res) => {
                 req.session.userOtp = otp;
                 req.session.email = email;
                 res.render("forgotPass-otp");
-             
+
             } else {
                 res.json({ success: false, message: "Failed to send OTP. Please try again" });
             }
@@ -141,10 +141,10 @@ const resendOtp = async (req, res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
         const email = req.session.email;
-    
+
         const emailSent = await sendVerificationEmail(email, otp);
         if (emailSent) {
-          
+
             res.status(200).json({ success: true, message: "Resend OTP Successful" });
         } else {
             throw new Error("Failed to send email");
@@ -191,8 +191,10 @@ const userProfile = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const walletPage = parseInt(req.query.walletPage) || 1;
-        const activeTab = req.query.tab || 'v-pills-profile-tab'; // Default to profile tab
-        const itemsPerPage = 10;
+        const addressPage = parseInt(req.query.addressPage) || 1;
+        const activeTab = req.query.tab || 'v-pills-profile-tab';
+        const itemsPerPage = 6;
+        const addressPerPage = 4;
 
         // Calculate pagination for orders
         const totalOrders = await Order.countDocuments({ userId: user._id });
@@ -202,8 +204,17 @@ const userProfile = async (req, res) => {
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
-        const address = await Address.findOne({ userId: user._id });
+        const addressDoc = await Address.findOne({ userId: user._id });
         const userWallet = await Wallet.findOne({ userId: user._id });
+
+        // Calculate pagination for addresses
+        let paginatedAddresses = [];
+        let totalAddressPages = 0;
+        if (addressDoc && addressDoc.address) {
+            const startIndex = (addressPage - 1) * addressPerPage;
+            paginatedAddresses = addressDoc.address.slice(startIndex, startIndex + addressPerPage);
+            totalAddressPages = Math.ceil(addressDoc.address.length / addressPerPage);
+        }
 
         // Calculate pagination for wallet transactions
         let walletTransactions = [];
@@ -219,7 +230,10 @@ const userProfile = async (req, res) => {
         res.render("profile", {
             user: user,
             orders: orders,
-            userAddress: address || {},
+            userAddress: {
+                ...addressDoc?._doc || {},
+                address: paginatedAddresses
+            },
             wallet: {
                 ...userWallet?._doc || { totalBalance: 0 },
                 transactions: walletTransactions
@@ -228,7 +242,9 @@ const userProfile = async (req, res) => {
                 currentPage: page,
                 totalPages: totalPages,
                 currentWalletPage: walletPage,
-                totalWalletPages: totalWalletPages
+                totalWalletPages: totalWalletPages,
+                currentAddressPage: addressPage,
+                totalAddressPages: totalAddressPages
             },
             activeTab: activeTab
         });
@@ -239,149 +255,149 @@ const userProfile = async (req, res) => {
 };
 
 const updateProfileImage = async (req, res) => {
-  uploadMiddleware(req, res, async function(err) {
-    try {
-      // Handle multer errors
-      if (err instanceof multer.MulterError) {
-        console.error('Multer error:', err);
-        return res.status(400).json({ 
-          success: false, 
-          message: 'File upload error: ' + err.message 
-        });
-      } else if (err) {
-        console.error('Upload error:', err);
-        return res.status(400).json({ 
-          success: false, 
-          message: err.message || 'Error uploading file' 
-        });
-      }
-
-      // Check if file exists
-      if (!req.file) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'No file uploaded' 
-        });
-      }
-
-      // Check authentication
-      if (!req.session?.user?._id) {
-        return res.status(401).json({
-          success: false,
-          message: 'User not authenticated'
-        });
-      }
-
-      // Find and update user
-      const user = await User.findById(req.session.user._id);
-      if (!user) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'User not found' 
-        });
-      }
-
-      // Delete old profile image if it exists and is not the default
-      if (user.profileImage && !user.profileImage.includes('default')) {
-        const oldImagePath = path.join(uploadDir, user.profileImage);
+    uploadMiddleware(req, res, async function (err) {
         try {
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
+            // Handle multer errors
+            if (err instanceof multer.MulterError) {
+                console.error('Multer error:', err);
+                return res.status(400).json({
+                    success: false,
+                    message: 'File upload error: ' + err.message
+                });
+            } else if (err) {
+                console.error('Upload error:', err);
+                return res.status(400).json({
+                    success: false,
+                    message: err.message || 'Error uploading file'
+                });
+            }
+
+            // Check if file exists
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'No file uploaded'
+                });
+            }
+
+            // Check authentication
+            if (!req.session?.user?._id) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+            }
+
+            // Find and update user
+            const user = await User.findById(req.session.user._id);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+
+            // Delete old profile image if it exists and is not the default
+            if (user.profileImage && !user.profileImage.includes('default')) {
+                const oldImagePath = path.join(uploadDir, user.profileImage);
+                try {
+                    if (fs.existsSync(oldImagePath)) {
+                        fs.unlinkSync(oldImagePath);
+                    }
+                } catch (error) {
+                    console.error('Error deleting old image:', error);
+                }
+            }
+
+            // Update user profile with new image
+            user.profileImage = req.file.filename;
+            await user.save();
+
+
+            // Update the session user data
+            req.session.user = user;
+
+            res.json({
+                success: true,
+                message: 'Profile image updated successfully',
+                imageUrl: `/uploads/profile-images/${req.file.filename}`
+            });
+
         } catch (error) {
-          console.error('Error deleting old image:', error);
+            console.error('Server error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message
+            });
         }
-      }
-
-      // Update user profile with new image
-      user.profileImage = req.file.filename;
-      await user.save();
-
-   
-      // Update the session user data
-      req.session.user = user;
-
-      res.json({ 
-        success: true, 
-        message: 'Profile image updated successfully',
-        imageUrl: `/uploads/profile-images/${req.file.filename}`
-      });
-
-    } catch (error) {
-      console.error('Server error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Server error',
-        error: error.message 
-      });
-    }
-  });
+    });
 };
 
 const deleteProfileImage = async (req, res) => {
-  try {
-    const userId = req.session.user._id;
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
-      });
-    }
-
-    // Check if user has a profile image
-    if (!user.profileImage || user.profileImage === 'default-profile.jpg') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'No profile image to delete' 
-      });
-    }
-
-    // Get the full path to the image
-    const imagePath = path.join(__dirname, '../../public/uploads/profile-images', user.profileImage);
-
-    // Check if file exists before attempting to delete
-    if (fs.existsSync(imagePath)) {
-      try {
-        fs.unlinkSync(imagePath);
-      } catch (error) {
-        console.error('Error deleting file:', error);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Error deleting image file' 
-        });
-      }
-    }
-
-    // Update user document with default image
     try {
-      user.profileImage = 'default-profile.jpg';
-      await user.save();
+        const userId = req.session.user._id;
+        const user = await User.findById(userId);
 
-      // Update session
-      req.session.user = user;
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
-      return res.status(200).json({ 
-        success: true, 
-        message: 'Profile image deleted successfully',
-        defaultImage: '/uploads/profile-images/default-profile.jpg'
-      });
+        // Check if user has a profile image
+        if (!user.profileImage || user.profileImage === 'default-profile.jpg') {
+            return res.status(400).json({
+                success: false,
+                message: 'No profile image to delete'
+            });
+        }
+
+        // Get the full path to the image
+        const imagePath = path.join(__dirname, '../../public/uploads/profile-images', user.profileImage);
+
+        // Check if file exists before attempting to delete
+        if (fs.existsSync(imagePath)) {
+            try {
+                fs.unlinkSync(imagePath);
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error deleting image file'
+                });
+            }
+        }
+
+        // Update user document with default image
+        try {
+            user.profileImage = 'default-profile.jpg';
+            await user.save();
+
+            // Update session
+            req.session.user = user;
+
+            return res.status(200).json({
+                success: true,
+                message: 'Profile image deleted successfully',
+                defaultImage: '/uploads/profile-images/default-profile.jpg'
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating user profile'
+            });
+        }
     } catch (error) {
-      console.error('Error updating user:', error);
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Error updating user profile' 
-      });
+        console.error('Error in deleteProfileImage:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
     }
-  } catch (error) {
-    console.error('Error in deleteProfileImage:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Internal server error',
-      error: error.message 
-    });
-  }
 };
 
 const changeEmail = async (req, res) => {
@@ -460,7 +476,7 @@ const renderChangePasswordPage = async (req, res) => {
 };
 
 const changePasswordValid = async (req, res) => {
-    try { 
+    try {
         const { email } = req.body;
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -528,53 +544,53 @@ const resetPassword = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  try {
-    const userId = req.session.user._id;
-    const { name, phone } = req.body;
+    try {
+        const userId = req.session.user._id;
+        const { name, phone } = req.body;
 
-    // Validate the input
-    if (!name || name.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name is required'
-      });
+        // Validate the input
+        if (!name || name.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name is required'
+            });
+        }
+
+        // Update user profile
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Update user fields
+        user.name = name.trim();
+        if (phone) {
+            user.phone = phone.trim();
+        }
+
+        await user.save();
+
+        // Update session data
+        req.session.user = user;
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: {
+                name: user.name,
+                phone: user.phone
+            }
+        });
+    } catch (error) {
+        console.error('Profile update error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile'
+        });
     }
-
-    // Update user profile
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Update user fields
-    user.name = name.trim();
-    if (phone) {
-      user.phone = phone.trim();
-    }
-
-    await user.save();
-
-    // Update session data
-    req.session.user = user;
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      user: {
-        name: user.name,
-        phone: user.phone
-      }
-    });
-  } catch (error) {
-    console.error('Profile update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating profile'
-    });
-  }
 };
 
 const getAddressPage = async (req, res) => {
@@ -834,89 +850,89 @@ const getWalletForUser = async (userId) => {
 };
 
 async function changePasswordModal(req, res) {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.session.user_id;
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.session.user_id;
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.json({ success: false, message: 'User not found' });
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordMatch) {
+            return res.json({ success: false, message: 'Current password is incorrect' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await securePassword(newPassword);
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error in changePasswordModal:', error);
+        return res.json({ success: false, message: 'Internal server error' });
     }
-
-    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!passwordMatch) {
-      return res.json({ success: false, message: 'Current password is incorrect' });
-    }
-
-    // Hash the new password
-    const hashedPassword = await securePassword(newPassword);
-    user.password = hashedPassword;
-    await user.save();
-
-    return res.json({ success: true, message: 'Password changed successfully' });
-  } catch (error) {
-    console.error('Error in changePasswordModal:', error);
-    return res.json({ success: false, message: 'Internal server error' });
-  }
 }
 
 async function changePasswordDirect(req, res) {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.session.user._id;
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.session.user._id;
 
-    // Input validation
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required'
-      });
+        // Input validation
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password and new password are required'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be at least 6 characters long'
+            });
+        }
+
+        // Find user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordMatch) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await securePassword(newPassword);
+
+        // Update password
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+        console.error('Error in changePasswordDirect:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters long'
-      });
-    }
-
-    // Find user
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Verify current password
-    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!passwordMatch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = await securePassword(newPassword);
-    
-    // Update password
-    user.password = hashedPassword;
-    await user.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Password changed successfully'
-    });
-
-  } catch (error) {
-    console.error('Error in changePasswordDirect:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
 }
 
 module.exports = {

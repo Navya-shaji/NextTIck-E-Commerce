@@ -328,7 +328,8 @@
                                         <div class="cart-item-row" id="item-<%= item.productId._id %>">
                                             <div class="cart-item-info">
                                                 <img src="/uploads/re-image/<%= item.productId.productImage[0] %>"
-                                                    alt="<%= item.productId.productName %>" class="cart-item-image">
+                                                    alt="<%= item.productId.productName %>" class="cart-item-image"
+                                                    onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'">
                                                 <div class="cart-item-details">
                                                     <h3>
                                                         <%= item.productId.productName %>
@@ -338,7 +339,8 @@
                                                     <% if (item.availableStock < 5) { %>
                                                         <span
                                                             style="color: #c5a059; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Only
-                                                            <%= item.availableStock %> Left</span>
+                                                            <%= item.availableStock %> Left
+                                                        </span>
                                                         <% } %>
                                                 </div>
                                             </div>

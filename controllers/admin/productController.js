@@ -96,6 +96,7 @@ const addProducts = async (req, res) => {
             quantity: parseInt(products.quantity),
             productImage: images,
             status: "Available",
+            isReturnable: products.isReturnable === 'true' || products.isReturnable === true
         });
 
         const savedProduct = await newProduct.save();
@@ -418,6 +419,7 @@ const updateProduct = async (req, res) => {
             quantity: data.quantity,
             flavor: data.flavor,
             size: data.size,
+            isReturnable: data.isReturnable === 'true' || data.isReturnable === true
         };
 
         if (image.length > 0) {

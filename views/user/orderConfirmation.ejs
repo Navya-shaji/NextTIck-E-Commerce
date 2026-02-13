@@ -1,96 +1,186 @@
+<%- include("../../views/partials/user/header.ejs") %>
 
-<style>
+  <style>
+    :root {
+      --primary-color: #000000;
+      --secondary-color: #28a745;
+      --text-muted: #6c757d;
+      --bg-light: #f8f9fa;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+    }
 
-/* Navbar Styles */
-/* Styling for H1 and P */
-.main h1, 
-.main p {
-    text-align: center; /* Center align the text */
-    color: #28a745; /* Green color */
-}
+    body {
+      background-color: var(--bg-light);
+      font-family: 'Outfit', sans-serif;
+    }
 
-/* Additional Styling for H1 */
-.main h1 {
-    font-size: 2.8rem; /* Slightly larger font size */
-    font-weight: bold;
-    margin-bottom: 20px;
-}
+    .success-container {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
 
-/* Additional Styling for P */
-.main p {
-    font-size: 1.5rem; /* Larger font size for better readability */
-    font-weight: 500;
-    margin-bottom: 30px;
-    line-height: 1.6;
-}
-/* Navbar Brand Styling */
-.navbar-brand {
-    font-size: 2rem; /* Adjust the font size */
-    font-weight: bold; /* Make the text bold */
-    color: #010802; /* Green color for brand */
-    text-decoration: none; /* Remove underline */
-    transition: color 0.3s ease, transform 0.3s ease; /* Smooth transition */
-}
+    .success-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 60px 40px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+      animation: fadeInUp 0.8s ease-out;
+    }
 
-.navbar-brand:hover {
-    /* color: #0b0b0b; Darker green on hover */
-    transform: scale(1.1); /* Slightly enlarge on hover */
-    text-decoration: none; /* Ensure no underline on hover */
-}
-/* Container for Centering */
-.continue-shopping {
-    display: flex; /* Flexbox for alignment */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    font-size: 1.2rem; /* Adjust font size */
-    font-weight: bold; /* Make text bold */
-    color: white; /* Text color */
-    background-color: #28a745; /* Green background */
-    padding: 10px 20px; /* Padding for button */
-    border-radius: 25px; /* Rounded edges */
-    text-decoration: none; /* Remove underline */
-    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth hover effects */
-    cursor: pointer; /* Change cursor to pointer */
-    width: max-content; /* Adjust width to content */
-    margin: 20px auto; /* Center button within container */
-}
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
 
-/* Icon Styling */
-.continue-shopping i {
-    margin-right: 10px; /* Space between icon and text */
-    font-size: 1.5rem; /* Adjust icon size */
-}
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-/* Hover Effect */
-.continue-shopping:hover {
-    background-color: #1e7e34; /* Darker green on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
+    .checkmark-wrapper {
+      width: 100px;
+      height: 100px;
+      background: #e8f5e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      position: relative;
+    }
 
+    .checkmark-wrapper i {
+      font-size: 50px;
+      color: var(--secondary-color);
+      animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 
-</style>
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
 
-    <a class="navbar-brand" href="/">NextTick</a>
-  
-  </div>
-</nav>
+      to {
+        transform: scale(1);
+      }
+    }
 
-<main class="main" style="padding-top: 200px;">
-  <section class="mt-50 mb-50">
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="text-center">
-            <h1 class="mb-4">Thank You for Your Order!</h1>
-            <p class="mb-4">Your order has been placed successfully.</p>
-            <a href="/shop" class="btn btn-success">
-              <div class="continue-shopping">
-                <i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping
-              </div>
-              </a>
-          </div>
-        </div>
+    .success-title {
+      font-weight: 700;
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .success-message {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 40px;
+      max-width: 450px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-premium {
+      padding: 14px 30px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .btn-view-orders {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-view-orders:hover {
+      background: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      color: white;
+    }
+
+    .btn-shop {
+      background: white;
+      color: var(--primary-color);
+      border: 1px solid #e0e0e0;
+    }
+
+    .btn-shop:hover {
+      background: #f8f9fa;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      color: var(--primary-color);
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--secondary-color);
+      border-radius: 2px;
+      opacity: 0;
+    }
+  </style>
+
+  <div class="success-container">
+    <div class="success-card">
+      <div class="checkmark-wrapper">
+        <i class="fas fa-check-circle"></i>
+      </div>
+
+      <h1 class="success-title">Order Confirmed!</h1>
+      <p class="success-message">
+        Thank you for choosing NextTick. Your order has been placed successfully and is being processed.
+        <% if (locals.orderId) { %>
+          <br><span class="badge bg-light text-dark mt-3 p-2 border">Order ID: #<%= orderId %></span>
+          <% } %>
+            <br>You will receive an email confirmation shortly.
+      </p>
+
+      <div class="order-actions">
+        <a href="/history" class="btn-premium btn-view-orders">
+          <i class="fas fa-shopping-bag"></i> View My Orders
+        </a>
+        <a href="/shop" class="btn-premium btn-shop">
+          <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+      </div>
+
+      <div class="mt-5 pt-4 border-top">
+        <p class="small text-muted mb-0">Need help with your order? <a href="/contact"
+            class="text-dark text-decoration-none fw-bold">Contact Support</a></p>
       </div>
     </div>
-  </section>
-</main>
+  </div>
+
+  <script>
+    // Subtle confetti animation logic could go here
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Order success page loaded');
+    });
+  </script>
+
+  <%- include("../../views/partials/user/footer.ejs") %>

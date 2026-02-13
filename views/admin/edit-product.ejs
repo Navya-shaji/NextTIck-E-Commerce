@@ -265,6 +265,16 @@
                                         <input type="number" class="form-control" name="quantity"
                                             value="<%= product.quantity %>" required>
                                     </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label class="form-label">Return Policy</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="isReturnable"
+                                                id="isReturnable" value="true" <%=product.isReturnable ? 'checked' : ''
+                                                %>>
+                                            <label class="form-check-label" for="isReturnable">Product is Returnable (30
+                                                Days)</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

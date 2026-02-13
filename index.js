@@ -7,7 +7,9 @@ const passport = require("./config/passport");
 const db = require("./config/db");
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
-const nocache=require("nocache")
+const nocache = require("nocache")
+const Cart = require("./models/cartSchema");
+
 db();
 
 app.use(express.json()); //middleware
@@ -18,7 +20,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, 
+    cookie: { secure: false },
   })
 );
 
@@ -30,7 +32,24 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set("view engine", "ejs"); 
+app.use(async (req, res, next) => {
+  try {
+    const userId = req.session.user?._id || req.session.passport?.user;
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      res.locals.cartCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
+    } else {
+      res.locals.cartCount = 0;
+    }
+    next();
+  } catch (error) {
+    console.error("Error in cart count middleware:", error);
+    res.locals.cartCount = 0;
+    next();
+  }
+});
+
+app.set("view engine", "ejs");
 
 
 app.use(express.static(path.join(__dirname, "public")));

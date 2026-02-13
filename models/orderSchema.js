@@ -59,6 +59,18 @@ const orderSchema = new Schema({
         ref: "Address",
         required: true
     },
+    shippingAddress: {
+        type: String,
+        required: false
+    },
+    paymentMethod: {
+        type: String,
+        required: false
+    },
+    deliveryCharge: {
+        type: Number,
+        default: 0
+    },
     invoiceDate: {
         type: Date
     },

@@ -105,7 +105,7 @@
                 right: 0;
                 background-color: #fff;
                 min-width: 180px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
                 border: 1px solid var(--border-color);
                 z-index: 100;
             }
@@ -258,9 +258,10 @@
                                 <div class="wishlist-item-info">
                                     <% if (product && product.productImage && product.productImage.length> 0) { %>
                                         <img src="/uploads/re-image/<%= product.productImage[0] %>"
-                                            alt="<%= product.productName %>" class="wishlist-item-image" />
+                                            alt="<%= product.productName %>" class="wishlist-item-image"
+                                            onerror="this.src='/images/pexels-brett-sayles-1186851.jpg'" />
                                         <% } else { %>
-                                            <img src="/uploads/re-image/default.png" alt="No Image"
+                                            <img src="/images/pexels-brett-sayles-1186851.jpg" alt="No Image"
                                                 class="wishlist-item-image" />
                                             <% } %>
                                                 <div class="wishlist-item-details">
@@ -294,14 +295,15 @@
                                         </button>
                                         <div class="dropdown-content">
                                             <% if (product && product.quantity> 0) { %>
-                                                <button class="dropdown-item" onclick="addToCartHandler(event, '<%= product._id %>')">
+                                                <button class="dropdown-item"
+                                                    onclick="addToCartHandler(event, '<%= product._id.toString() %>')">
                                                     <i class="fas fa-shopping-bag"></i> Add to Bag
                                                 </button>
                                                 <% } else { %>
                                                     <button class="dropdown-item" disabled>Out of Stock</button>
                                                     <% } %>
                                                         <button class="dropdown-item remove"
-                                                            onclick="removeFromWishlist('<%= product ? product._id : '' %>')">
+                                                            onclick="removeFromWishlist('<%= product ? product._id.toString() : '' %>')">
                                                             <i class="fas fa-trash-alt"></i> Remove
                                                         </button>
                                         </div>
