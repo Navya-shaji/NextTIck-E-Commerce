@@ -1,53 +1,67 @@
-<%- include("../../views/partials/user/header") %>
+<%- include("../../views/partials/user/header.ejs") %>
 
-<!-- <head> -->
-    <!-- <link rel="stylesheet" href="/styles/change-email.css">
-</head> -->
+    <head>
+        <link rel="stylesheet" href="/styles/profile.css">
+    </head>
 
-<body>
-    <section class="content-main d-flex justify-content-center align-items-center" style="min-height: 100vh; background-color: #ffff;">
-        <div class="card card-login shadow-lg p-4" style="max-width: 400px; border-radius: 15px;">
-            <div class="card-body">
-                <h4 class="card-title mb-3 text-center">Enter Current Email</h4>
-                <form method="post" action="/change-email" onsubmit="return validateLoginForm()">
-                    <div class="form-group mb-4">
-                        <label for="email" class="form-label text-secondary">Email Address</label>
-                        <input class="form-control" name="email" placeholder="Email" type="text" id="email">
-                        <div class="error-message" id="email-error"></div>
-                    </div>
-                    <div class="mb-4">
-     
-                        <button type="submit" class="btn btn-primary w-100" style="border-radius: 8px; font-weight: bold;">
-                            Verify Email
-                        </button>
-                    </div>
-                </form>
+    <main class="main">
+        <div class="breadcrumb-wrap">
+            <div class="profile-container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/userProfile">My Account</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Change Email</li>
+                    </ol>
+                </nav>
             </div>
         </div>
-    </section>
 
-    <script>
-        function validateLoginForm() {
-            const emailInput = document.getElementById('email');
-            const emailError = document.getElementById('email-error');
-            const emailValue = emailInput.value.trim();
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        <div class="profile-container">
+            <div class="premium-form-card">
+                <h4 class="card-title">Update Email</h4>
+                <p class="text-muted mb-4">Verification is required to change your primary email address.</p>
 
-            if (emailValue === '') {
-                emailError.textContent = 'Please enter your email.';
-                emailInput.classList.add('is-invalid');
-                return false;
-            } else if (!emailValue.match(emailPattern)) {
-                emailError.textContent = 'Please enter a valid email address.';
-                emailInput.classList.add('is-invalid');
-                return false;
-            } else {
+                <form method="POST" action="/change-email" id="changeEmailForm">
+                    <div class="form-group">
+                        <label for="email" class="info-label">Current Email Address</label>
+                        <input class="form-control" name="email" id="email" placeholder="Enter current email"
+                            type="email" required>
+                        <small id="emailError" class="text-danger"></small>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn-gold">Verify Current Email</button>
+                    </div>
+
+                    <% if (locals.message && message.length> 0) { %>
+                        <div class="alert alert-danger mt-4 text-center">
+                            <%= message %>
+                        </div>
+                        <% } %>
+                </form>
+
+                <div class="mt-5 pt-3 border-top">
+                    <a href="/userProfile" class="link-gold">Back to Profile</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include("../../views/partials/user/footer.ejs") %>
+
+        <script>
+            document.getElementById('changeEmailForm').addEventListener('submit', function (e) {
+                const email = document.getElementById('email').value.trim();
+                const emailError = document.getElementById('emailError');
                 emailError.textContent = '';
-                emailInput.classList.remove('is-invalid');
-                return true;
-            }
-        }
-    </script>
-</body>
 
-<%- include("../../views/partials/user/footer") %>
+                if (!email) {
+                    emailError.textContent = 'Email is required.';
+                    e.preventDefault();
+                } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                    emailError.textContent = 'Please enter a valid email address.';
+                    e.preventDefault();
+                }
+            });
+        </script>

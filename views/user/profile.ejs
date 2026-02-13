@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="/styles/profile.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.14/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   </head>
 
   <main class="main">
@@ -26,7 +26,8 @@
             <div class="user-avatar-section">
               <div class="avatar-wrapper">
                 <% const defaultAvatar="https://cdn-icons-png.flaticon.com/512/4128/4128176.png" ; const
-                  avatarUrl=user.profileImage ? `/uploads/profile-images/${user.profileImage}` : defaultAvatar; %>
+                  avatarUrl=user.profileImage && user.profileImage !=='default-profile.jpg' ?
+                  `/uploads/profile-images/${user.profileImage}` : defaultAvatar; %>
                   <img src="<%= avatarUrl %>" alt="User Avatar" class="avatar-image" id="profileImage"
                     onerror="this.src='<%= defaultAvatar %>'">
 
@@ -104,7 +105,7 @@
                       <span>
                         <%= user.email %>
                       </span>
-                      <span class="text-muted" style="font-size: 0.7rem;">Primary</span>
+                      <small class="text-muted">Primary</small>
                     </div>
                   </div>
                   <div class="info-item">
@@ -152,10 +153,9 @@
                             </td>
                             <td>
                               <span class="badge-premium <%= 
-                                                            order.status.toLowerCase() === 'pending' ? 'badge-pending' : 
-                                                            order.status.toLowerCase() === 'delivered' ? 'badge-success' : 
-                                                            'badge-danger' 
-                                                        %>">
+                                  order.status.toLowerCase() === 'pending' ? 'badge-pending' : 
+                                  order.status.toLowerCase() === 'delivered' ? 'badge-success' : 
+                                  'badge-danger' %>">
                                 <%= order.status %>
                               </span>
                             </td>
@@ -163,24 +163,52 @@
                             </td>
                             <td>
                               <span
-                                class="text-<%= order.paymentStatus.toLowerCase() === 'paid' ? 'success' : 'warning' %>"
-                                style="font-size: 0.8rem;">
+                                class="<%= order.paymentStatus.toLowerCase() === 'paid' ? 'text-success' : 'text-warning' %>">
                                 <%= order.paymentStatus %>
                               </span>
                             </td>
                             <td>
-                              <div class="d-flex gap-2">
-                                <a href="/orders/view/<%= order._id %>" class="btn-outline-gold btn-sm"><i
-                                    class="fas fa-eye"></i></a>
-                                <% if (order.status==='Pending' ) { %>
-                                  <button onclick="cancelOrder('<%= order._id %>')"
-                                    class="btn-outline-gold btn-sm text-danger border-danger"><i
-                                      class="fas fa-times"></i></button>
-                                  <% } %>
-                                    <% if (order.paymentStatus==='Pending' ) { %>
-                                      <button onclick="retryPayment('<%= order._id %>')" class="btn-gold btn-sm"><i
-                                          class="fas fa-redo"></i></button>
-                                      <% } %>
+                              <div class="dropdown">
+                                <button class="btn-outline-gold dropdown-toggle px-3 py-2" type="button"
+                                  id="orderAction<%= order._id %>" data-bs-toggle="dropdown" aria-expanded="false"
+                                  style="font-size: 0.8rem;">
+                                  Action
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0"
+                                  aria-labelledby="orderAction<%= order._id %>">
+                                  <li>
+                                    <a class="dropdown-item py-2" href="/orders/view/<%= order._id %>">
+                                      <i class="fas fa-eye me-2 text-primary"></i> View Details
+                                    </a>
+                                  </li>
+
+                                  <% if (order.status==='Pending' ) { %>
+                                    <li>
+                                      <button class="dropdown-item py-2 text-danger"
+                                        onclick="cancelOrder('<%= order._id %>')">
+                                        <i class="fas fa-times me-2"></i> Cancel Order
+                                      </button>
+                                    </li>
+                                    <% } %>
+
+                                      <% if (order.paymentStatus==='Pending' && order.status !=='Cancelled' ) { %>
+                                        <li>
+                                          <button class="dropdown-item py-2 text-success"
+                                            onclick="retryPayment('<%= order._id %>')">
+                                            <i class="fas fa-redo me-2"></i> Retry Payment
+                                          </button>
+                                        </li>
+                                        <% } %>
+
+                                          <% if (order.status==='Delivered' && !order.returnedByUser) { %>
+                                            <li>
+                                              <a class="dropdown-item py-2 text-warning"
+                                                href="/return-reason/<%= order._id %>">
+                                                <i class="fas fa-undo me-2"></i> Return Order
+                                              </a>
+                                            </li>
+                                            <% } %>
+                                </ul>
                               </div>
                             </td>
                           </tr>
@@ -198,10 +226,11 @@
                               <% } %>
                     </tbody>
                   </table>
-                  <!-- Server-side Pagination for Orders -->
+
+                  <!-- Pagination -->
                   <% if (typeof pagination !=='undefined' && pagination.totalPages> 1) { %>
                     <nav aria-label="Orders pagination" class="mt-4">
-                      <ul class="pagination pagination-sm justify-content-center">
+                      <ul class="pagination justify-content-center">
                         <li class="page-item <%= pagination.currentPage === 1 ? 'disabled' : '' %>">
                           <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&tab=v-pills-orders-tab"
                             aria-label="Previous">
@@ -209,161 +238,161 @@
                           </a>
                         </li>
                         <% for(let i=1; i <=pagination.totalPages; i++) { %>
-                          <% if (i===1 || i===pagination.totalPages || (i>= pagination.currentPage - 1 && i <=
-                              pagination.currentPage + 1)) { %>
-                              <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>&tab=v-pills-orders-tab">
-                                  <%= i %>
-                                </a>
-                              </li>
-                              <% } else if (i===pagination.currentPage - 2 || i===pagination.currentPage + 2) { %>
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                                <% } %>
-                                  <% } %>
-                                    <li
-                                      class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
-                                      <a class="page-link"
-                                        href="?page=<%= pagination.currentPage + 1 %>&tab=v-pills-orders-tab"
-                                        aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                      </a>
-                                    </li>
+                          <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>&tab=v-pills-orders-tab">
+                              <%= i %>
+                            </a>
+                          </li>
+                          <% } %>
+                            <li
+                              class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
+                              <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&tab=v-pills-orders-tab"
+                                aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                              </a>
+                            </li>
                       </ul>
                     </nav>
                     <% } %>
                 </div>
+              </div>
 
-                <!-- Address Tab -->
-                <div class="tab-pane fade" id="v-pills-address" role="tabpanel">
-                  <div class="section-title">
-                    <span>Saved Addresses</span>
-                    <a href="/add-address" class="btn-gold">Add New</a>
-                  </div>
-                  <div class="row">
-                    <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
-                      <% userAddress.address.forEach((addr)=> { %>
-                        <div class="col-md-6 mb-4">
-                          <div class="info-item h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                              <span class="badge-premium badge-success" style="font-size: 0.65rem;">
-                                <%= addr.addressType %>
-                              </span>
-                              <div class="gap-2">
-                                <a href="/edit-address/<%= addr.id %>" class="text-primary me-2"><i
-                                    class="fas fa-edit"></i></a>
-                                <a href="/delete-address/<%= addr.id %>" class="text-danger"><i
-                                    class="fas fa-trash-alt"></i></a>
-                              </div>
-                            </div>
-                            <h6 class="mb-1">
-                              <%= addr.name %>
-                            </h6>
-                            <p class="text-muted small mb-1">
-                              <%= addr.city %>, <%= addr.state %>
-                            </p>
-                            <p class="text-muted small mb-1">
-                              <%= addr.landMark %>
-                            </p>
-                            <p class="text-muted small mb-1">PIN: <%= addr.pincode %>
-                            </p>
-                            <p class="text-muted small mb-0">Phone: <%= addr.phone %>
-                            </p>
-                          </div>
-                        </div>
-                        <% }) %>
-                          <% } else { %>
-                            <div class="col-12 text-center py-5">
-                              <p class="text-muted">No addresses saved.</p>
-                            </div>
-                            <% } %>
-                  </div>
+              <!-- Address Tab -->
+              <div class="tab-pane fade" id="v-pills-address" role="tabpanel">
+                <div class="section-title">
+                  <span>Saved Addresses</span>
+                  <a href="/add-address" class="btn-gold">Add New</a>
                 </div>
+                <div class="row">
+                  <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
+                    <% userAddress.address.forEach((addr)=> { %>
+                      <div class="col-md-6 mb-4">
+                        <div class="info-item h-100">
+                          <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="mb-0 user-name" style="font-size: 1.1rem;">
+                              <%= addr.name %>
+                            </h5>
+                            <div class="d-flex gap-2">
+                              <a href="/edit-address/<%= addr.id %>" class="text-primary"><i
+                                  class="fas fa-edit"></i></a>
+                              <a href="/delete-address/<%= addr.id %>" class="text-danger"><i
+                                  class="fas fa-trash-alt"></i></a>
+                            </div>
+                          </div>
 
-                <!-- Wallet Tab -->
-                <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel">
-                  <div class="section-title">Wallet Overview</div>
-                  <div class="wallet-premium-card">
-                    <div class="wallet-label">Available Balance</div>
-                    <h1 class="wallet-amount">₹<%= (wallet.totalBalance || 0).toFixed(2) %>
-                    </h1>
-                  </div>
-
-                  <h5 class="mb-3 font-outfit fw-bold">Recent Transactions</h5>
-                  <div class="table-responsive">
-                    <table class="premium-table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Description</th>
-                          <th>Type</th>
-                          <th>Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody id="walletTableBody">
-                        <% if (wallet && wallet.transactions && wallet.transactions.length> 0) { %>
-                          <% wallet.transactions.forEach(tx=> { %>
-                            <tr>
-                              <td>
-                                <%= new Date(tx.date).toLocaleDateString() %>
-                              </td>
-                              <td class="text-muted small">
-                                <%= tx.description || 'Wallet Tx' %>
-                              </td>
-                              <td>
-                                <span
-                                  class="badge-premium <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'badge-danger' : 'badge-success' %>">
-                                  <%= tx.type %>
-                                </span>
-                              </td>
-                              <td
-                                class="fw-bold <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'text-danger' : 'text-success' %>">
-                                <%= tx.type==='Withdrawal' || tx.type==='Purchase' ? '-' : '+' %>₹<%= tx.amount %>
-                              </td>
-                            </tr>
-                            <% }) %>
-                              <% } else { %>
-                                <tr>
-                                  <td colspan="4" class="text-center py-4 text-muted">No transactions found.</td>
-                                </tr>
-                                <% } %>
-                      </tbody>
-                    </table>
-                    <!-- Wallet History Pagination -->
-                    <% if (typeof pagination !=='undefined' && pagination.totalWalletPages> 1) { %>
-                      <nav aria-label="Wallet pagination" class="mt-4">
-                        <ul class="pagination pagination-sm justify-content-center">
-                          <li class="page-item <%= pagination.currentWalletPage === 1 ? 'disabled' : '' %>">
-                            <a class="page-link"
-                              href="?walletPage=<%= pagination.currentWalletPage - 1 %>&tab=v-pills-wallet-tab"
-                              aria-label="Previous">
-                              <span aria-hidden="true">&laquo;</span>
-                            </a>
-                          </li>
-                          <% for(let i=1; i <=pagination.totalWalletPages; i++) { %>
-                            <li class="page-item <%= pagination.currentWalletPage === i ? 'active' : '' %>">
-                              <a class="page-link" href="?walletPage=<%= i %>&tab=v-pills-wallet-tab">
-                                <%= i %>
-                              </a>
-                            </li>
-                            <% } %>
-                              <li
-                                class="page-item <%= pagination.currentWalletPage === pagination.totalWalletPages ? 'disabled' : '' %>">
-                                <a class="page-link"
-                                  href="?walletPage=<%= pagination.currentWalletPage + 1 %>&tab=v-pills-wallet-tab"
-                                  aria-label="Next">
-                                  <span aria-hidden="true">&raquo;</span>
-                                </a>
-                              </li>
-                        </ul>
-                      </nav>
-                      <% } %>
-                  </div>
-
+                          <p class="mb-2 fw-bold text-dark"><i class="fas fa-map-pin me-2 text-warning"></i>
+                            <%= addr.addressType %>
+                          </p>
+                          <p class="text-muted mb-1">
+                            <%= addr.city %>, <%= addr.state %>
+                          </p>
+                          <p class="text-muted mb-1">
+                            <%= addr.landMark %>
+                          </p>
+                          <p class="text-muted mb-1">PIN: <%= addr.pincode %>
+                          </p>
+                          <p class="text-muted mb-0">Phone: <strong>
+                              <%= addr.phone %>
+                            </strong></p>
+                        </div>
+                      </div>
+                      <% }) %>
+                        <% } else { %>
+                          <div class="col-12 text-center py-5">
+                            <p class="text-muted">No addresses saved.</p>
+                          </div>
+                          <% } %>
                 </div>
               </div>
+
+              <!-- Wallet Tab -->
+              <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel">
+                <div class="section-title">Wallet Overview</div>
+                <div class="wallet-premium-card">
+                  <div class="wallet-label">Available Balance</div>
+                  <h1 class="wallet-amount">₹<%= (wallet.totalBalance || 0).toFixed(2) %>
+                  </h1>
+                </div>
+
+                <h5 class="mb-3" style="font-family: var(--font-heading); color: var(--primary-color);">Recent
+                  Transactions</h5>
+                <div class="table-responsive">
+                  <table class="premium-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody id="walletTableBody">
+                      <% if (wallet && wallet.transactions && wallet.transactions.length> 0) { %>
+                        <% wallet.transactions.forEach(tx=> { %>
+                          <tr>
+                            <td>
+                              <%= new Date(tx.date).toLocaleDateString() %>
+                            </td>
+                            <td class="text-muted">
+                              <%= tx.description || 'Wallet Tx' %>
+                            </td>
+                            <td>
+                              <span
+                                class="badge-premium <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'badge-danger' : 'badge-success' %>">
+                                <%= tx.type %>
+                              </span>
+                            </td>
+                            <td
+                              class="fw-bold <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'text-danger' : 'text-success' %>">
+                              <%= tx.type==='Withdrawal' || tx.type==='Purchase' ? '-' : '+' %>₹<%= tx.amount %>
+                            </td>
+                          </tr>
+                          <% }) %>
+                            <% } else { %>
+                              <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No transactions found.</td>
+                              </tr>
+                              <% } %>
+                    </tbody>
+                  </table>
+
+                  <!-- Wallet Pagination -->
+                  <% if (typeof pagination !=='undefined' && pagination.totalWalletPages> 1) { %>
+                    <nav aria-label="Wallet pagination" class="mt-4">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item <%= pagination.currentWalletPage === 1 ? 'disabled' : '' %>">
+                          <a class="page-link"
+                            href="?walletPage=<%= pagination.currentWalletPage - 1 %>&tab=v-pills-wallet-tab"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                          </a>
+                        </li>
+                        <% for(let i=1; i <=pagination.totalWalletPages; i++) { %>
+                          <li class="page-item <%= pagination.currentWalletPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="?walletPage=<%= i %>&tab=v-pills-wallet-tab">
+                              <%= i %>
+                            </a>
+                          </li>
+                          <% } %>
+                            <li
+                              class="page-item <%= pagination.currentWalletPage === pagination.totalWalletPages ? 'disabled' : '' %>">
+                              <a class="page-link"
+                                href="?walletPage=<%= pagination.currentWalletPage + 1 %>&tab=v-pills-wallet-tab"
+                                aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                              </a>
+                            </li>
+                      </ul>
+                    </nav>
+                    <% } %>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
+      </div>
+    </div>
   </main>
 
   <!-- Modals -->
@@ -581,4 +610,15 @@
           }
         }
       });
+
+      // Make functions globally available
+      window.toggleEdit = toggleEdit;
+      window.saveProfileChanges = saveProfileChanges;
+      window.deleteProfileImage = deleteProfileImage;
+      window.cancelOrder = cancelOrder;
+      window.retryPayment = retryPayment;
+      window.showChangePasswordModal = showChangePasswordModal;
+      window.changePassword = changePassword;
+      window.verifyRazorpayPayment = verifyRazorpayPayment;
+
     </script>

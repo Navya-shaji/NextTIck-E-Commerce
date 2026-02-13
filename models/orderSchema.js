@@ -1,70 +1,83 @@
 
-const mongoose =require("mongoose")
-const {Schema}=mongoose;
-const {v4:uuidv4} = require("uuid");
+const mongoose = require("mongoose")
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require("uuid");
 
-const orderSchema =new Schema({
+const orderSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
         // required: true
     },
-    orderId:{
-        type:String,
-        default:()=>uuidv4(),
-        unique:true
+    orderId: {
+        type: String,
+        default: () => uuidv4(),
+        unique: true
     },
-    orderItems:[{
-        product:{
-            type:Schema.Types.ObjectId,
-            ref:"Product",
-            required:true
+    orderItems: [{
+        product: {
+            type: Schema.Types.ObjectId,
+            ref: "Product",
+            required: true
         },
-        quantity:{
-            type:Number,
-            required:true
+        quantity: {
+            type: Number,
+            required: true
         },
-        price:{
-            type:Number,
-            default:0
+        price: {
+            type: Number,
+            default: 0
+        },
+        status: {
+            type: String,
+            default: "Pending",
+            enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"]
+        },
+        cancellationReason: {
+            type: String,
+            default: null
+        },
+        returnReason: {
+            type: String,
+            default: null
         }
     }],
-    totalPrice:{
-      type:Number,
-      required:true
+    totalPrice: {
+        type: Number,
+        required: true
     },
-    discount:{
-        type:Number,
-        default:0
+    discount: {
+        type: Number,
+        default: 0
     },
-    finalAmount:{
-        type:Number,
-        required:true
+    finalAmount: {
+        type: Number,
+        required: true
     },
-    address:{
-        type:Schema.Types.ObjectId,
-        ref:"Address",  
-        required:true
+    address: {
+        type: Schema.Types.ObjectId,
+        ref: "Address",
+        required: true
     },
-    invoiceDate:{
-        type:Date
+    invoiceDate: {
+        type: Date
     },
-    status:{
-        type:String,
-        required:true,
-        enum:["Pending","Processing","Shipped","Delivered","Cancelled","Return Request","Returned"]
+    status: {
+        type: String,
+        required: true,
+        enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"]
 
     },
-    returnedByUser: { type: Boolean, default: false },  
+    returnedByUser: { type: Boolean, default: false },
 
-    createdOn:{
-        type:Date,
-        default:Date.now,
-        required:true
+    createdOn: {
+        type: Date,
+        default: Date.now,
+        required: true
     },
-    couponApplied:{
-       type:Boolean,
-       default:false,
+    couponApplied: {
+        type: Boolean,
+        default: false,
     },
     paymentId: {
         type: String
@@ -73,20 +86,20 @@ const orderSchema =new Schema({
         type: String,
         enum: ['Pending', 'Completed', 'Failed']
     },
-    returnReason: { 
+    returnReason: {
         type: String,
         required: false
     },
-    paymentId:{
-        type:String,
-        required:false
+    paymentId: {
+        type: String,
+        required: false
     },
     cancellationReason: {
         type: String,
         default: null
     },
-   
-    
+
+
 })
-const Order =mongoose.model("Order",orderSchema);
+const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

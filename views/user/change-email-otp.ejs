@@ -1,150 +1,131 @@
-<%- include("../../views/partials/user/header") %>
-<style>
- .otp-wrapper {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   width: 100%;
-   padding-top: 100px;
- }
+<%- include("../../views/partials/user/header.ejs") %>
 
+  <head>
+    <link rel="stylesheet" href="/styles/profile.css">
+    <style>
+      .otp-timer {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 15px 0;
+        color: var(--accent-color);
+      }
 
- .otp-container {
-   max-width: 350px;
-   width: 100%;
-   padding: 40px;
-   background-color: #fff;
-   border-radius: 10px;
-   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-   text-align: center;
- }
+      .resend-link {
+        cursor: pointer;
+        text-decoration: underline;
+        color: var(--accent-color);
+        font-weight: 600;
+      }
 
+      .resend-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        text-decoration: none;
+      }
+    </style>
+  </head>
 
- .otp-container h3 {
-   font-size: 24px;
-   font-weight: bold;
-   color: #333;
-   margin-bottom: 20px;
- }
+  <main class="main">
+    <div class="breadcrumb-wrap">
+      <div class="profile-container">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/userProfile">My Account</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Email Verification</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
 
+    <div class="profile-container">
+      <div class="premium-form-card">
+        <h4 class="card-title">Verify Your Email</h4>
+        <p class="text-muted mb-4">A 6-digit verification code has been sent to your email address.</p>
 
- .form-group label {
-   display: block;
-   font-weight: 500;
-   color: #555;
-   margin-bottom: 8px;
- }
+        <form action="/verify-email-otp" method="post" id="otpForm">
+          <div class="form-group">
+            <label for="otp" class="info-label">Enter OTP</label>
+            <input type="text" id="otp" name="otp" class="form-control text-center" maxlength="6"
+              style="font-size: 2rem; letter-spacing: 10px; font-family: var(--font-body);" required>
+          </div>
 
+          <div class="otp-timer-wrapper mb-4">
+            <div id="otpTimer" class="otp-timer">01:00</div>
+            <p class="text-muted small">Code validity</p>
+          </div>
 
- .otp-input {
-   width: 100%;
-   padding: 10px;
-   font-size: 18px;
-   text-align: center;
-   border-radius: 4px;
-   border: 1px solid #ced4da;
-   transition: all 0.3s;
- }
+          <div class="mt-4">
+            <button type="submit" class="btn-gold">Verify & Update</button>
+          </div>
 
+          <% if (locals.message && message.length> 0) { %>
+            <div class="alert alert-danger mt-4 text-center">
+              <%= message %>
+            </div>
+            <% } %>
+        </form>
 
- .otp-input:focus {
-   border-color: #007bff;
-   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
- }
+        <div class="mt-4 pt-3 border-top">
+          <p class="text-muted">Didn't receive the code? <span id="resendBtn" class="resend-link disabled"
+              onclick="resendOTP()">Resend OTP</span></p>
+        </div>
+      </div>
+    </div>
+  </main>
 
+  <%- include("../../views/partials/user/footer.ejs") %>
 
- .btn-primary {
-   width: 100%;
-   font-weight: bold;
-   background-color: #007bff;
-   border-color: #007bff;
-   margin-top: 20px;
-   border-radius: 5px;
-   padding: 10px;
- }
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+      let timer = 60;
+      let timerInterval;
 
- .otp-timer, .resend-btn {
-   display: inline-block;
-   font-size: 14px;
-   color: #555;
-   margin-top: 15px;
- }
+      function startOTPTimer(duration) {
+        timer = duration;
+        const timerElement = document.getElementById('otpTimer');
+        const resendBtn = document.getElementById('resendBtn');
+        resendBtn.classList.add('disabled');
 
+        clearInterval(timerInterval);
+        timerInterval = setInterval(function () {
+          const minutes = Math.floor(timer / 60);
+          const seconds = timer % 60;
+          timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
- .text-muted {
-   font-size: 14px;
-   color: #6c757d;
-   text-align: center;
-   margin-top: 20px;
- }
-</style>
+          if (--timer < 0) {
+            clearInterval(timerInterval);
+            timerElement.textContent = 'Expired';
+            resendBtn.classList.remove('disabled');
+          }
+        }, 1000);
+      }
 
+      function resendOTP() {
+        if ($('#resendBtn').hasClass('disabled')) return;
 
-<div class="otp-wrapper">
-   <div class="otp-container">
-       <h3>Email Verification</h3>
-       <form action="/verify-email-otp" method="post">
-           <div class="form-group">
-               <label for="otp">Enter OTP:</label>
-               <input type="text" id="otp" name="otp" class="otp-input" required>
-           </div>
-           <button type="submit" class="btn btn-primary">Verify OTP</button>
-           <div class="otp-timer">
-               <span id="otpTimer">OTP Expires in: 1:00</span>
-           </div>
-           <button type="button" onclick="resendOTP()" class="resend-btn">Resend OTP</button>
-           <% if (locals.message && message.length > 0) { %>
-               <div class="alert alert-danger mt-3">
-                   <%= message %>
-               </div>
-           <% } %>
-       </form>
-    
-   </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script>
- function startOTPTimer(durationInSeconds) {
-   let timer = durationInSeconds;
-   const timerElement = document.getElementById('otpTimer');
-   const countdown = setInterval(function () {
-     const minutes = Math.floor(timer / 60);
-     const seconds = timer % 60;
+        $.ajax({
+          type: 'POST',
+          url: '/resend-otp',
+          success: function (response) {
+            if (response.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Resent',
+                text: 'OTP has been resent to your email.',
+                timer: 1500,
+                showConfirmButton: false
+              });
+              startOTPTimer(60);
+            } else {
+              Swal.fire('Error', 'Failed to resend OTP', 'error');
+            }
+          }
+        });
+      }
 
-
-     timerElement.textContent = `OTP Expires in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-
-     if (--timer < 0) {
-       clearInterval(countdown);
-       timerElement.textContent = 'OTP Expired';
-     }
-   }, 1000);
- }
-
-
- function resendOTP() {
-   $.ajax({
-     type: 'POST',
-     url: '/resend-otp',
-     success: function (response) {
-       if (response.success) {
-         startOTPTimer(60);
-       } else {
-         alert('Failed to resend OTP. Please try again.');
-       }
-     },
-     error: function () {
-       alert('Error occurred while resending OTP. Please try again.');
-     }
-   });
- }
- startOTPTimer(60);
-</script>
-
-
-<%- include("../../views/partials/user/footer") %>
-
-
-
+      startOTPTimer(60);
+    </script>

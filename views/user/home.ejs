@@ -1,29 +1,350 @@
 <%- include ("../../views/partials/user/header.ejs") %>
 
   <head>
-    <link rel="stylesheet" href="/styles/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #1a1a1a;
+        --secondary-color: #f4f4f4;
+        --accent-color: #c5a059;
+        --text-color: #333;
+        --light-text: #666;
+        --white: #ffffff;
+        --font-heading: 'Cinzel', serif;
+        --font-body: 'Outfit', sans-serif;
+      }
+
+      body {
+        font-family: var(--font-body);
+        color: var(--text-color);
+        background-color: var(--white);
+        overflow-x: hidden;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/images/banner-bg.jpg') center/cover no-repeat;
+        background-color: #1a1a1a;
+        /* Fallback */
+        color: var(--white);
+        text-align: center;
+      }
+
+      .hero-content {
+        z-index: 2;
+        animation: fadeIn Up 1s ease-out;
+      }
+
+      .hero-subtitle {
+        font-size: 1.2rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        display: block;
+        color: var(--accent-color);
+      }
+
+      .hero-title {
+        font-family: var(--font-heading);
+        font-size: 4.5rem;
+        line-height: 1.1;
+        margin-bottom: 2rem;
+        font-weight: 400;
+      }
+
+      .hero-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background-color: transparent;
+        border: 1px solid var(--white);
+        color: var(--white);
+        text-decoration: none;
+        font-family: var(--font-heading);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .hero-btn:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--white);
+      }
+
+      /* Section Headers */
+      .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .section-title {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .section-subtitle {
+        color: var(--light-text);
+        font-size: 1rem;
+        letter-spacing: 1px;
+      }
+
+      /* Collections/Products */
+      .collections-section {
+        padding: 5rem 0;
+        background-color: var(--white);
+      }
+
+      .collection-nav {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .collection-btn {
+        background: none;
+        border: none;
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--light-text);
+        cursor: pointer;
+        padding-bottom: 5px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .collection-btn.active,
+      .collection-btn:hover {
+        color: var(--primary-color);
+        border-color: var(--accent-color);
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        padding: 0 15px;
+      }
+
+      .product-card {
+        background: var(--white);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        height: 100%;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .product-image-wrapper {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        background-color: #f9f9f9;
+        margin-bottom: 15px;
+      }
+
+      .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Ensures image fills the square without distortion */
+        transition: transform 0.5s ease;
+      }
+
+      .product-card:hover .product-img {
+        transform: scale(1.05);
+      }
+
+      .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.05);
+        /* Subtle overlay on hover */
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .product-card:hover .product-overlay {
+        opacity: 1;
+      }
+
+      .product-info {
+        text-align: center;
+        padding: 0 10px 20px;
+      }
+
+      .product-category {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--light-text);
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+        display: block;
+      }
+
+      .product-title {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .product-price {
+        font-family: var(--font-body);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--accent-color);
+      }
+
+      .original-price {
+        text-decoration: line-through;
+        color: #999;
+        margin-left: 8px;
+        font-size: 0.9em;
+        font-weight: 400;
+      }
+
+      /* Features Section */
+      .features-section {
+        padding: 4rem 0;
+        background-color: #f9f9f9;
+        border-top: 1px solid #eee;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        text-align: center;
+      }
+
+      .feature-item {
+        padding: 20px;
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+      }
+
+      .feature-title {
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+      }
+
+      .feature-desc {
+        font-size: 0.9rem;
+        color: var(--light-text);
+        line-height: 1.6;
+      }
+
+      /* Newsletter */
+      .newsletter-section {
+        padding: 5rem 0;
+        background-color: var(--primary-color);
+        color: var(--white);
+        text-align: center;
+      }
+
+      .newsletter-form {
+        max-width: 500px;
+        margin: 2rem auto 0;
+        display: flex;
+      }
+
+      .newsletter-input {
+        flex: 1;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: transparent;
+        color: var(--white);
+        font-family: var(--font-body);
+        outline: none;
+      }
+
+      .newsletter-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .newsletter-btn {
+        padding: 15px 30px;
+        background-color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        color: var(--white);
+        font-family: var(--font-heading);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+      }
+
+      .newsletter-btn:hover {
+        background-color: var(--white);
+        color: var(--primary-color);
+        border-color: var(--white);
+      }
+
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2.5rem;
+        }
+
+        .product-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
+        }
+
+        .newsletter-form {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      /* Animation helper */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
   </head>
 
   <!-- Hero Section -->
-  <section id="home-section" class="hero-section">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text" style="text-align: center; max-width: 800px; margin: 0 auto;">
-          <h1 class="hero-title">
-            <span class="title-line">MODERN TIMEPIECES</span>
-            <span class="title-line accent">FOR THE CURATED LIFE</span>
-          </h1>
-          <div class="hero-buttons" style="justify-content: center;">
-            <a href="#collections" class="btn-primary">SHOP THE COLLECTION</a>
-          </div>
-        </div>
-      </div>
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-subtitle">Est. 2024</span>
+      <h1 class="hero-title">Timeless<br>Elegance</h1>
+      <a href="#collections" class="hero-btn">Explore Collection</a>
     </div>
   </section>
 
@@ -31,47 +352,53 @@
   <section id="collections" class="collections-section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">EXCLUSIVE COLLECTIONS</h2>
-        <div class="collection-nav">
-          <button class="collection-btn active" data-collection="all">ALL</button>
-          <button class="collection-btn" data-collection="minimal">MINIMAL</button>
-          <button class="collection-btn" data-collection="popular">POPULAR</button>
-        </div>
+        <h2 class="section-title">Exclusive Collections</h2>
+        <p class="section-subtitle">Curated modern timepieces for the sophisticated.</p>
       </div>
-      <div class="collections-grid">
+
+      <div class="collection-nav" id="collectionNav">
+        <button class="collection-btn active" data-filter="all">All</button>
+        <button class="collection-btn" data-filter="new-arrivals">New Arrivals</button>
+        <button class="collection-btn" data-filter="best-sellers">Best Sellers</button>
+      </div>
+
+      <div class="product-grid">
         <% if (products && products.length> 0) { %>
-          <% products.slice(0, 6).forEach((product, index)=> { %>
-            <div class="collection-item" data-collection="<%= index % 2 === 0 ? 'minimal' : 'popular' %>">
-              <a href="/productDetails?id=<%= product._id %>" style="text-decoration: none; color: inherit;">
-                <div class="watch-container">
+          <% products.slice(0, 8).forEach((product, index)=> { %>
+            <div class="product-card" data-category="all">
+              <a href="/productDetails?id=<%= product._id %>" style="text-decoration: none;">
+                <div class="product-image-wrapper">
                   <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
-                    class="collection-watch-img">
-                  <div class="watch-overlay"></div>
+                    class="product-img" onerror="this.src='/images/placeholder-watch.jpg'"> <!-- Fallback image -->
+                  <div class="product-overlay"></div>
                 </div>
-                <div class="watch-info">
-                  <h3 class="watch-name">
-                    <%= product.productName %>
-                  </h3>
-                  <div class="watch-price">
-                    <% let finalPrice=product.regularPrice; let maxOffer=Math.max(product.discount || 0,
-                      (product.category && product.category.offer) || 0, product.productOffer || 0); if (maxOffer> 0) {
-                      finalPrice = product.regularPrice - (product.regularPrice * maxOffer / 100);
-                      %>
-                      <span class="sale-price">₹<%= finalPrice.toLocaleString() %></span>
-                      <span class="original-price" style="font-size: 0.8em; opacity: 0.5;">₹<%=
-                          product.regularPrice.toLocaleString() %></span>
-                      <% } else { %>
-                        <span class="current-price">₹<%= product.salesPrice.toLocaleString() %></span>
-                        <% } %>
-                  </div>
+                <div class="product-info">
+                  <% if(product.category) { %>
+                    <span class="product-category">
+                      <%= product.category.name %>
+                    </span>
+                    <% } %>
+                      <h3 class="product-title">
+                        <%= product.productName %>
+                      </h3>
+                      <div class="price-wrapper">
+                        <% if (product.productOffer> 0 || (product.category && product.category.categoryOffer > 0)) {
+                          const offer = Math.max(product.productOffer || 0, product.category?.categoryOffer || 0);
+                          const discountedPrice = Math.round(product.salesPrice - (product.salesPrice * offer / 100));
+                          %>
+                          <span class="product-price">₹<%= discountedPrice.toLocaleString() %></span>
+                          <span class="original-price">₹<%= product.salesPrice.toLocaleString() %></span>
+                          <% } else { %>
+                            <span class="product-price">₹<%= product.salesPrice.toLocaleString() %></span>
+                            <% } %>
+                      </div>
                 </div>
               </a>
             </div>
             <% }); %>
               <% } else { %>
-                <div class="no-products">
-                  <h3>Coming Soon</h3>
-                  <p>Our exclusive timepiece collection is being curated.</p>
+                <div class="col-12 text-center py-5">
+                  <h3 class="text-muted">New Collection Dropping Soon</h3>
                 </div>
                 <% } %>
       </div>
@@ -83,16 +410,19 @@
     <div class="container">
       <div class="features-grid">
         <div class="feature-item">
-          <h3 class="feature-title">EXPRESS DELIVERY</h3>
-          <p class="feature-description">Complimentary worldwide shipping on premium orders.</p>
+          <i class="fas fa-shipping-fast feature-icon"></i>
+          <h3 class="feature-title">Express Delivery</h3>
+          <p class="feature-desc">Complimentary shipping on all premium orders worldwide.</p>
         </div>
         <div class="feature-item">
-          <h3 class="feature-title">AUTHENTICITY GUARANTEED</h3>
-          <p class="feature-description">Every timepiece is certified for 100% original craftsmanship.</p>
+          <i class="fas fa-check-circle feature-icon"></i>
+          <h3 class="feature-title">Authenticity Guaranteed</h3>
+          <p class="feature-desc">Every timepiece is certified for 100% original craftsmanship.</p>
         </div>
         <div class="feature-item">
-          <h3 class="feature-title">CURATED SELECTION</h3>
-          <p class="feature-description">Only the finest designs make it into our exclusive boutique.</p>
+          <i class="fas fa-shield-alt feature-icon"></i>
+          <h3 class="feature-title">Secure Warranty</h3>
+          <p class="feature-desc">2-year international warranty on all our movements.</p>
         </div>
       </div>
     </div>
@@ -101,86 +431,28 @@
   <!-- Newsletter Section -->
   <section class="newsletter-section">
     <div class="container">
-      <div class="newsletter-content">
-        <h2 class="newsletter-title">JOIN THE ELITE</h2>
-        <p class="newsletter-subtitle">Subscribe to receive early access to our limited-release drops.</p>
-        <form class="newsletter-form">
-          <div class="input-group">
-            <input type="email" placeholder="Email address" required>
-            <button type="submit" class="subscribe-btn">JOIN</button>
-          </div>
-        </form>
-      </div>
+      <h2 class="section-title" style="color: var(--white);">Join The Elite</h2>
+      <p class="section-subtitle" style="color: rgba(255,255,255,0.7);">Subscribe for early access to limited releases.
+      </p>
+      <form class="newsletter-form"
+        onsubmit="event.preventDefault(); Swal.fire('Subscribed!', 'Welcome to the club.', 'success');">
+        <input type="email" class="newsletter-input" placeholder="Your email address" required>
+        <button type="submit" class="newsletter-btn">SUBSCRIBE</button>
+      </form>
     </div>
   </section>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    // Collection Filter
-    document.addEventListener('DOMContentLoaded', () => {
-      const btns = document.querySelectorAll('.collection-btn');
-      const items = document.querySelectorAll('.collection-item');
-
-      btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          btns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const filter = btn.dataset.collection;
-
-          items.forEach(item => {
-            if (filter === 'all' || item.dataset.collection === filter) {
-              item.style.display = 'block';
-            } else {
-              item.style.display = 'none';
-            }
-          });
-        });
-      });
-    });
-
-    // Smooth Scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-          behavior: 'smooth'
-        });
-      });
-    });
-
-    // Cart Handler
-    function addToCartHandler(event, productId) {
-      event.preventDefault();
-      fetch('/addToCart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: 1 })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire({ title: 'Added', icon: 'success', timer: 1000, showConfirmButton: false });
-            if (data.cartCount) document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
-          } else {
-            Swal.fire({ title: 'Error', text: data.message, icon: 'error' });
-          }
-        })
-        .catch(() => Swal.fire({ title: 'Please Login', icon: 'info' }));
-    }
-
-    // Wishlist Handler
-    function addToWishlist(productId) {
-      fetch('/addToWishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId })
-      })
-        .then(res => res.json())
-        .then(data => {
-          Swal.fire({ title: data.status ? 'Added to Wishlist' : 'Already in Wishlist', icon: 'info', timer: 1500 });
-        });
-    }
-  </script>
-
   <%- include ("../../views/partials/user/footer.ejs") %>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      // Simple filter logic for demonstration (can be expanded)
+      document.querySelectorAll('.collection-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.collection-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          // Add actual filtering logic here if you have data attributes on products
+        });
+      });
+    </script>
