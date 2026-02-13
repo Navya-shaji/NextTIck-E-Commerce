@@ -1,0 +1,458 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    </head>
+
+    <style>
+        .content-wrapper {
+            padding: 2.5rem;
+            background-color: var(--admin-bg);
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .btn-add-banner {
+            background: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add-banner:hover {
+            background: var(--accent-gold-hover);
+            transform: translateY(-1px);
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* Table Styling */
+        .table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .banner-image {
+            width: 120px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-toggle {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+        }
+
+        .modal-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .form-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-gold:hover {
+            background: var(--accent-gold-hover);
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+
+    <section class="content-wrapper">
+        <div class="content-header">
+            <h1 class="content-title">Banner Management</h1>
+            <button class="btn-add-banner" data-bs-toggle="modal" data-bs-target="#addBannerModal">
+                <i class="fas fa-plus"></i> Add New Banner
+            </button>
+        </div>
+
+        <div class="premium-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Link</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (banners && banners.length> 0) { %>
+                            <% banners.forEach(banner=> { %>
+                                <tr id="banner-row-<%= banner._id %>">
+                                    <td>
+                                        <img src="/uploads/banners/<%= banner.image %>" alt="<%= banner.title %>"
+                                            class="banner-image">
+                                    </td>
+                                    <td>
+                                        <%= banner.title %>
+                                    </td>
+                                    <td>
+                                        <%= banner.description.substring(0, 50) %>...
+                                    </td>
+                                    <td>
+                                        <a href="<%= banner.link %>" target="_blank"
+                                            style="color: var(--accent-gold);">View</a>
+                                    </td>
+                                    <td>
+                                        <%= new Date(banner.startDate).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(banner.endDate).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <% const now=new Date(); const isExpired=new Date(banner.endDate) < now; const
+                                            isScheduled=new Date(banner.startDate)> now;
+                                            %>
+                                            <% if (isExpired) { %>
+                                                <span class="badge badge-danger">Expired</span>
+                                                <% } else if (isScheduled) { %>
+                                                    <span class="badge badge-warning">Scheduled</span>
+                                                    <% } else if (banner.isActive) { %>
+                                                        <span class="badge badge-success"
+                                                            id="status-<%= banner._id %>">Active</span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-danger"
+                                                                id="status-<%= banner._id %>">Inactive</span>
+                                                            <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="action-btn btn-toggle"
+                                                onclick="toggleBannerStatus('<%= banner._id %>')">
+                                                <i class="fas fa-toggle-on"></i>
+                                            </button>
+                                            <button class="action-btn btn-delete"
+                                                onclick="deleteBanner('<%= banner._id %>')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted">No banners found</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Banner Modal -->
+    <div class="modal fade" id="addBannerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Banner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addBannerForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Banner Title *</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Link URL *</label>
+                                <input type="url" class="form-control" name="link" placeholder="https://" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" class="form-control" name="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Banner Image *</label>
+                            <input type="file" class="form-control" name="image" accept="image/*" required
+                                onchange="previewImage(event)">
+                            <img id="imagePreview" class="image-preview">
+                        </div>
+                        <button type="submit" class="btn btn-gold w-100">Add Banner</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('imagePreview');
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('addBannerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('/admin/addBanner', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        confirmButtonColor: '#c5a059'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message,
+                        confirmButtonColor: '#c5a059'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to add banner',
+                    confirmButtonColor: '#c5a059'
+                });
+            }
+        });
+
+        async function toggleBannerStatus(bannerId) {
+            try {
+                const response = await fetch(`/admin/toggleBannerStatus/${bannerId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const statusBadge = document.getElementById(`status-${bannerId}`);
+                    if (data.isActive) {
+                        statusBadge.textContent = 'Active';
+                        statusBadge.className = 'badge badge-success';
+                    } else {
+                        statusBadge.textContent = 'Inactive';
+                        statusBadge.className = 'badge badge-danger';
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to update banner status',
+                    confirmButtonColor: '#c5a059'
+                });
+            }
+        }
+
+        async function deleteBanner(bannerId) {
+            const result = await Swal.fire({
+                title: 'Delete Banner?',
+                text: 'This action cannot be undone',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/deleteBanner/${bannerId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById(`banner-row-${bannerId}`).remove();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to delete banner',
+                        confirmButtonColor: '#c5a059'
+                    });
+                }
+            }
+        }
+    </script>
+
+    <%- include("../../views/partials/admin/footer") %>

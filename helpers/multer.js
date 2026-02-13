@@ -1,7 +1,18 @@
-const multer = require("multer")
+const multer = require("multer");
 const path = require("path");
 
-const storage = multer.diskStorage({
+// Banner storage configuration
+const bannerStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, "../public/uploads/banners"));
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+// Product image storage configuration
+const productStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, "../public/uploads/re-image"));
     },
@@ -9,13 +20,8 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + "-" + file.originalname);
     }
 });
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, "public/uploads/product-images/");
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, file.originalname); // Use original file name or customize
-//     },
-// });
 
-module.exports = storage;
+module.exports = {
+    bannerStorage,
+    productStorage
+};

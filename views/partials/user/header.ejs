@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>NextTick</title>
+  <title>NexTick</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -30,7 +30,8 @@
       --header-bg: #ffffff;
       --header-text: #000000;
       --header-accent: #c5a059;
-      --header-font: 'Outfit', sans-serif;
+      --header-font: 'Cinzel', serif;
+      --nav-font: 'Outfit', sans-serif;
       --body-font: 'Inter', sans-serif;
     }
 
@@ -95,7 +96,7 @@
     .nav-link {
       text-decoration: none;
       color: var(--header-text);
-      font-family: var(--body-font);
+      font-family: var(--nav-font);
       font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
@@ -330,23 +331,13 @@
   <header class="main-header">
     <div class="header-container">
       <a href="/" class="brand-logo">
-        <h1>Nextick</h1>
+        <h1>NexTick</h1>
       </a>
 
       <nav class="main-nav">
         <ul class="nav-menu">
           <li><a href="/" class="nav-link">Home</a></li>
-          <li class="dropdown">
-            <a href="/shop" class="nav-link">Shop</a>
-            <div class="dropdown-menu">
-              <a href="/shop" class="dropdown-item">All Watches</a>
-              <a href="/shop?category=luxury" class="dropdown-item">Luxury</a>
-              <a href="/shop?category=sport" class="dropdown-item">Sport</a>
-            </div>
-          </li>
-          <% if (locals.user) { %>
-            <li><a href="/userProfile" class="nav-link">Account</a></li>
-            <% } %>
+          <li><a href="/shop" class="nav-link">Shop</a></li>
         </ul>
       </nav>
 

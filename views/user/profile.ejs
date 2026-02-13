@@ -28,24 +28,8 @@
                 <% const defaultAvatar="https://cdn-icons-png.flaticon.com/512/4128/4128176.png" ; const
                   avatarUrl=user.profileImage && user.profileImage !=='default-profile.jpg' ?
                   `/uploads/profile-images/${user.profileImage}` : defaultAvatar; %>
-                  <img src="<%= avatarUrl %>" alt="User Avatar" class="avatar-image" id="profileImage"
+                  <img src="<%= avatarUrl %>" alt="User Avatar" class="avatar-image profile-pic" id="profileImage"
                     onerror="this.src='<%= defaultAvatar %>'">
-
-                  <div class="avatar-actions">
-                    <form id="profileImageForm" enctype="multipart/form-data">
-                      <label for="profileImageInput" class="avatar-btn" title="Update Image">
-                        <i class="fas fa-camera"></i>
-                      </label>
-                      <input type="file" id="profileImageInput" name="profileImage" accept="image/*"
-                        style="display: none;">
-                    </form>
-                    <% if (user.profileImage && user.profileImage !=='default-profile.jpg' && user.profileImage
-                      !==defaultAvatar) { %>
-                      <button onclick="deleteProfileImage()" class="avatar-btn" title="Delete Image">
-                        <i class="fas fa-trash-alt"></i>
-                      </button>
-                      <% } %>
-                  </div>
               </div>
               <h4 class="user-name">
                 <%= user.name %>
@@ -122,6 +106,29 @@
                     <div class="info-value">
                       <span>••••••••</span>
                       <button class="edit-trigger" onclick="showChangePasswordModal()">Change</button>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Profile Picture</div>
+                    <div class="info-value">
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="<%= avatarUrl %>" alt="Avatar" class="profile-pic" id="gridProfilePreview"
+                          style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-color);">
+                        <span class="text-muted" style="font-size: 0.85rem;">Update your avatar</span>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <form id="profileImageForm" enctype="multipart/form-data" class="m-0">
+                          <label for="profileImageInput" class="edit-trigger m-0" style="cursor: pointer;">
+                            Change
+                          </label>
+                          <input type="file" id="profileImageInput" name="profileImage" accept="image/*"
+                            style="display: none;">
+                        </form>
+                        <% if (user.profileImage && user.profileImage !=='default-profile.jpg' && user.profileImage
+                          !==defaultAvatar) { %>
+                          <button onclick="deleteProfileImage()" class="edit-trigger text-danger">Delete</button>
+                          <% } %>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -545,6 +552,10 @@
             profileImgs.forEach(img => {
               img.src = data.imageUrl + '?t=' + new Date().getTime();
             });
+
+            // Show delete buttons if they were hidden
+            const deleteBtns = document.querySelectorAll('button[onclick="deleteProfileImage()"]');
+            deleteBtns.forEach(btn => btn.style.display = 'inline-block');
           } else throw new Error(data.message);
         } catch (err) {
           Swal.fire('Error', err.message, 'error');
@@ -552,13 +563,34 @@
       });
 
       async function deleteProfileImage() {
-        const res = await Swal.fire({ title: 'Delete image?', icon: 'warning', showCancelButton: true });
+        const res = await Swal.fire({
+          title: 'Delete image?',
+          text: 'Are you sure you want to remove your profile picture?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Yes, delete it!'
+        });
+
         if (res.isConfirmed) {
           try {
             const response = await fetch('/delete-profile-image', { method: 'POST' });
             const data = await response.json();
-            if (data.success) location.reload();
-            else throw new Error(data.message);
+            if (data.success) {
+              Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Profile picture removed.', timer: 1500, showConfirmButton: false });
+
+              const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/4128/4128176.png";
+              const profileImgs = document.querySelectorAll('.profile-pic');
+              profileImgs.forEach(img => {
+                img.src = defaultAvatar;
+              });
+
+              // Hide delete buttons
+              const deleteBtns = document.querySelectorAll('button[onclick="deleteProfileImage()"]');
+              deleteBtns.forEach(btn => btn.style.display = 'none');
+
+            } else throw new Error(data.message);
           } catch (err) { Swal.fire('Error', err.message, 'error'); }
         }
       }
@@ -640,7 +672,7 @@
             key: data.data.key_id,
             amount: data.data.amount,
             currency: data.data.currency,
-            name: "NextTick",
+            name: "NexTick",
             description: "Order Payment Retry",
             order_id: data.data.order_id,
             handler: function (response) {

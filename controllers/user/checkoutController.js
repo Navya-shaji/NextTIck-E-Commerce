@@ -442,7 +442,7 @@ const retryPayment = async (req, res) => {
             key_id: process.env.RAZORPAY_KEY_ID,
             amount: order.finalAmount * 100,
             currency: "INR",
-            name: "NextTick",
+            name: "NexTick",
             description: `Order Payment - ${orderId}`,
             prefill: {
                 name: order.userId.name || '',

@@ -36,6 +36,8 @@ body {
   position: sticky;
   top: 100px;
   margin-bottom: 30px;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .user-avatar-section {
@@ -157,10 +159,10 @@ body {
 .profile-content-card {
   background: var(--white);
   border: 1px solid var(--border-color);
-  padding: 50px 60px;
+  padding: 25px 35px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-  min-height: 700px;
-  border-radius: 4px;
+  min-height: 450px;
+  border-radius: 25px;
 }
 
 .section-title {
@@ -185,11 +187,12 @@ body {
 }
 
 .info-item {
-  padding: 25px;
+  padding: 15px 20px;
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
   background: #fbfbfb;
   position: relative;
+  border-radius: 15px;
 }
 
 .info-item:hover {
