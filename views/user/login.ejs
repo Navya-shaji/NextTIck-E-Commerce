@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LOGIN</title>
   <link rel="stylesheet" href="/styles/login.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -16,16 +17,18 @@
 
         <form action="/login" method="POST" class="auth-form" id="loginForm" novalidate>
           <div class="form-group">
-            <label for="email">Email or Phone Number *</label>
+            <label for="email">Email or Phone Number</label>
             <input type="email" id="email" name="email" placeholder="Email or Phone Number" required>
             <div id="emailError" class="error-message"></div>
           </div>
 
           <div class="form-group">
-            <label for="password">Password *</label>
-            <div class="password-wrapper">
-              <input type="password" id="password" name="password" placeholder="Password" required>
-              <span class="toggle-password">👁️</span>
+            <label for="password">Password</label>
+            <div class="password-wrapper" style="position: relative;">
+              <input type="password" id="password" name="password" placeholder="Password" style="padding-right: 40px;"
+                required>
+              <i class="toggle-password fas fa-eye"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
             </div>
             <div id="passwordError" class="error-message"></div>
           </div>
@@ -77,90 +80,110 @@
     </div>
   </div>
 
-  <script src="/js/login-validation.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const loginForm = document.getElementById("loginForm");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const emailError = document.getElementById("emailError");
+      const passwordError = document.getElementById("passwordError");
+      const togglePassword = document.querySelector(".toggle-password");
+
+      // Toggle Password Visibility
+      if (togglePassword) {
+        togglePassword.addEventListener("click", function () {
+          const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+          passwordInput.setAttribute("type", type);
+
+          // Toggle icon class
+          this.classList.toggle('fa-eye');
+          this.classList.toggle('fa-eye-slash');
+        });
+      }
+
+      function validateEmail(email) {
+        const emailPattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+        return emailPattern.test(email);
+      }
+
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = "block";
+      }
+
+      function clearError(element) {
+        element.textContent = "";
+        element.style.display = "none";
+      }
+
+      function validateForm(e) {
+        let isValid = true;
+
+        // Email validation
+        if (!emailInput.value.trim()) {
+          showError(emailError, "Email is required");
+          isValid = false;
+        } else if (!validateEmail(emailInput.value)) {
+          showError(emailError, "Invalid email format");
+          isValid = false;
+        } else {
+          clearError(emailError);
+        }
+
+        // Password validation
+        if (!passwordInput.value) {
+          showError(passwordError, "Password is required");
+          isValid = false;
+        } else if (passwordInput.value.length < 8) {
+          showError(passwordError, "Password should be at least 8 characters long");
+          isValid = false;
+        } else {
+          clearError(passwordError);
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+        }
+      }
+
+      if (loginForm) {
+        loginForm.addEventListener("submit", validateForm);
+      }
+
+      // Real-time validation
+      if (emailInput) {
+        emailInput.addEventListener("input", function () {
+          if (this.value && !validateEmail(this.value)) {
+            showError(emailError, "Invalid email format");
+          } else {
+            clearError(emailError);
+          }
+        });
+      }
+
+      if (passwordInput) {
+        passwordInput.addEventListener("input", function () {
+          if (this.value && this.value.length < 8) {
+            showError(passwordError, "Password should be at least 8 characters long");
+          } else {
+            clearError(passwordError);
+          }
+        });
+      }
+    });
+
+    function loadDemoCredentials() {
+      const emailEl = document.getElementById('email');
+      const passEl = document.getElementById('password');
+      if (emailEl) emailEl.value = 'user@example.com';
+      if (passEl) passEl.value = 'Password@123';
+      // Clear any existing errors
+      const emailErr = document.getElementById('emailError');
+      const passErr = document.getElementById('passwordError');
+      if (emailErr) emailErr.textContent = '';
+      if (passErr) passErr.textContent = '';
+    }
+  </script>
 </body>
 
 </html>
-<script>
-
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("loginForm");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const emailError = document.getElementById("emailError");
-    const passwordError = document.getElementById("passwordError");
-
-    function validateEmail(email) {
-      const emailPattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
-      return emailPattern.test(email);
-    }
-
-    function showError(element, message) {
-      element.textContent = message;
-      element.style.display = "block";
-    }
-
-    function clearError(element) {
-      element.textContent = "";
-      element.style.display = "none";
-    }
-
-    function validateForm(e) {
-      let isValid = true;
-
-      // Email validation
-      if (!emailInput.value.trim()) {
-        showError(emailError, "Email is required");
-        isValid = false;
-      } else if (!validateEmail(emailInput.value)) {
-        showError(emailError, "Invalid email format");
-        isValid = false;
-      } else {
-        clearError(emailError);
-      }
-
-      // Password validation
-      if (!passwordInput.value) {
-        showError(passwordError, "Password is required");
-        isValid = false;
-      } else if (passwordInput.value.length < 8) {
-        showError(passwordError, "Password should be at least 8 characters long");
-        isValid = false;
-      } else {
-        clearError(passwordError);
-      }
-
-      if (!isValid) {
-        e.preventDefault();
-      }
-    }
-
-    loginForm.addEventListener("submit", validateForm);
-
-    // Real-time validation
-    emailInput.addEventListener("input", function () {
-      if (this.value && !validateEmail(this.value)) {
-        showError(emailError, "Invalid email format");
-      } else {
-        clearError(emailError);
-      }
-    });
-
-    passwordInput.addEventListener("input", function () {
-      if (this.value && this.value.length < 8) {
-        showError(passwordError, "Password should be at least 8 characters long");
-      } else {
-        clearError(passwordError);
-      }
-    });
-  });
-
-  function loadDemoCredentials() {
-    document.getElementById('email').value = 'user@example.com';
-    document.getElementById('password').value = 'Password@123';
-    // Clear any existing errors
-    document.getElementById('emailError').textContent = '';
-    document.getElementById('passwordError').textContent = '';
-  }
-</script>
