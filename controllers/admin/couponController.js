@@ -15,7 +15,7 @@ const loadcoupon = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        res.render('coupon', { 
+        res.render('coupon', {
             coupons,
             currentPage: page,
             totalPages,
@@ -27,9 +27,26 @@ const loadcoupon = async (req, res) => {
     }
 };
 
+const getCoupon = async (req, res) => {
+    try {
+        const id = req.query.id;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ status: false, message: "Invalid coupon ID." });
+        }
+        const coupon = await Coupon.findById(id);
+        if (!coupon) {
+            return res.status(404).json({ status: false, message: "Coupon not found." });
+        }
+        res.status(200).json({ status: true, coupon });
+    } catch (error) {
+        console.error("Error fetching coupon:", error);
+        res.status(500).json({ status: false, message: "Internal server error." });
+    }
+};
+
 const createCoupon = async (req, res) => {
     try {
-        if (!req.body.couponName || !req.body.startDate || !req.body.endDate || 
+        if (!req.body.couponName || !req.body.startDate || !req.body.endDate ||
             !req.body.offerPrice || !req.body.minimumPrice) {
             return res.status(400).send("Invalid input: All fields are required.");
         }
@@ -59,10 +76,10 @@ const createCoupon = async (req, res) => {
         });
 
         await newCoupon.save();
-        res.status(201).json({ message: "Coupon created successfully." });
+        res.status(201).json({ status: true, message: "Coupon created successfully." });
     } catch (error) {
         console.error("Error creating coupon:", error);
-        res.redirect("pageerror");
+        res.status(500).json({ status: false, message: "Internal server error." });
     }
 };
 
@@ -110,30 +127,30 @@ const updateCoupon = async (req, res) => {
         const updatedCoupon = await Coupon.findByIdAndUpdate(
             id,
             { $set: updateData },
-            { new: true, runValidators: true } 
+            { new: true, runValidators: true }
         );
 
         if (!updatedCoupon) {
-            return res.status(404).send("Coupon not found.");
+            return res.status(404).json({ status: false, message: "Coupon not found." });
         }
 
-        res.status(200).send("Coupon updated successfully.");
+        res.status(200).json({ status: true, message: "Coupon updated successfully." });
     } catch (error) {
         console.error("Error updating coupon:", error);
-        res.status(500).send("Internal server error.");
+        res.status(500).json({ status: false, message: "Internal server error." });
     }
 };
 
 const deleteCoupon = async (req, res) => {
     try {
         const id = req.params.id;
-        
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: "Invalid coupon ID." });
         }
 
         const deletedCoupon = await Coupon.findByIdAndDelete(id);
-        
+
         if (deletedCoupon) {
             res.status(200).json({ success: true, message: "Coupon deleted successfully." });
         } else {
@@ -141,16 +158,17 @@ const deleteCoupon = async (req, res) => {
         }
     } catch (error) {
         console.error("Error deleting coupon:", error);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: "Internal server error.",
-            error: error.message 
+            error: error.message
         });
     }
 };
 
 module.exports = {
     loadcoupon,
+    getCoupon,
     createCoupon,
     editCoupon,
     updateCoupon,

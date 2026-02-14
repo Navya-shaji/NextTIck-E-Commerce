@@ -409,69 +409,86 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const mainStatusForm = document.getElementById('mainStatusForm');
-            if (mainStatusForm) {
-                mainStatusForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-                    const status = document.getElementById('orderStatus').value;
-                    try {
-                        const response = await fetch('/admin/orders/update-status', {
+        (function () {
+            window.initOrderData = function () {
+                const mainStatusForm = document.getElementById('mainStatusForm');
+                if (mainStatusForm) {
+                    mainStatusForm.onsubmit = async function (e) {
+                        e.preventDefault();
+                        const status = document.getElementById('orderStatus').value;
+                        try {
+                            const response = await fetch('/admin/orders/update-status', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ orderId: '<%= order._id %>', status: status })
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Logistics Updated',
+                                    confirmButtonColor: '#1e293b'
+                                }).then(() => {
+                                    if (window.loadContent) {
+                                        window.loadContent(window.location.href);
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Update Failed',
+                                    text: data.message
+                                });
+                            }
+                        } catch (error) {
+                            Swal.fire('Error', 'Communication failure', 'error');
+                        }
+                    };
+                }
+            };
+
+            window.updateItemStatus = async function (orderId, productId, status) {
+                try {
+                    const result = await Swal.fire({
+                        title: 'Update Item Status?',
+                        text: `Are you sure you want to change this item's status to ${status}?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, update it!'
+                    });
+
+                    if (result.isConfirmed) {
+                        const response = await fetch('/admin/orders/update-item-status', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderId: '<%= order._id %>', status: status })
+                            body: JSON.stringify({ orderId, productId, status })
                         });
                         const data = await response.json();
                         if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Logistics Updated',
-                                confirmButtonColor: '#1e293b'
-                            }).then(() => location.reload());
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Update Failed',
-                                text: data.message
+                            Swal.fire('Updated!', data.message, 'success').then(() => {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
+                                } else {
+                                    location.reload();
+                                }
                             });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to update status', 'error');
                         }
-                    } catch (error) {
-                        Swal.fire('Error', 'Communication failure', 'error');
                     }
-                });
-            }
-        });
-
-        async function updateItemStatus(orderId, productId, status) {
-            try {
-                const result = await Swal.fire({
-                    title: 'Update Item Status?',
-                    text: `Are you sure you want to change this item's status to ${status}?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, update it!'
-                });
-
-                if (result.isConfirmed) {
-                    const response = await fetch('/admin/orders/update-item-status', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId, productId, status })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        Swal.fire('Updated!', data.message, 'success').then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to update status', 'error');
-                    }
+                } catch (error) {
+                    console.error('Error updating item status:', error);
+                    Swal.fire('Error', 'An internal error occurred', 'error');
                 }
-            } catch (error) {
-                console.error('Error updating item status:', error);
-                Swal.fire('Error', 'An internal error occurred', 'error');
-            }
-        }
+            };
+
+            // Initialize immediately
+            window.initOrderData();
+        })();
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

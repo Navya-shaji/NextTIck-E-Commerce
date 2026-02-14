@@ -181,6 +181,27 @@
         .clear-search:hover {
             color: #ef4444;
         }
+
+        /* Fix Dropdown Clipping */
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        .premium-card {
+            overflow: visible !important;
+        }
+
+        .dropdown-menu {
+            z-index: 1060 !important;
+            min-width: 160px;
+        }
+
+        .dropdown-item {
+            cursor: pointer;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -233,19 +254,27 @@
                                                 <% } %>
                                     </td>
                                     <td class="text-end">
-                                        <% if (customer.isBlocked) { %>
-                                            <a href="/admin/unblock/<%= customer._id %>"
-                                                class="action-btn btn-unblock spa-action-btn"
-                                                data-id="<%= customer._id %>">
-                                                <i class="fas fa-unlock me-1"></i> Unblock
-                                            </a>
-                                            <% } else { %>
-                                                <a href="/admin/block/<%= customer._id %>"
-                                                    class="action-btn btn-block spa-action-btn"
-                                                    data-id="<%= customer._id %>">
-                                                    <i class="fas fa-ban me-1"></i> Block
-                                                </a>
-                                                <% } %>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                <li>
+                                                    <% if (customer.isBlocked) { %>
+                                                        <a class="dropdown-item py-2 text-success spa-action-btn"
+                                                            href="/admin/unblock/<%= customer._id %>">
+                                                            <i class="fas fa-unlock me-2"></i>Authorize Customer
+                                                        </a>
+                                                        <% } else { %>
+                                                            <a class="dropdown-item py-2 text-danger spa-action-btn"
+                                                                href="/admin/block/<%= customer._id %>">
+                                                                <i class="fas fa-ban me-2"></i>Restrict Customer
+                                                            </a>
+                                                            <% } %>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                                 <% }); %>

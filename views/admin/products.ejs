@@ -191,16 +191,51 @@
             background: var(--accent-gold);
             color: white;
         }
+
+        /* Fix Dropdown Clipping */
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        .product-card {
+            overflow: visible !important;
+        }
+
+        .dropdown-menu {
+            z-index: 1060 !important;
+            min-width: 180px;
+        }
+
+        /* Clear Search Button */
+        .clear-search {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            transition: color 0.2s;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .clear-search:hover {
+            color: #e11d48;
+        }
     </style>
 
     <div class="content-wrapper">
         <div class="content-header">
             <h2 class="content-title">Product Inventory</h2>
             <div class="search-container">
-                <form action="" method="get">
+                <form action="/admin/products" method="get">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" class="search-input" placeholder="Search by name or brand..." name="search"
                         value="<%= typeof search !== 'undefined' ? search : '' %>">
+                    <% if (typeof search !=='undefined' && search) { %>
+                        <a href="/admin/products" class="clear-search" title="Clear Search">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        <% } %>
                 </form>
             </div>
         </div>
@@ -249,35 +284,39 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="action-group">
-                                        <% if (locals.data[i].productOffer===0) { %>
-                                            <button class="action-btn btn-offer"
-                                                onclick="addProductOffer('<%= data[i]._id %>')">
-                                                <i class="fas fa-tag me-1"></i> Offer
-                                            </button>
-                                            <% } else { %>
-                                                <button class="action-btn btn-remove-offer"
-                                                    onclick="removeOffer('<%= data[i]._id %>')">
-                                                    <i class="fas fa-times me-1"></i> Offer
-                                                </button>
-                                                <% } %>
-
-                                                    <% if(data[i].isBlocked===false) { %>
-                                                        <a href="/admin/blockProduct?id=<%=data[i]._id %>"
-                                                            class="action-btn btn-block">
-                                                            <i class="fas fa-ban me-1"></i> Block
-                                                        </a>
-                                                        <% } else { %>
-                                                            <a href="/admin/unblockProduct?id=<%=data[i]._id %>"
-                                                                class="action-btn btn-unblock">
-                                                                <i class="fas fa-check me-1"></i> Active
-                                                            </a>
-                                                            <% } %>
-
-                                                                <a href="/admin/editProduct?id=<%=data[i]._id%>"
-                                                                    class="action-btn btn-edit">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
+                                    <div class="dropdown text-end">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li><a class="dropdown-item py-2"
+                                                    href="/admin/editProduct?id=<%=data[i]._id%>">
+                                                    <i class="fas fa-edit me-2 text-primary"></i>Edit Inventory</a>
+                                            </li>
+                                            <% if (data[i].productOffer===0) { %>
+                                                <li><button class="dropdown-item py-2"
+                                                        onclick="addProductOffer('<%= data[i]._id %>')">
+                                                        <i class="fas fa-tag me-2 text-success"></i>Attach
+                                                        Offer</button>
+                                                </li>
+                                                <% } else { %>
+                                                    <li><button class="dropdown-item py-2"
+                                                            onclick="removeOffer('<%= data[i]._id %>')">
+                                                            <i class="fas fa-times me-2 text-danger"></i>Relinquish
+                                                            Offer</button>
+                                                    </li>
+                                                    <% } %>
+                                                        <div class="dropdown-divider"></div>
+                                                        <li><button
+                                                                class="dropdown-item py-2 <%= data[i].isBlocked ? 'text-success' : 'text-danger' %>"
+                                                                onclick="toggleProductStatus('<%= data[i]._id %>', <%= data[i].isBlocked %>)">
+                                                                <i
+                                                                    class="fas <%= data[i].isBlocked ? 'fa-check' : 'fa-ban' %> me-2"></i>
+                                                                <%= data[i].isBlocked ? 'Authorize Product'
+                                                                    : 'Restrict Product' %>
+                                                            </button></li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -287,253 +326,221 @@
             </div>
         </div>
 
-        <% if (totalPages> 1) {
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, currentPage + 2);
+        <% if (totalPages> 1) { %>
+            <nav class="pagination-wrap">
+                <ul class="pagination">
+                    <% if (currentPage> 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&search=<%= search %>" title="First Page">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                                title="Previous">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        <% } %>
 
-            if (currentPage <= 3) { endPage=Math.min(totalPages, 5); } if (currentPage> totalPages - 3) {
-                startPage = Math.max(1, totalPages - 4);
-                }
-                %>
-                <div class="pagination-wrap">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            <% if (currentPage> 1) { %>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
+                            <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages, currentPage
+                                + 2); if (startPage> 1) { %>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
                                 <% } %>
 
-                                    <% if (startPage> 1) { %>
-                                        <li class="page-item">
-                                            <a class="page-link"
-                                                href="?page=1&search=<%= typeof search !== 'undefined' ? search : '' %>">1</a>
+                                    <% for (let i=startPage; i <=endPage; i++) { %>
+                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
+                                                <%= i %>
+                                            </a>
                                         </li>
-                                        <% if (startPage> 2) { %>
-                                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                                            <% } %>
+                                        <% } %>
+
+                                            <% if (endPage < totalPages) { %>
+                                                <li class="page-item disabled"><span class="page-link">...</span></li>
                                                 <% } %>
 
-                                                    <% for (let i=startPage; i <=endPage; i++) { %>
-                                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                    <% if (currentPage < totalPages) { %>
+                                                        <li class="page-item">
                                                             <a class="page-link"
-                                                                href="?page=<%= i %>&search=<%= typeof search !== 'undefined' ? search : '' %>">
-                                                                <%= i %>
+                                                                href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                                                                title="Next">
+                                                                <i class="fas fa-angle-right"></i>
+                                                            </a>
+                                                        </li>
+                                                        <li class="page-item">
+                                                            <a class="page-link"
+                                                                href="?page=<%= totalPages %>&search=<%= search %>"
+                                                                title="Last Page">
+                                                                <i class="fas fa-angle-double-right"></i>
                                                             </a>
                                                         </li>
                                                         <% } %>
-
-                                                            <% if (endPage < totalPages) { %>
-                                                                <% if (endPage < totalPages - 1) { %>
-                                                                    <li class="page-item disabled"><span
-                                                                            class="page-link">...</span></li>
-                                                                    <% } %>
-                                                                        <li class="page-item">
-                                                                            <a class="page-link"
-                                                                                href="?page=<%= totalPages %>&search=<%= typeof search !== 'undefined' ? search : '' %>">
-                                                                                <%= totalPages %>
-                                                                            </a>
-                                                                        </li>
-                                                                        <% } %>
-
-                                                                            <% if (currentPage < totalPages) { %>
-                                                                                <li class="page-item">
-                                                                                    <a class="page-link"
-                                                                                        href="?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>">
-                                                                                        <i
-                                                                                            class="fas fa-chevron-right"></i>
-                                                                                    </a>
-                                                                                </li>
-                                                                                <% } %>
-                        </ul>
-                    </nav>
-                </div>
-                <% } %>
+                </ul>
+            </nav>
+            <% } %>
     </div>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        async function addProductOffer(productId) {
-            const { value: amount } = await Swal.fire({
-                title: "Offer in Percentage",
-                input: "number",
-                inputLabel: "Percentage",
-                inputPlaceholder: "%",
-                inputAttributes: {
-                    min: 0,
-                    max: 100,
-                    step: 1
+        (function () {
+            window.initProducts = function () {
+                // Initialize search form
+                const searchForm = document.querySelector('.search-container form');
+                if (searchForm) {
+                    searchForm.onsubmit = function (e) {
+                        e.preventDefault();
+                        const search = this.querySelector('input[name="search"]').value;
+                        const url = `/admin/products?search=${encodeURIComponent(search)}`;
+                        if (window.loadContent) {
+                            window.loadContent(url);
+                        } else {
+                            window.location.href = url;
+                        }
+                    };
                 }
-            });
 
-            $.ajax({
-                url: "/admin/addProductOffer",
-                method: "post",
-                data: {
-                    percentage: amount,
-                    productId: productId
-                },
-                success: (response) => {
-                    if (response.status === true) {
-                        location.reload();
-                        Swal.fire("Offer added", "the offer has been removed", "Success")
-                    } else {
-                        alert("failed")
-                    }
+                // Initialize pagination links
+                document.querySelectorAll('.pagination .page-link').forEach(link => {
+                    link.onclick = function (e) {
+                        const href = this.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('javascript:')) {
+                            e.preventDefault();
+                            const url = `/admin/products${href.startsWith('?') ? href : '?' + href.split('?')[1]}`;
+                            if (window.loadContent) {
+                                window.loadContent(url);
+                            } else {
+                                window.location.href = url;
+                            }
+                        }
+                    };
+                });
+
+                // Initialize clear search link
+                const clearSearch = document.querySelector('.clear-search');
+                if (clearSearch) {
+                    clearSearch.onclick = function (e) {
+                        e.preventDefault();
+                        if (window.loadContent) {
+                            window.loadContent('/admin/products');
+                        } else {
+                            window.location.href = '/admin/products';
+                        }
+                    };
                 }
-            })
+            };
 
-        }
-        function removeOffer(productId) {
-            try {
+            window.toggleProductStatus = function (id, isBlocked) {
+                const action = isBlocked ? 'unblock' : 'block';
                 Swal.fire({
-                    title: "Remove offer",
-                    text: "Are you sure you want to remove this offer",
-                    icon: "Warning",
+                    title: 'Confirm Action',
+                    text: `Are you sure you want to ${action} this product?`,
+                    icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "d33",
-                    confirmButtonText: "Yes,remove it!",
-                    timer: 5000,
-                    timerProgressBar: true
-
+                    confirmButtonColor: isBlocked ? '#10b981' : '#e11d48',
+                    confirmButtonText: `Yes, ${action} it`
                 }).then(async (result) => {
                     if (result.isConfirmed) {
-                        $.ajax({
-                            url: "/admin/removeProductOffer",
-                            method: "post",
-                            data: {
-                                productId: productId
-                            },
-                            success: (response) => {
-                                if (response.status === true) {
-                                    Swal.fire("Removed!", "The offer has been removed", "success");
-                                    location.reload()
-                                } else if (response.status === false) {
-                                    Swal.fire("failed")
+                        try {
+                            const response = await fetch(`/admin/${action}Product?id=${id}`, {
+                                method: 'GET',
+                                headers: { 'Accept': 'application/json' }
+                            });
+                            const data = await response.json();
+                            if (data.status || response.ok) {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
                                 } else {
-                                    alert("failed")
+                                    window.location.reload();
                                 }
+                            } else {
+                                Swal.fire('Error', data.message || 'Operation failed', 'error');
                             }
-                        })
+                        } catch (error) {
+                            console.error('Error toggling status:', error);
+                            // Fallback if JSON response fails (e.g. redirect)
+                            if (window.loadContent) {
+                                window.loadContent(window.location.href);
+                            } else {
+                                window.location.reload();
+                            }
+                        }
                     }
-                })
-            } catch (error) {
-                console.error(error)
-            }
-        }
+                });
+            };
 
+            window.addProductOffer = async function (productId) {
+                const { value: percentage } = await Swal.fire({
+                    title: 'Apply Product Offer',
+                    input: 'number',
+                    inputLabel: 'Percentage Discount',
+                    inputPlaceholder: 'Enter a value between 1 and 99',
+                    inputAttributes: { min: 1, max: 99, step: 1 },
+                    showCancelButton: true
+                });
 
+                if (percentage) {
+                    try {
+                        const response = await fetch('/admin/addProductOffer', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId, percentage })
+                        });
+                        const res = await response.json();
+                        if (res.status) {
+                            Swal.fire('Success', 'Offer applied', 'success').then(() => {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error', res.message || 'Failed to apply offer', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Communication failure', 'error');
+                    }
+                }
+            };
 
+            window.removeOffer = function (productId) {
+                Swal.fire({
+                    title: 'Remove Offer?',
+                    text: 'The product will return to its regular price.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: 'Yes, remove it'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch('/admin/removeProductOffer', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ productId })
+                            });
+                            const res = await response.json();
+                            if (res.status) {
+                                Swal.fire('Removed', 'Offer removed successfully', 'success').then(() => {
+                                    if (window.loadContent) {
+                                        window.loadContent(window.location.href);
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to remove offer', 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error', 'Communication failure', 'error');
+                        }
+                    }
+                });
+            };
 
-
-        //     if (amount) {
-        //         if (amount < 0 || amount > 100 || isNaN(amount)) {
-        //             Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
-        //             return;
-        //         }
-
-        //         try {
-        //             Swal.fire({
-        //                 title: "Adding Offer...",
-        //                 text: "Please wait while the offer is being added",
-        //                 allowOutsideClick: false,
-        //                 didOpen: () => {
-        //                     Swal.showLoading();
-        //                 },
-        //             });
-
-        //             const response = await fetch("/admin/addProductOffer", {
-        //                 method: "POST",
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                 },
-        //                 body: JSON.stringify({
-        //                     percentage: amount,
-        //                     productId: productId,
-        //                 }),
-        //             });
-
-        //             const data = await response.json();
-
-        //             Swal.close();
-
-        //             if (response.ok && data.status === true) {
-        //                 Swal.fire("Offer Added", "The offer has been added successfully", "success").then(() => {
-        //                     location.reload();
-        //                 });
-        //             } else {
-        //                 Swal.fire("Failed", data.message || "Adding offer failed", "error");
-        //             }
-        //         } catch (error) {
-        //             Swal.fire(
-        //                 "Error",
-        //                 "An error occurred while adding the offer. Please try again.",
-        //                 "error"
-        //             );
-        //             console.error("Error adding offer:", error);
-        //         }
-        //     }
-        // }
-        // async function removeProductOffer(productId) {
-        //     const confirm = await Swal.fire({
-        //         title: "Remove Offer",
-        //         text: "Are you sure you want to remove the offer from this product?",
-        //         icon: "warning",
-        //         showCancelButton: true,
-        //         confirmButtonText: "Yes, Remove",
-        //         cancelButtonText: "Cancel",
-        //     });
-
-        //     if (confirm.isConfirmed) {
-        //         try {
-        //             Swal.fire({
-        //                 title: "Removing Offer...",
-        //                 text: "Please wait while the offer is being removed",
-        //                 allowOutsideClick: false,
-        //                 didOpen: () => {
-        //                     Swal.showLoading();
-        //                 },
-        //             });
-
-        //             const response = await fetch("/admin/removeProductOffer", {
-        //                 method: "POST",
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                 },
-        //                 body: JSON.stringify({
-        //                     productId: productId,
-        //                 }),
-        //             });
-
-        //             const data = await response.json();
-
-        //             Swal.close();
-
-        //             if (response.ok && data.status === true) {
-        //                 Swal.fire("Offer Removed", "The offer has been successfully removed", "success").then(() => {
-        //                     location.reload();
-        //                 });
-        //             } else {
-        //                 Swal.fire("Failed", data.message || "Removing offer failed", "error");
-        //             }
-        //         } catch (error) {
-        //             Swal.fire(
-        //                 "Error",
-        //                 "An error occurred while removing the offer. Please try again.",
-        //                 "error"
-        //             );
-        //             console.error("Error removing offer:", error);
-        //         }
-        //     }
-        // }
-
+            // Initialize immediately
+            window.initProducts();
+        })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <%- include("../../views/partials/admin/footer") %>

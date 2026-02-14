@@ -427,14 +427,73 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Define the ordered statuses (Simplified for UI logic)
+        (function () {
+            window.initOrders = function () {
+                document.querySelectorAll('.status-select').forEach(select => {
+                    updateSelectStyle(select);
+                    select.dataset.originalValue = select.value;
+
+                    select.onchange = async function () {
+                        const orderId = this.dataset.orderId;
+                        const newStatus = this.value;
+                        const currentStatus = this.dataset.originalValue;
+
+                        try {
+                            const response = await fetch('/admin/orders/update-status', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ orderId, status: newStatus }),
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                const Toast = Swal.mixin({
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+
+                                Toast.fire({
+                                    icon: 'success',
+                                    title: 'Order status updated'
+                                });
+
+                                updateSelectStyle(this);
+                                this.dataset.originalValue = newStatus;
+
+                                if (["Delivered", "Cancelled", "Returned"].includes(newStatus)) {
+                                    this.disabled = true;
+                                }
+                            } else {
+                                Swal.fire({
+                                    title: 'Update Failed',
+                                    text: data.message || 'Could not update status',
+                                    icon: 'error',
+                                    confirmButtonColor: '#1e293b'
+                                });
+                                this.value = currentStatus;
+                                updateSelectStyle(this);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Network error occurred',
+                                icon: 'error'
+                            });
+                            this.value = currentStatus;
+                            updateSelectStyle(this);
+                        }
+                    };
+                });
+            };
+
             function updateSelectStyle(select) {
                 const status = select.value;
-                // Remove all possible status classes
                 select.classList.remove('badge-pending', 'badge-processing', 'badge-shipped', 'badge-delivered', 'badge-cancelled', 'badge-returned');
-
-                // Add the appropriate class
                 if (status === 'Pending') select.classList.add('badge-pending');
                 else if (status === 'Processing') select.classList.add('badge-processing');
                 else if (status === 'Shipped') select.classList.add('badge-shipped');
@@ -443,168 +502,93 @@
                 else if (status === 'Return Request' || status === 'Returned') select.classList.add('badge-returned');
             }
 
-            document.querySelectorAll('.status-select').forEach(select => {
-                // Initialize style
-                updateSelectStyle(select);
-
-                // Store initial value
-                select.dataset.originalValue = select.value;
-
-                select.addEventListener('change', async function () {
-                    const orderId = this.dataset.orderId;
-                    const newStatus = this.value;
-                    const currentStatus = this.dataset.originalValue;
-
-                    try {
-                        const response = await fetch('/admin/orders/update-status', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderId, status: newStatus }),
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            const Toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            })
-
-                            Toast.fire({
-                                icon: 'success',
-                                title: 'Order status updated'
-                            })
-
-                            // Update style
-                            updateSelectStyle(this);
-
-                            // Update original value to the new successful status
-                            this.dataset.originalValue = newStatus;
-
-                            // Disable if final status
-                            if (["Delivered", "Cancelled", "Returned"].includes(newStatus)) {
-                                this.disabled = true;
-                            }
-
-                        } else {
-                            Swal.fire({
-                                title: 'Update Failed',
-                                text: data.message || 'Could not update status',
-                                icon: 'error',
-                                confirmButtonColor: '#1e293b'
-                            });
-                            this.value = currentStatus;
-                            updateSelectStyle(this);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Network error occurred',
-                            icon: 'error'
-                        });
-                        this.value = currentStatus;
-                        updateSelectStyle(this);
+            window.cancelOrder = async function (orderId) {
+                const { value: reason } = await Swal.fire({
+                    title: 'Cancel Order?',
+                    input: 'textarea',
+                    inputLabel: 'Reason for cancellation',
+                    inputPlaceholder: 'Enter reason here...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Confirm Cancellation',
+                    inputValidator: (value) => {
+                        if (!value) return 'You need to provide a reason!'
                     }
                 });
-            });
-        });
 
-        async function cancelOrder(orderId) {
-            const { value: reason } = await Swal.fire({
-                title: 'Cancel Order?',
-                input: 'textarea',
-                inputLabel: 'Reason for cancellation',
-                inputPlaceholder: 'Enter reason here...',
-                inputAttributes: {
-                    'aria-label': 'Enter reason here'
-                },
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Confirm Cancellation',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'You need to provide a reason!'
-                    }
-                }
-            });
-
-            if (reason) {
-                try {
-                    const response = await fetch('/admin/orders/cancel-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId, reason })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Cancelled!',
-                            text: 'Order has been cancelled.',
-                            icon: 'success',
-                            confirmButtonColor: '#1e293b'
-                        }).then(() => {
-                            location.reload();
+                if (reason) {
+                    try {
+                        const response = await fetch('/admin/orders/cancel-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId, reason })
                         });
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Cancelled!',
+                                text: 'Order has been cancelled.',
+                                icon: 'success'
+                            }).then(() => {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Network error occurred', 'error');
                 }
-            }
-        }
+            };
 
-        async function deleteOrder(orderId) {
-            const res = await Swal.fire({
-                title: 'Delete Order?',
-                text: 'This will permanently remove the order record!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, delete it!'
-            });
+            window.deleteOrder = async function (orderId) {
+                const res = await Swal.fire({
+                    title: 'Delete Order?',
+                    text: 'This will permanently remove the order record!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete it!'
+                });
 
-            if (res.isConfirmed) {
-                try {
-                    const response = await fetch('/admin/orders/delete-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Deleted!',
-                            text: 'Order has been permanently deleted.',
-                            icon: 'success',
-                            confirmButtonColor: '#1e293b'
-                        }).then(() => {
-                            location.reload();
+                if (res.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/orders/delete-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId })
                         });
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to delete order', 'error');
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Order has been permanently deleted.',
+                                icon: 'success'
+                            }).then(() => {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to delete order', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Network error occurred', 'error');
                 }
-            }
-        }
+            };
+
+            // Initialize immediately
+            window.initOrders();
+        })();
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

@@ -403,137 +403,149 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        let salesChart, topProductsChart, topCategoriesChart, topBrandsChart;
+        (function () {
+            var salesChart, topProductsChart, topCategoriesChart, topBrandsChart;
+            var COLORS = ['#c5a059', '#1e293b', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9'];
 
-        const COLORS = ['#c5a059', '#1e293b', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9'];
+            window.initDashboard = function () {
+                initCharts();
 
-        function initCharts() {
-            const chartData = {
-                products: <% - JSON.stringify(topProducts || []) %>,
-                categories: <% - JSON.stringify(topCategories || []) %>,
-                brands: <% - JSON.stringify(topBrands || []) %>
+                // Populate Year Filter
+                const yearSelect = document.getElementById('yearFilter');
+                if (yearSelect) {
+                    const currYear = new Date().getFullYear();
+                    yearSelect.innerHTML = '';
+                    for (let y = currYear; y >= currYear - 4; y--) {
+                        yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+                    }
+                    yearSelect.onchange = window.updateDashboardData;
+                }
+
+                const chartFilter = document.getElementById('chartFilter');
+                if (chartFilter) {
+                    chartFilter.onchange = window.updateDashboardData;
+                }
             };
 
-            // Standard Donut Config
-            const getDonutConfig = (labels, data) => ({
-                type: 'doughnut',
-                data: {
-                    labels,
-                    datasets: [{
-                        data,
-                        backgroundColor: COLORS,
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
+            function initCharts() {
+                const chartData = {
+                    products: <% - JSON.stringify(topProducts || []) %>,
+                    categories: <% - JSON.stringify(topCategories || []) %>,
+                    brands: <% - JSON.stringify(topBrands || []) %>
+                };
 
-            // Sales Line Chart
-            const salesCtx = document.getElementById('salesChart');
-            salesChart = new Chart(document.getElementById('salesChart'), {
-                type: 'line',
-                data: {
-                    labels: <% - JSON.stringify(initialSalesData.labels) %>,
-                    datasets: [{
-                        label: 'Revenue',
-                        data: <% - JSON.stringify(initialSalesData.data) %>,
-                        borderColor: '#c5a059',
-                        borderWidth: 3,
-                        background: 'rgba(197, 160, 89, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#c5a059',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9' },
-                            ticks: { callback: val => '₹' + val.toLocaleString('en-IN') }
+                const getDonutConfig = (labels, data) => ({
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: COLORS,
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                const salesCtx = document.getElementById('salesChart');
+                if (salesCtx) {
+                    if (salesChart) salesChart.destroy();
+                    salesChart = new Chart(salesCtx, {
+                        type: 'line',
+                        data: {
+                            labels: <% - JSON.stringify(initialSalesData.labels) %>,
+                            datasets: [{
+                                label: 'Revenue',
+                                data: <% - JSON.stringify(initialSalesData.data) %>,
+                                borderColor: '#c5a059',
+                                borderWidth: 3,
+                                background: 'rgba(197, 160, 89, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#c5a059',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                            }]
                         },
-                        x: { grid: { display: false } }
-                    }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: '#f1f5f9' },
+                                    ticks: { callback: val => '₹' + val.toLocaleString('en-IN') }
+                                },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
                 }
-            });
 
-            // Products Donut
-            if (chartData.products.length) {
-                topProductsChart = new Chart(document.getElementById('topProductsChart'),
-                    getDonutConfig(chartData.products.map(p => p.name), chartData.products.map(p => p.revenue)));
-                renderList('topProductsList', chartData.products);
+                if (chartData.products.length && document.getElementById('topProductsChart')) {
+                    if (topProductsChart) topProductsChart.destroy();
+                    topProductsChart = new Chart(document.getElementById('topProductsChart'),
+                        getDonutConfig(chartData.products.map(p => p.name), chartData.products.map(p => p.revenue)));
+                    renderList('topProductsList', chartData.products);
+                }
+
+                if (chartData.categories.length && document.getElementById('topCategoriesChart')) {
+                    if (topCategoriesChart) topCategoriesChart.destroy();
+                    topCategoriesChart = new Chart(document.getElementById('topCategoriesChart'),
+                        getDonutConfig(chartData.categories.map(c => c.name), chartData.categories.map(c => c.revenue)));
+                    renderList('topCategoriesList', chartData.categories);
+                }
+
+                if (chartData.brands.length && document.getElementById('topBrandsChart')) {
+                    if (topBrandsChart) topBrandsChart.destroy();
+                    topBrandsChart = new Chart(document.getElementById('topBrandsChart'),
+                        getDonutConfig(chartData.brands.map(b => b.name), chartData.brands.map(b => b.revenue)));
+                    renderList('topBrandsList', chartData.brands, true);
+                }
             }
 
-            // Categories Donut
-            if (chartData.categories.length) {
-                topCategoriesChart = new Chart(document.getElementById('topCategoriesChart'),
-                    getDonutConfig(chartData.categories.map(c => c.name), chartData.categories.map(c => c.revenue)));
-                renderList('topCategoriesList', chartData.categories);
-            }
-
-            // Brands Donut
-            if (chartData.brands.length) {
-                topBrandsChart = new Chart(document.getElementById('topBrandsChart'),
-                    getDonutConfig(chartData.brands.map(b => b.name), chartData.brands.map(b => b.revenue)));
-                renderList('topBrandsList', chartData.brands, true);
-            }
-        }
-
-        function renderList(id, data, isBrand = false) {
-            const container = document.getElementById(id);
-            container.innerHTML = data.slice(0, 5).map((item, i) => `
-            <div class="top-list-item">
-                <div class="item-rank rank-${i + 1}">${i + 1}</div>
-                <div class="item-info">
-                    <span class="item-name">${item.name}</span>
-                    <span class="item-meta">${isBrand ? item.totalOrderCount + ' Orders' : item.count + ' Units Sold'}</span>
+            function renderList(id, data, isBrand = false) {
+                const container = document.getElementById(id);
+                if (!container) return;
+                container.innerHTML = data.slice(0, 5).map((item, i) => `
+                <div class="top-list-item">
+                    <div class="item-rank rank-${i + 1}">${i + 1}</div>
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-meta">${isBrand ? item.totalOrderCount + ' Orders' : item.count + ' Units Sold'}</span>
+                    </div>
+                    <div class="item-value">₹${item.revenue.toLocaleString('en-IN')}</div>
                 </div>
-                <div class="item-value">₹${item.revenue.toLocaleString('en-IN')}</div>
-            </div>
-        `).join('');
-        }
+            `).join('');
+            }
 
-        async function updateDashboardData() {
-            const filter = document.getElementById('chartFilter').value;
-            const year = document.getElementById('yearFilter').value;
-            try {
-                const res = await fetch(`/admin/dashboard/sales-data?filter=${filter}&year=${year}`);
-                const data = await res.json();
-                salesChart.data.labels = data.labels;
-                salesChart.data.datasets[0].data = data.data;
-                salesChart.update();
-            } catch (err) { console.error(err); }
-        }
+            window.updateDashboardData = async function () {
+                const filter = document.getElementById('chartFilter').value;
+                const yearFilterEl = document.getElementById('yearFilter');
+                const year = yearFilterEl ? yearFilterEl.value : new Date().getFullYear();
+                try {
+                    const res = await fetch(`/admin/dashboard/sales-data?filter=${filter}&year=${year}`);
+                    const data = await res.json();
+                    if (salesChart) {
+                        salesChart.data.labels = data.labels;
+                        salesChart.data.datasets[0].data = data.data;
+                        salesChart.update();
+                    }
+                } catch (err) { console.error(err); }
+            };
 
-        // Initialize when script runs (safe since it's at bottom of body)
-        initCharts();
-
-        // Populate Year Filter
-        const yearSelect = document.getElementById('yearFilter');
-        const currYear = new Date().getFullYear();
-        for (let y = currYear; y >= currYear - 4; y--) {
-            yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
-        }
-
-        const chartFilter = document.getElementById('chartFilter');
-        const yearFilter = document.getElementById('yearFilter');
-
-        if (chartFilter) chartFilter.onchange = updateDashboardData;
-        if (yearFilter) yearFilter.onchange = updateDashboardData;
+            window.initDashboard();
+        })();
     </script>
 
     <%- include("../partials/admin/footer") %>

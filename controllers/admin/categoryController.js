@@ -65,7 +65,7 @@ const addCategory = async (req, res) => {
         });
 
         await newCategory.save();
-        return res.json({ message: "Category added successfully" });
+        return res.json({ status: true, message: "Category added successfully" });
     } catch (error) {
         console.error("Error in addCategory:", error);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -145,7 +145,11 @@ const removeCategoryOffer = async (req, res) => {
 
 const removeCategory = async (req, res) => {
     try {
-        const { categoryId } = req.body;
+        const categoryId = req.query.id || req.body.categoryId;
+
+        if (!categoryId) {
+            return res.status(400).json({ status: false, message: "Category ID is required" });
+        }
 
         const category = await Category.findById(categoryId);
         if (!category) {

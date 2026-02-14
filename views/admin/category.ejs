@@ -1,108 +1,77 @@
 <%- include("../../views/partials/admin/header") %>
 
   <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" />
-    <link rel="stylesheet" href="/styles/category.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
     <style>
-      .content-wrapper {
-        padding: 2.5rem;
-        background-color: var(--admin-bg);
+      :root {
+        --gold-primary: #a88732;
+        --gold-secondary: #9c7a2c;
+        --dark-bg: #0f172a;
       }
 
-      .content-header {
-        margin-bottom: 2rem;
+      body {
+        background-color: #f8fafc;
+        font-family: 'Outfit', sans-serif;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      body::-webkit-scrollbar {
+        display: none;
+      }
+
+      * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+
+      *::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .content-wrapper {
+        padding: 2.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
       }
 
       .content-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-      }
-
-      .category-grid {
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        gap: 2rem;
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: var(--dark-bg);
+        letter-spacing: -0.025em;
+        margin-bottom: 0;
       }
 
       .premium-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(0, 0, 0, 0.02);
-      }
-
-      .card-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        color: #1e293b;
-      }
-
-      /* Form Styles */
-      .form-label {
-        color: #64748b;
-        font-weight: 600;
-        font-size: 0.85rem;
-        margin-bottom: 0.5rem;
-        display: block;
-      }
-
-      .form-control {
-        border-radius: 10px;
-        padding: 0.7rem 1rem;
-        border: 1px solid #e2e8f0;
-        font-size: 0.9rem;
-      }
-
-      .form-control:focus {
-        border-color: var(--accent-gold);
-        box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+        padding: 2rem;
       }
 
       .btn-gold {
-        background: var(--accent-gold);
+        background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
         color: white;
         border: none;
-        padding: 0.75rem;
-        border-radius: 10px;
+        border-radius: 12px;
+        padding: 0.6rem 1.25rem;
         font-weight: 600;
-        transition: all 0.2s;
-        width: 100%;
+        transition: all 0.3s ease;
       }
 
       .btn-gold:hover {
-        background: var(--accent-gold-hover);
-        transform: translateY(-1px);
-      }
-
-      /* Table Styles */
-      .table thead th {
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        padding: 1rem 1.5rem;
-        border: none;
-      }
-
-      .table tbody td {
-        padding: 1.25rem 1.5rem;
-        vertical-align: middle;
-        border-top: 1px solid #f1f5f9;
-        font-size: 0.9rem;
-        color: #334155;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(168, 135, 50, 0.2);
+        color: white;
       }
 
       .status-badge {
         padding: 0.35rem 0.75rem;
-        border-radius: 6px;
+        border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
       }
 
@@ -112,70 +81,73 @@
       }
 
       .badge-unlisted {
-        background: #fff1f2;
-        color: #e11d48;
+        background: #fef2f2;
+        color: #ef4444;
       }
 
-      .action-btn {
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        margin: 2px;
-      }
-
-      .btn-outline {
-        border: 1px solid #e2e8f0;
+      .table thead th {
+        background: #f8fafc;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
         color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
       }
 
-      .btn-offer {
-        background: #f5f3ff;
-        color: #8b5cf6;
-        border: 1px solid #ddd6fe;
-      }
-
-      .btn-edit {
-        background: #eff6ff;
-        color: #3b82f6;
-        border: 1px solid #dbeafe;
-      }
-
-      .search-wrapper .form-control {
-        border-radius: 0 10px 10px 0;
-        height: 45px;
-      }
-
-      .search-wrapper .input-group-text {
-        border-radius: 10px 0 0 10px;
-        background-color: white !important;
-        border: 1px solid #e2e8f0;
-        border-right: none;
+      .table tbody td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+        color: #1e293b;
+        border-bottom: 1px solid #f8fafc;
       }
 
       .modal-content {
-        border-radius: 16px;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
       }
 
       .modal-header {
+        padding: 1.5rem 2rem;
         border-bottom: 1px solid #f1f5f9;
-        padding: 1.5rem;
+        background: #fff;
       }
 
       .modal-body {
         padding: 2rem;
+      }
+
+      .dropdown-menu {
+        border: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 0.5rem;
+      }
+
+      .dropdown-item {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .dropdown-item:hover {
+        background-color: #f1f5f9;
       }
     </style>
   </head>
 
   <body>
     <div class="content-wrapper">
-      <div class="content-header d-flex justify-content-between align-items-center">
+      <div class="content-header d-flex justify-content-between align-items-center mb-4">
         <h2 class="content-title">Category Architecture</h2>
-        <button class="btn-gold" style="width: auto; padding: 0.75rem 1.5rem;" data-bs-toggle="modal"
-          data-bs-target="#addCategoryModal">
+        <button class="btn-gold" style="width: auto;" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
           <i class="fas fa-plus me-2"></i> Define New Category
         </button>
       </div>
@@ -197,23 +169,22 @@
       </div>
 
       <div class="category-grid" style="display: block;">
-        <!-- Category List -->
         <div class="premium-card" style="padding: 0; overflow: hidden;">
           <div class="table-responsive">
             <table class="table" id="categoryTable">
               <thead>
                 <tr>
-                  <th>Namespace</th>
-                  <th>Segment Description</th>
-                  <th class="text-center">Offer</th>
-                  <th class="text-center">Status</th>
-                  <th class="text-end">Lifecycle Actions</th>
+                  <th>Category Identity</th>
+                  <th>Description</th>
+                  <th class="text-center">Offer Status</th>
+                  <th class="text-center">Listing</th>
+                  <th class="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <% if (cat && cat.length> 0) {
-                  const reversedCat = [...cat].reverse();
-                  for (let i = 0; i < reversedCat.length; i++) { const category=reversedCat[i]; %>
+                <% if (cat && cat.length> 0) { %>
+                  <% for (let i=0; i < cat.length; i++) { let category=cat[i]; let escapedName=(category.name || ""
+                    ).replace(/'/g, "\\'" ); let escapedDesc=(category.description || "" ).replace(/'/g, "\\'" ); %>
                     <tr>
                       <td class="fw-bold">
                         <%= category.name %>
@@ -242,18 +213,13 @@
                             Actions
                           </button>
                           <ul class="dropdown-menu">
-                            <!-- Edit -->
                             <li>
-                              <a class="dropdown-item" href="#"
-                                onclick="openEditModal('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')">
-                                <i class="fas fa-edit me-2 text-primary"></i> Edit
-                              </a>
+                              <a class="dropdown-item" href="javascript:void(0)"
+                                onclick="openEditModal(event, '<%= category._id %>', '<%= escapedName %>', '<%= escapedDesc %>')"><i
+                                  class="fas fa-edit me-2 text-primary"></i> Edit</a>
                             </li>
-
-                            <!-- List/Unlist -->
                             <li>
-                              <a class="dropdown-item list-unlisted-btn" href="#" data-id="<%= category._id %>"
-                                data-status="<%= category.isListed %>"
+                              <a class="dropdown-item" href="javascript:void(0)"
                                 onclick="toggleListing(event, '<%= category._id %>', <%= category.isListed %>)">
                                 <% if (category.isListed) { %>
                                   <i class="fas fa-eye-slash me-2 text-danger"></i> Unlist
@@ -262,18 +228,18 @@
                                     <% } %>
                               </a>
                             </li>
-
-                            <!-- Offers -->
                             <li>
                               <hr class="dropdown-divider">
                             </li>
                             <li>
                               <% if (!category.categoryOffer) { %>
-                                <a class="dropdown-item" href="#" onclick="addOffer('<%= category._id %>')">
+                                <a class="dropdown-item" href="javascript:void(0)"
+                                  onclick="addOffer(event, '<%= category._id %>')">
                                   <i class="fas fa-tag me-2 text-warning"></i> Add Offer
                                 </a>
                                 <% } else { %>
-                                  <a class="dropdown-item" href="#" onclick="removeOffer('<%= category._id %>')">
+                                  <a class="dropdown-item" href="javascript:void(0)"
+                                    onclick="removeOffer(event, '<%= category._id %>')">
                                     <i class="fas fa-eraser me-2 text-danger"></i> Revoke Offer
                                   </a>
                                   <% } %>
@@ -294,482 +260,448 @@
           </div>
         </div>
       </div>
+
+      <div id="paginationWrapper">
+        <% if (totalPages> 1) {
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, currentPage + 2);
+          if (currentPage <= 3) { endPage=Math.min(totalPages, 5); } if (currentPage> totalPages - 3) { startPage =
+            Math.max(1, totalPages - 4); }
+            %>
+            <div class="pagination-container mt-4" id="paginationContainer">
+              <ul class="pagination justify-content-center">
+                <% if (currentPage> 1) { %>
+                  <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                      onclick="changePage(event, <%= currentPage - 1 %>)">&laquo; Previous</a></li>
+                  <% } %>
+                    <% if (startPage> 1) { %>
+                      <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                          onclick="changePage(event, 1)">1</a></li>
+                      <% if (startPage> 2) { %><li class="page-item disabled"><span class="page-link">...</span></li>
+                        <% } %>
+                          <% } %>
+                            <% for (let i=startPage; i <=endPage; i++) { %>
+                              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(event, <%= i %>)">
+                                  <%= i %>
+                                </a>
+                              </li>
+                              <% } %>
+                                <% if (endPage < totalPages) { %>
+                                  <% if (endPage < totalPages - 1) { %>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <% } %>
+                                      <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                                          onclick="changePage(event, <%= totalPages %>)">
+                                          <%= totalPages %>
+                                        </a></li>
+                                      <% } %>
+                                        <% if (currentPage < totalPages) { %>
+                                          <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                                              onclick="changePage(event, <%= currentPage + 1 %>)">Next &raquo;</a></li>
+                                          <% } %>
+              </ul>
+            </div>
+            <% } %>
+      </div>
     </div>
 
-    <% if (totalPages> 1) {
-      let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, currentPage + 2);
-
-      if (currentPage <= 3) endPage=Math.min(totalPages, 5); if (currentPage> totalPages - 3) startPage = Math.max(1,
-        totalPages - 4);
-        %>
-        <div class="pagination-container mt-4" id="paginationContainer">
-          <ul class="pagination justify-content-center">
-            <% if (currentPage> 1) { %>
-              <li class="page-item">
-                <a class="page-link" href="#" onclick="changePage(<%= currentPage - 1 %>)">&laquo; Previous</a>
-              </li>
-              <% } %>
-
-                <% if (startPage> 1) { %>
-                  <li class="page-item">
-                    <a class="page-link" href="#" onclick="changePage(1)">1</a>
-                  </li>
-                  <% if (startPage> 2) { %>
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    <% } %>
-                      <% } %>
-
-                        <% for (let i=startPage; i <=endPage; i++) { %>
-                          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                            <a class="page-link" href="#" onclick="changePage(<%= i %>)">
-                              <%= i %>
-                            </a>
-                          </li>
-                          <% } %>
-
-                            <% if (endPage < totalPages) { %>
-                              <% if (endPage < totalPages - 1) { %>
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                                <% } %>
-                                  <li class="page-item">
-                                    <a class="page-link" href="#" onclick="changePage(<%= totalPages %>)">
-                                      <%= totalPages %>
-                                    </a>
-                                  </li>
-                                  <% } %>
-
-                                    <% if (currentPage < totalPages) { %>
-                                      <li class="page-item">
-                                        <a class="page-link" href="#" onclick="changePage(<%= currentPage + 1 %>)">Next
-                                          &raquo;</a>
-                                      </li>
-                                      <% } %>
-          </ul>
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-white">
+            <h5 class="modal-title fw-bold">Define New Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="addCategoryForm" onsubmit="return handleFormSubmit(event)">
+              <div class="mb-4">
+                <label class="form-label">Category Name</label>
+                <input type="text" id="categoryName" placeholder="e.g. Luxury Chronographs" class="form-control"
+                  name="name" />
+                <div id="name-error" class="error-message"
+                  style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Strategic Description</label>
+                <textarea id="descriptionId" placeholder="Describe the segment..." class="form-control"
+                  name="description" rows="4"></textarea>
+                <div id="description-error" class="error-message"
+                  style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn-gold py-2">Establish Category</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <% } %>
+      </div>
+    </div>
 
-          <!-- Add Category Modal -->
-          <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-white">
-                  <h5 class="modal-title fw-bold">Define New Category</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                  <form id="addCategoryForm" onsubmit="return handleFormSubmit(event)">
-                    <div class="mb-4">
-                      <label class="form-label">Category Name</label>
-                      <input type="text" placeholder="e.g. Luxury Chronographs" class="form-control" name="name" />
-                      <div id="name-error" class="error-message"
-                        style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
-                    </div>
-                    <div class="mb-4">
-                      <label class="form-label">Strategic Description</label>
-                      <textarea id="descriptionId" placeholder="Describe the segment..." class="form-control"
-                        name="description" rows="4"></textarea>
-                      <div id="description-error" class="error-message"
-                        style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
-                    </div>
-                    <div class="d-grid">
-                      <button type="submit" class="btn-gold py-2">Establish Category</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-white">
+            <h5 class="modal-title fw-bold">Edit Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-
-          <!-- Edit Category Modal -->
-          <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header border-0">
-                  <h5 class="modal-title fw-bold">Edit Category</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="editCategoryForm" onsubmit="return handleEditFormSubmit(event)">
-                    <div class="mb-3">
-                      <label class="form-label">Category Name</label>
-                      <input type="text" id="editCategoryName" name="categoryName" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Description</label>
-                      <textarea id="editCategoryDescription" name="description" class="form-control" rows="4"
-                        required></textarea>
-                    </div>
-                    <input type="hidden" id="editCategoryId">
-                    <div class="d-grid mt-4">
-                      <button type="submit" class="btn-gold">Update Category</button>
-                    </div>
-                  </form>
-                </div>
+          <div class="modal-body p-4">
+            <form id="editCategoryForm" onsubmit="return handleEditFormSubmit(event)">
+              <div class="mb-4">
+                <label class="form-label">Category Name</label>
+                <input type="text" id="editCategoryName" name="categoryName" class="form-control" required>
               </div>
-            </div>
+              <div class="mb-4">
+                <label class="form-label">Description</label>
+                <textarea id="editCategoryDescription" name="description" class="form-control" rows="4"
+                  required></textarea>
+              </div>
+              <input type="hidden" id="editCategoryId">
+              <div class="d-grid">
+                <button type="submit" class="btn-gold py-2">Update Category</button>
+              </div>
+            </form>
           </div>
+        </div>
+      </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      (function () {
+        let editModal = null;
+        let addModal = null;
+        let searchTimeout = null;
 
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        window.initCategory = function () {
+          const editEl = document.getElementById('editCategoryModal');
+          const addEl = document.getElementById('addCategoryModal');
+          if (editEl) {
+            editModal = bootstrap.Modal.getInstance(editEl);
+            if (!editModal) editModal = new bootstrap.Modal(editEl);
+          }
+          if (addEl) {
+            addModal = bootstrap.Modal.getInstance(addEl);
+            if (!addModal) addModal = new bootstrap.Modal(addEl);
+          }
+        };
 
+        window.handleSearch = function (query) {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+            window.fetchCategories(1, query);
+          }, 500);
+        };
 
-          <script>
-            let editModal;
-            let addModal;
-            let searchTimeout;
+        window.changePage = function (event, page) {
+          if (event) event.preventDefault();
+          const query = document.getElementById('categorySearch') ? document.getElementById('categorySearch').value : "";
+          window.fetchCategories(page, query);
+        };
 
-            document.addEventListener('DOMContentLoaded', () => {
-              editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
-              addModal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
+        window.fetchCategories = function (page = 1, search = "") {
+          fetch('/admin/category?page=' + page + '&search=' + encodeURIComponent(search), {
+            headers: { 'Accept': 'application/json' }
+          })
+            .then(res => res.json())
+            .then(data => {
+              window.updateTable(data.cat);
+              window.updatePagination(data.currentPage, data.totalPages);
+            })
+            .catch(err => console.error('Error fetching categories:', err));
+        };
+
+        window.updateTable = function (categories) {
+          const tbody = document.querySelector('#categoryTable tbody');
+          if (!tbody) return;
+          if (!categories || categories.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted small">No categories found matching your search</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = categories.map(category => {
+            const escapedName = (category.name || "").replace(/'/g, "\\'");
+            const escapedDesc = (category.description || "").replace(/'/g, "\\'");
+            const isListed = category.isListed;
+
+            let offerDisplay = '<span class="text-muted small">None</span>';
+            if (category.categoryOffer) {
+              offerDisplay = '<span class="fw-bold text-primary">' + category.categoryOffer + '%</span>';
+            }
+
+            let statusBadge = '<span class="status-badge ' + (isListed ? 'badge-listed' : 'badge-unlisted') + '">' +
+              (isListed ? 'Listed' : 'Archived') + '</span>';
+
+            let listAction = isListed ?
+              '<i class="fas fa-eye-slash me-2 text-danger"></i> Unlist' :
+              '<i class="fas fa-eye me-2 text-success"></i> List';
+
+            let offerAction = !category.categoryOffer ?
+              '<a class="dropdown-item" href="javascript:void(0)" onclick="addCategoryOffer(event, \'' + category._id + '\')"><i class="fas fa-tag me-2 text-warning"></i> Add Offer</a>' :
+              '<a class="dropdown-item" href="javascript:void(0)" onclick="removeCategoryOffer(event, \'' + category._id + '\')"><i class="fas fa-eraser me-2 text-danger"></i> Revoke Offer</a>';
+
+            return '<tr>' +
+              '<td class="fw-bold">' + category.name + '</td>' +
+              '<td class="text-muted small" style="max-width: 250px;">' + (category.description || "") + '</td>' +
+              '<td class="text-center">' + offerDisplay + '</td>' +
+              '<td class="text-center">' + statusBadge + '</td>' +
+              '<td class="text-end">' +
+              '<div class="dropdown">' +
+              '<button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>' +
+              '<ul class="dropdown-menu shadow-sm border-0">' +
+              '<li><a class="dropdown-item" href="javascript:void(0)" onclick="openEditModal(event, \'' + category._id + '\', \'' + escapedName + '\', \'' + escapedDesc + '\')"><i class="fas fa-edit me-2 text-primary"></i> Edit</a></li>' +
+              '<li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleListing(event, \'' + category._id + '\', ' + isListed + ')">' + listAction + '</a></li>' +
+              '<li><hr class="dropdown-divider"></li>' +
+              '<li>' + offerAction + '</li>' +
+              '<li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteCategory(\'' + category._id + '\')"><i class="fas fa-trash-alt me-2"></i> Delete</a></li>' +
+              '</ul>' +
+              '</div>' +
+              '</td>' +
+              '</tr>';
+          }).join('');
+
+          // Re-initialize dropdowns
+          if (typeof bootstrap !== 'undefined') {
+            const dropdownElementList = [].slice.call(tbody.querySelectorAll('[data-bs-toggle="dropdown"]'));
+            dropdownElementList.map(function (dropdownToggleEl) {
+              return new bootstrap.Dropdown(dropdownToggleEl);
             });
+          }
+        };
 
-            function handleSearch(query) {
-              clearTimeout(searchTimeout);
-              searchTimeout = setTimeout(() => {
-                fetchCategories(1, query);
-              }, 500);
+        window.updatePagination = function (currentPage, totalPages) {
+          let container = document.getElementById('paginationContainer');
+          const wrapper = document.getElementById('paginationWrapper');
+
+          if (totalPages <= 1) {
+            if (container) container.innerHTML = '';
+            return;
+          }
+
+          if (!container) {
+            container = document.createElement('div');
+            container.id = 'paginationContainer';
+            container.className = 'pagination-container mt-4';
+            if (wrapper) wrapper.appendChild(container);
+          }
+
+          let html = '<ul class="pagination justify-content-center">';
+          if (currentPage > 1) {
+            html += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(event, ' + (currentPage - 1) + ')">&laquo; Previous</a></li>';
+          }
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, currentPage + 2);
+          if (currentPage <= 3) endPage = Math.min(totalPages, 5);
+          if (currentPage > totalPages - 3) startPage = Math.max(1, totalPages - 4);
+
+          if (startPage > 1) {
+            html += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(event, 1)">1</a></li>';
+            if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+          }
+          for (let i = startPage; i <= endPage; i++) {
+            html += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '"><a class="page-link" href="#" onclick="changePage(event, ' + i + ')">' + i + '</a></li>';
+          }
+          if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            html += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(event, ' + totalPages + ')">' + totalPages + '</a></li>';
+          }
+          if (currentPage < totalPages) {
+            html += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(event, ' + (currentPage + 1) + ')">Next &raquo;</a></li>';
+          }
+          html += '</ul>';
+          container.innerHTML = html;
+        };
+
+        window.handleFormSubmit = async function (event) {
+          event.preventDefault();
+          const nameInput = document.getElementById('categoryName');
+          const descriptionInput = document.getElementById('descriptionId');
+          const nameError = document.getElementById('name-error');
+          const descriptionError = document.getElementById('description-error');
+
+          if (nameError) nameError.style.display = 'none';
+          if (descriptionError) descriptionError.style.display = 'none';
+
+          let isValid = true;
+          const name = nameInput.value.trim();
+          const description = descriptionInput.value.trim();
+
+          if (name === '') {
+            if (nameError) { nameError.innerText = 'Please enter a name'; nameError.style.display = 'block'; }
+            isValid = false;
+          } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+            if (nameError) { nameError.innerText = 'Only alphabets are allowed'; nameError.style.display = 'block'; }
+            isValid = false;
+          }
+
+          if (description === '') {
+            if (descriptionError) { descriptionError.innerText = 'Please enter a description'; descriptionError.style.display = 'block'; }
+            isValid = false;
+          }
+
+          if (!isValid) return;
+
+          try {
+            const response = await fetch('/admin/addCategory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ name, description })
+            });
+            const data = await response.json();
+            if (response.ok && data.status) {
+              Swal.fire({ icon: 'success', title: 'Success', text: 'Category added successfully!', showConfirmButton: false, timer: 1500 });
+              if (addModal) addModal.hide();
+              event.target.reset();
+              window.fetchCategories(1);
+            } else {
+              Swal.fire({ icon: 'error', title: 'Oops', text: data.error || 'An error occurred' });
             }
+          } catch (error) {
+            Swal.fire({ icon: "error", title: "Oops", text: error.message || "An error occurred" });
+          }
+        };
 
-            function changePage(page) {
-              const query = document.getElementById('categorySearch').value;
-              fetchCategories(page, query);
+        window.openEditModal = function (event, id, name, description) {
+          if (event) event.preventDefault();
+          window.initCategory();
+          const idEl = document.getElementById('editCategoryId');
+          const nameEl = document.getElementById('editCategoryName');
+          const descEl = document.getElementById('editCategoryDescription');
+          if (idEl) idEl.value = id;
+          if (nameEl) nameEl.value = name;
+          if (descEl) descEl.value = description;
+          if (editModal) editModal.show();
+        };
+
+        window.handleEditFormSubmit = async function (event) {
+          event.preventDefault();
+          const id = document.getElementById('editCategoryId').value;
+          const categoryName = document.getElementById('editCategoryName').value;
+          const description = document.getElementById('editCategoryDescription').value;
+
+          try {
+            const response = await fetch('/admin/editCategory/' + id, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ categoryName, description })
+            });
+            const data = await response.json();
+            if (response.ok && data.status) {
+              Swal.fire({ icon: 'success', title: 'Updated', text: 'Category updated successfully', timer: 1500, showConfirmButton: false });
+              if (editModal) editModal.hide();
+              window.fetchCategories(window.getCurrentPage());
+            } else {
+              Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Update failed' });
             }
+          } catch (err) {
+            Swal.fire('Error', err.message, 'error');
+          }
+        };
 
-            function fetchCategories(page = 1, search = "") {
-              fetch(`/admin/category?page=${page}&search=${search}`, {
-                headers: { 'Accept': 'application/json' }
-              })
-                .then(res => res.json())
-                .then(data => {
-                  updateTable(data.cat);
-                  updatePagination(data.currentPage, data.totalPages);
-                })
-                .catch(err => console.error('Error fetching categories:', err));
+        window.addCategoryOffer = async function (event, categoryId) {
+          if (event) event.preventDefault();
+          const { value: amount } = await Swal.fire({
+            title: "Offer in Percentage", input: "number", inputLabel: "Percentage", inputPlaceholder: "%", inputAttributes: { min: 0, max: 100, step: 1 }
+          });
+          if (amount) {
+            if (amount < 0 || amount > 100 || isNaN(amount)) {
+              Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
+              return;
             }
-
-            function updateTable(categories) {
-              const tbody = document.querySelector('#categoryTable tbody');
-              if (!categories || categories.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted small">No categories found matching your search</td></tr>`;
-                return;
-              }
-
-              tbody.innerHTML = categories.map(category => `
-                <tr>
-                  <td class="fw-bold">${category.name}</td>
-                  <td class="text-muted small" style="max-width: 250px;">${category.description}</td>
-                  <td class="text-center">
-                    ${category.categoryOffer ? `<span class="fw-bold text-primary">${category.categoryOffer}%</span>` : '<span class="text-muted small">None</span>'}
-                  </td>
-                  <td class="text-center">
-                    <span class="status-badge ${category.isListed ? 'badge-listed' : 'badge-unlisted'}">
-                      ${category.isListed ? 'Listed' : 'Archived'}
-                    </span>
-                  </td>
-                  <td class="text-end">
-                    <div class="dropdown">
-                      <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Actions
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#" onclick="openEditModal('${category._id}', '${category.name.replace(/'/g, "\\'")}', '${category.description.replace(/'/g, "\\'")}')">
-                            <i class="fas fa-edit me-2 text-primary"></i> Edit
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#" onclick="toggleListing(event, '${category._id}', ${category.isListed})">
-                            ${category.isListed ?
-                  '<i class="fas fa-eye-slash me-2 text-danger"></i> Unlist' :
-                  '<i class="fas fa-eye me-2 text-success"></i> List'}
-                          </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                          ${!category.categoryOffer ?
-                  `<a class="dropdown-item" href="#" onclick="addOffer('${category._id}')"><i class="fas fa-tag me-2 text-warning"></i> Add Offer</a>` :
-                  `<a class="dropdown-item" href="#" onclick="removeOffer('${category._id}')"><i class="fas fa-eraser me-2 text-danger"></i> Revoke Offer</a>`}
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              `).join('');
-            }
-
-            function updatePagination(currentPage, totalPages) {
-              const container = document.getElementById('paginationContainer');
-              if (!container) return;
-
-              if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-              }
-
-              let html = '<ul class="pagination justify-content-center">';
-
-              if (currentPage > 1) {
-                html += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage - 1})">&laquo; Previous</a></li>`;
-              }
-
-              let startPage = Math.max(1, currentPage - 2);
-              let endPage = Math.min(totalPages, currentPage + 2);
-
-              for (let i = startPage; i <= endPage; i++) {
-                html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
-              }
-
-              if (currentPage < totalPages) {
-                html += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next &raquo;</a></li>`;
-              }
-
-              html += '</ul>';
-              container.innerHTML = html;
-            }
-
-            function openEditModal(id, name, description) {
-              const idInput = document.getElementById('editCategoryId');
-              const nameInput = document.getElementById('editCategoryName');
-              const descInput = document.getElementById('editCategoryDescription');
-
-              if (idInput) idInput.value = id;
-              if (nameInput) nameInput.value = name;
-              if (descInput) descInput.value = description;
-
-              editModal.show();
-            }
-
-            function toggleListing(event, id, isListed) {
-              event.preventDefault();
-              const url = isListed ? `/admin/unlistCategory?id=${id}` : `/admin/listCategory?id=${id}`;
-
-              fetch(url, { headers: { 'Accept': 'application/json' } })
-                .then(res => res.json())
-                .then(data => {
-                  if (data.status) {
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Success',
-                      text: data.message,
-                      timer: 1500,
-                      showConfirmButton: false
-                    });
-                    fetchCategories(getCurrentPage());
-                  }
-                })
-                .catch(err => Swal.fire('Error', 'Operation failed', 'error'));
-            }
-
-            function getCurrentPage() {
-              const activePage = document.querySelector('.page-item.active .page-link');
-              return activePage ? parseInt(activePage.innerText) : 1;
-            }
-
-            function handleEditFormSubmit(event) {
-              event.preventDefault();
-
-              const id = document.getElementById('editCategoryId').value;
-              const categoryName = document.getElementById('editCategoryName').value;
-              const description = document.getElementById('editCategoryDescription').value;
-
-              fetch(`/admin/editCategory/${id}`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json'
-                },
-                body: JSON.stringify({ categoryName, description })
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.status) {
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Updated',
-                      text: 'Category updated successfully',
-                      timer: 1500,
-                      showConfirmButton: false
-                    });
-                    editModal.hide();
-                    fetchCategories(getCurrentPage());
-                  } else {
-                    throw new Error(data.error || 'Update failed');
-                  }
-                })
-                .catch(err => {
-                  Swal.fire('Error', err.message, 'error');
-                });
-            }
-
-            function handleFormSubmit(event) {
-              event.preventDefault();
-
-              if (!validateForm()) return;
-
-              const nameInput = document.getElementsByName('name')[0];
-              const descInput = document.getElementById('descriptionId');
-              const name = nameInput ? nameInput.value : "";
-              const description = descInput ? descInput.value : "";
-
-              fetch('/admin/addCategory', {
-                method: 'post',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json'
-                },
-                body: JSON.stringify({ name, description })
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.error) throw new Error(data.error);
-
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Category added successfully!',
-                    showConfirmButton: false,
-                    timer: 1500
-                  });
-                  addModal.hide();
-                  document.getElementById('addCategoryForm').reset();
-                  fetchCategories(1);
-                })
-                .catch(error => {
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Oops',
-                    text: error.message || 'An error occurred while adding the category'
-                  });
-                });
-            }
-
-            async function addOffer(categoryId) {
-              const { value: amount } = await Swal.fire({
-                title: "Offer in Percentage",
-                input: "number",
-                inputLabel: "Percentage",
-                inputPlaceholder: "%",
-                inputAttributes: { min: 0, max: 100, step: 1 }
+            try {
+              Swal.fire({ title: "Adding Offer...", didOpen: () => Swal.showLoading() });
+              const response = await fetch("/admin/addCategoryOffer", {
+                method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({ percentage: amount, categoryId: categoryId }),
               });
-
-              if (amount) {
-                if (amount < 0 || amount > 100 || isNaN(amount)) {
-                  Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100", "error");
-                  return;
-                }
-
-                try {
-                  Swal.fire({
-                    title: "Adding Offer...",
-                    didOpen: () => Swal.showLoading(),
-                  });
-
-                  const response = await fetch("/admin/addCategoryOffer", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                    body: JSON.stringify({ percentage: amount, categoryId: categoryId }),
-                  });
-
-                  const data = await response.json();
-                  Swal.close();
-
-                  if (response.ok && data.status === true) {
-                    Swal.fire("Offer Added", "The offer has been added successfully", "success");
-                    fetchCategories(getCurrentPage());
-                  } else {
-                    Swal.fire("Failed", data.message || "Adding offer failed", "error");
-                  }
-                } catch (error) {
-                  Swal.fire("Error", "An error occurred", "error");
-                }
+              const data = await response.json();
+              Swal.close();
+              if (response.ok && data.status === true) {
+                Swal.fire("Offer Added", "The offer has been added successfully", "success");
+                window.fetchCategories(window.getCurrentPage());
+              } else {
+                Swal.fire("Failed", data.message || "Adding offer failed", "error");
               }
-            }
+            } catch (error) { Swal.fire("Error", "An error occurred", "error"); }
+          }
+        };
 
-            async function removeOffer(categoryId) {
-              const confirm = await Swal.fire({
-                title: "Remove Offer",
-                text: "Are you sure you want to remove the offer?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Yes, Remove",
+        window.removeCategoryOffer = async function (event, categoryId) {
+          if (event) event.preventDefault();
+          const confirm = await Swal.fire({
+            title: "Remove Offer", text: "Are you sure you want to remove the offer?", icon: "warning", showCancelButton: true, confirmButtonText: "Yes, Remove",
+          });
+          if (confirm.isConfirmed) {
+            try {
+              Swal.fire({ title: "Removing...", didOpen: () => Swal.showLoading() });
+              const response = await fetch("/admin/removeCategoryOffer", {
+                method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({ categoryId: categoryId }),
               });
-
-              if (confirm.isConfirmed) {
-                try {
-                  Swal.fire({
-                    title: "Removing...",
-                    didOpen: () => Swal.showLoading(),
-                  });
-
-                  const response = await fetch("/admin/removeCategoryOffer", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                    body: JSON.stringify({ categoryId: categoryId }),
-                  });
-
-                  const data = await response.json();
-                  Swal.close();
-
-                  if (response.ok && data.status === true) {
-                    Swal.fire("Removed", "Offer removed success", "success");
-                    fetchCategories(getCurrentPage());
-                  } else {
-                    Swal.fire("Failed", data.message || "Removing offer failed", "error");
-                  }
-                } catch (error) {
-                  Swal.fire("Error", "An error occurred", "error");
-                }
+              const data = await response.json();
+              Swal.close();
+              if (response.ok && data.status === true) {
+                Swal.fire("Removed", "Offer removed success", "success");
+                window.fetchCategories(window.getCurrentPage());
+              } else {
+                Swal.fire("Failed", data.message || "Removing offer failed", "error");
               }
+            } catch (error) { Swal.fire("Error", "An error occurred", "error"); }
+          }
+        };
+
+        window.toggleListing = async function (event, id, isListed) {
+          if (event) event.preventDefault();
+          const action = isListed ? 'unlist' : 'list';
+          try {
+            const response = await fetch('/admin/' + action + 'Category?id=' + id, { method: 'GET', headers: { 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (data.status) {
+              window.fetchCategories(window.getCurrentPage());
+            } else {
+              Swal.fire('Error', data.message || 'Failed to toggle listing', 'error');
             }
+          } catch (error) {
+            console.error('Error toggling listing:', error);
+            Swal.fire('Error', 'An error occurred while toggling listing', 'error');
+          }
+        };
 
-            function validateForm() {
-              clearErrorMessages();
-              const nameElements = document.getElementsByName('name');
-              const descElement = document.getElementById('descriptionId');
-              const name = nameElements.length > 0 ? nameElements[0].value.trim() : "";
-              const description = descElement ? descElement.value.trim() : "";
-              let isValid = true;
+        window.deleteCategory = async function (id) {
+          const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          });
 
-              if (name === '') {
-                displayErrorMessage('name-error', 'Please enter a name');
-                isValid = false;
-              } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-                displayErrorMessage('name-error', 'Only alphabets are allowed');
-                isValid = false;
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch('/admin/deleteCategory?id=' + id, { method: 'GET', headers: { 'Accept': 'application/json' } });
+              const data = await response.json();
+              if (data.status) {
+                Swal.fire('Deleted!', 'Category has been deleted.', 'success');
+                window.fetchCategories(window.getCurrentPage());
+              } else {
+                Swal.fire('Error!', data.message || 'Deletion failed.', 'error');
               }
-              if (description === '') {
-                displayErrorMessage('description-error', 'Please enter a description');
-                isValid = false;
-              }
-              return isValid;
+            } catch (error) {
+              Swal.fire('Error!', 'An error occurred during deletion.', 'error');
             }
+          }
+        };
 
-            function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              if (errorElement) {
-                errorElement.innerText = message;
-                errorElement.style.display = 'block';
-              }
-            }
+        window.getCurrentPage = function () {
+          const activePage = document.querySelector('#paginationContainer .page-item.active .page-link');
+          return activePage ? parseInt(activePage.innerText) : 1;
+        };
 
-            function clearErrorMessages() {
-              const errorElements = document.querySelectorAll('.error-message');
-              errorElements.forEach((element) => {
-                element.innerText = '';
-                element.style.display = 'none';
-              });
-            }
-
-            function clearErrorMessage() {
-              const errorElements = document.getElementsByClassName("error-message");
-              Array.from(errorElements).forEach(element => {
-                element.innerText = "";
-                element.style.display = "none";
-              });
-            }
-          </script>
-
-
-          <%- include("../../views/partials/admin/footer") %>
+        window.initCategory();
+      })();
+    </script>
+    <%- include("../../views/partials/admin/footer") %>

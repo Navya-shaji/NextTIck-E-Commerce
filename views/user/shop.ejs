@@ -199,6 +199,19 @@
         color: var(--light-text);
       }
 
+      .clear-search-lite {
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        color: var(--light-text);
+        text-decoration: none;
+        transition: 0.3s;
+      }
+
+      .clear-search-lite:hover {
+        color: #ff4d4d;
+      }
+
       .sort-select-premium {
         padding: 12px 20px;
         border: 1px solid var(--border-color);
@@ -599,14 +612,19 @@
         <main class="products-area">
           <div class="shop-toolbar">
             <div class="search-form-lite">
-              <form action="/shop" method="GET" style="display: flex;">
+              <form action="/shop" method="GET" style="display: flex; align-items: center; width: 100%;">
                 <% if (query.category) { %><input type="hidden" name="category" value="<%= query.category %>">
                   <% } %>
                     <% if (query.brand) { %><input type="hidden" name="brand" value="<%= query.brand %>">
                       <% } %>
                         <input type="text" name="query" placeholder="Search our catalog..."
                           value="<%= query.query || '' %>">
-                        <button type="submit"><i class="fas fa-search"></i></button>
+                        <% if (query.query) { %>
+                          <a href="/shop" class="clear-search-lite" title="Clear Search">
+                            <i class="fas fa-times"></i>
+                          </a>
+                          <% } %>
+                            <button type="submit"><i class="fas fa-search"></i></button>
               </form>
             </div>
 

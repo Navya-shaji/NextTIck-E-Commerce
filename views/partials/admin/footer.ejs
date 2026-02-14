@@ -1,71 +1,75 @@
+</main>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Handle Mobile Sidebar
-    document.querySelector('.btn-mobile')?.addEventListener('click', function () {
-        document.querySelector('.navbar-aside').classList.toggle('show');
-    });
-
-    // Close sidebar on overlay click (mobile)
-    document.querySelector('.screen-overlay')?.addEventListener('click', function () {
-        document.querySelector('.navbar-aside').classList.remove('show');
-    });
-
-    // SPA Navigation Script
-    document.addEventListener('DOMContentLoaded', () => {
+    (function () {
         const mainContentSelector = '.main-wrap';
 
+        // Handle Mobile Sidebar
+        const mobileBtn = document.querySelector('.btn-mobile');
+        if (mobileBtn) {
+            mobileBtn.onclick = () => {
+                document.querySelector('.navbar-aside')?.classList.toggle('show');
+            };
+        }
+
+        const overlay = document.querySelector('.screen-overlay');
+        if (overlay) {
+            overlay.onclick = () => {
+                document.querySelector('.navbar-aside')?.classList.remove('show');
+            };
+        }
+
         // Function to update active menu item
-        const updateActiveMenuItem = (url) => {
+        window.updateActiveMenuItem = (urlPath) => {
             document.querySelectorAll('.menu-link').forEach(link => {
                 const item = link.closest('.menu-item');
+                if (!item) return;
                 item.classList.remove('active');
-                if (link.getAttribute('href') === url) {
+                const href = link.getAttribute('href');
+                if (href && (href === urlPath || urlPath.startsWith(href + '?') || urlPath.startsWith(href + '/'))) {
                     item.classList.add('active');
                 }
             });
         };
 
-        // Initial active state
-        updateActiveMenuItem(window.location.pathname);
-
-        // Handle internal navigation (Sidebar + Pagination + Actions)
-        document.body.addEventListener('click', async (e) => {
-            const link = e.target.closest('.menu-link, .page-link, .spa-action-btn');
-            if (!link) return;
-
-            const href = link.getAttribute('href');
-            // Allow logout or external links to function normally
-            if (!href || href === '/admin/logout' || href.startsWith('http') || href === '#') return;
-
-            e.preventDefault();
-
+        // Global SPA Content Loader
+        window.loadContent = async (url, pushState = true) => {
             try {
                 // Show loading indicator
                 const mainContent = document.querySelector(mainContentSelector);
                 if (mainContent) mainContent.style.opacity = '0.5';
 
-                const response = await fetch(href);
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('Network response was not ok');
 
+                // Get the final URL (handles redirects)
+                const finalUrl = response.url;
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
                 const newContent = doc.querySelector(mainContentSelector);
                 if (!newContent) {
-                    window.location.href = href; // Fallback if parsing fails
+                    window.location.href = finalUrl; // Fallback
                     return;
                 }
 
+                // Update Title if available
+                if (doc.title) document.title = doc.title;
+
                 // Replace content
-                if (mainContent) mainContent.replaceWith(newContent);
+                const currentMain = document.querySelector(mainContentSelector);
+                if (currentMain) currentMain.replaceWith(newContent);
 
-                // Update URL
-                window.history.pushState({ path: href }, '', href);
+                // Update URL to the FINAL responded URL
+                if (pushState) {
+                    window.history.pushState({ path: finalUrl }, '', finalUrl);
+                }
 
-                // Update active menu item
-                updateActiveMenuItem(href.split('?')[0]); // Use base path for sidebar highlighting
+                // Update active menu item based on base path
+                const urlObj = new URL(finalUrl, window.location.origin);
+                window.updateActiveMenuItem(urlObj.pathname);
 
                 // Re-execute scripts in the new content
                 const scripts = newContent.querySelectorAll('script');
@@ -73,22 +77,57 @@
                     const newScript = document.createElement('script');
                     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
                     newScript.textContent = oldScript.textContent;
-                    // We append to body or head to execute, or replace inside container if it was inline
-                    // Appending to the new content container is safer for scoped execution context
                     oldScript.parentNode.replaceChild(newScript, oldScript);
                 });
 
+                // Re-initialize Bootstrap Components
+                if (typeof bootstrap !== 'undefined') {
+                    // Re-initialize Dropdowns
+                    const dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                    dropdownElementList.map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl));
+
+                    // Re-initialize Tooltips
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+                    // Handle Modals
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.paddingRight = '';
+                }
+
+                window.scrollTo(0, 0);
+
             } catch (error) {
-                console.error('Navigation error:', error);
-                window.location.href = href; // Fallback to full reload
+                console.error('SPA Load Error:', error);
+                window.location.href = url; // Fallback
             }
+        };
+
+        // Handle internal navigation clicks
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.menu-link, .page-link, .spa-action-btn, .dropdown-item, .btn-back');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (!href || href === '/admin/logout' || href.startsWith('http') || href.startsWith('#') || href.startsWith('javascript:')) return;
+
+            e.preventDefault();
+            window.loadContent(href);
         });
 
         // Handle browser back/forward buttons
-        window.addEventListener('popstate', () => {
-            window.location.reload(); // Simple fallback for back button
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.path) {
+                window.loadContent(e.state.path, false);
+            } else {
+                window.loadContent(window.location.href, false);
+            }
         });
-    });
+
+        // Initial sidebar highlight
+        window.updateActiveMenuItem(window.location.pathname);
+    })();
 </script>
 </body>
 

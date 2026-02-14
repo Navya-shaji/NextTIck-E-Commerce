@@ -262,8 +262,15 @@ const blockProduct = async (req, res) => {
     try {
         let id = req.query.id;
         await Product.updateOne({ _id: id }, { $set: { isBlocked: true } })
+
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            return res.json({ status: true, message: "Product blocked successfully" });
+        }
         res.redirect("/admin/products")
     } catch (error) {
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            return res.status(500).json({ status: false, message: "Error blocking product" });
+        }
         res.redirect("/admin/error")
     }
 }
@@ -274,8 +281,15 @@ const unblockProduct = async (req, res) => {
     try {
         let id = req.query.id;
         await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            return res.json({ status: true, message: "Product unblocked successfully" });
+        }
         res.redirect("/admin/products")
     } catch (error) {
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            return res.status(500).json({ status: false, message: "Error unblocking product" });
+        }
         res.redirect("/admin/error")
     }
 }

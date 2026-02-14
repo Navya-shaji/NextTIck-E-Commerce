@@ -424,118 +424,138 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function previewImage(event) {
-            const preview = document.getElementById('imagePreview');
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+        (function () {
+            window.initBanners = function () {
+                const addBannerForm = document.getElementById('addBannerForm');
+                if (addBannerForm) {
+                    addBannerForm.onsubmit = async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
 
-        document.getElementById('addBannerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
+                        try {
+                            const response = await fetch('/admin/addBanner', {
+                                method: 'POST',
+                                body: formData
+                            });
 
-            try {
-                const response = await fetch('/admin/addBanner', {
-                    method: 'POST',
-                    body: formData
-                });
+                            const data = await response.json();
 
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message,
-                        confirmButtonColor: '#c5a059'
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message,
-                        confirmButtonColor: '#c5a059'
-                    });
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: data.message,
+                                    confirmButtonColor: '#c5a059'
+                                }).then(() => {
+                                    if (window.loadContent) {
+                                        window.loadContent(window.location.href);
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: data.message,
+                                    confirmButtonColor: '#c5a059'
+                                });
+                            }
+                        } catch (error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to add banner',
+                                confirmButtonColor: '#c5a059'
+                            });
+                        }
+                    };
                 }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to add banner',
-                    confirmButtonColor: '#c5a059'
-                });
-            }
-        });
 
-        async function toggleBannerStatus(bannerId) {
-            try {
-                const response = await fetch(`/admin/toggleBannerStatus/${bannerId}`, {
-                    method: 'POST'
-                });
+                const editBannerForm = document.getElementById('editBannerForm');
+                if (editBannerForm) {
+                    editBannerForm.onsubmit = async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const bannerId = document.getElementById('editBannerId').value;
 
-                const data = await response.json();
+                        try {
+                            const response = await fetch(`/admin/editBanner/${bannerId}`, {
+                                method: 'POST',
+                                body: formData
+                            });
 
-                if (data.success) {
-                    const statusBadge = document.getElementById(`status-${bannerId}`);
-                    if (data.isActive) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.className = 'badge badge-success';
-                    } else {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.className = 'badge badge-danger';
-                    }
+                            const data = await response.json();
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: data.message,
+                                    confirmButtonColor: '#c5a059'
+                                }).then(() => {
+                                    if (window.loadContent) {
+                                        window.loadContent(window.location.href);
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: data.message,
+                                    confirmButtonColor: '#c5a059'
+                                });
+                            }
+                        } catch (error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to update banner',
+                                confirmButtonColor: '#c5a059'
+                            });
+                        }
+                    };
                 }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to update banner status',
-                    confirmButtonColor: '#c5a059'
-                });
-            }
-        }
+            };
 
-        async function deleteBanner(bannerId) {
-            const result = await Swal.fire({
-                title: 'Delete Banner?',
-                text: 'This action cannot be undone',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, delete it!'
-            });
+            window.previewImage = function (event) {
+                const preview = document.getElementById('imagePreview');
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
 
-            if (result.isConfirmed) {
+            window.toggleBannerStatus = async function (bannerId) {
                 try {
-                    const response = await fetch(`/admin/deleteBanner/${bannerId}`, {
-                        method: 'DELETE'
+                    const response = await fetch(`/admin/toggleBannerStatus/${bannerId}`, {
+                        method: 'POST'
                     });
 
                     const data = await response.json();
 
                     if (data.success) {
-                        document.getElementById(`banner-row-${bannerId}`).remove();
+                        const statusBadge = document.getElementById(`status-${bannerId}`);
+                        if (statusBadge) {
+                            if (data.isActive) {
+                                statusBadge.textContent = 'Active';
+                                statusBadge.className = 'badge badge-success';
+                            } else {
+                                statusBadge.textContent = 'Inactive';
+                                statusBadge.className = 'badge badge-danger';
+                            }
+                        }
+
                         Swal.fire({
                             icon: 'success',
-                            title: 'Deleted!',
+                            title: 'Success!',
                             text: data.message,
                             timer: 1500,
                             showConfirmButton: false
@@ -545,108 +565,111 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: 'Failed to delete banner',
+                        text: 'Failed to update banner status',
                         confirmButtonColor: '#c5a059'
                     });
                 }
-            }
-        }
+            };
 
-        function handleEditButtonClick(btn) {
-            const id = btn.getAttribute('data-id');
-            const title = btn.getAttribute('data-title');
-            const description = btn.getAttribute('data-description');
-            const start = btn.getAttribute('data-start');
-            const end = btn.getAttribute('data-end');
-            const link = btn.getAttribute('data-link');
-            const image = btn.getAttribute('data-image');
-            openEditModal(id, title, description, start, end, link, image);
-        }
-
-        function openEditModal(bannerId, title, description, startDate, endDate, link, image) {
-            document.getElementById('editBannerId').value = bannerId;
-            document.getElementById('editTitle').value = title;
-            document.getElementById('editDescription').value = description;
-
-            // Format dates for input fields (YYYY-MM-DD)
-            const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
-            const formattedEndDate = new Date(endDate).toISOString().split('T')[0];
-            document.getElementById('editStartDate').value = formattedStartDate;
-            document.getElementById('editEndDate').value = formattedEndDate;
-
-            document.getElementById('editLink').value = link;
-            document.getElementById('editCurrentImage').src = `/uploads/banners/${image}`;
-            document.getElementById('editImagePreview').style.display = 'none';
-
-            // Show the modal
-            const editModalElement = document.getElementById('editBannerModal');
-            let modal = bootstrap.Modal.getInstance(editModalElement);
-            if (!modal) {
-                modal = new bootstrap.Modal(editModalElement);
-            }
-            modal.show();
-        }
-
-        function deleteBannerFromModal() {
-            const bannerId = document.getElementById('editBannerId').value;
-            deleteBanner(bannerId);
-            // Hide modal after starting delete process
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editBannerModal'));
-            if (modal) modal.hide();
-        }
-
-        function previewEditImage(event) {
-            const preview = document.getElementById('editImagePreview');
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        document.getElementById('editBannerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const bannerId = document.getElementById('editBannerId').value;
-
-            try {
-                const response = await fetch(`/admin/editBanner/${bannerId}`, {
-                    method: 'POST',
-                    body: formData
+            window.deleteBanner = async function (bannerId) {
+                const result = await Swal.fire({
+                    title: 'Delete Banner?',
+                    text: 'This action cannot be undone',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete it!'
                 });
 
-                const data = await response.json();
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/deleteBanner/${bannerId}`, {
+                            method: 'DELETE'
+                        });
 
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message,
-                        confirmButtonColor: '#c5a059'
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message,
-                        confirmButtonColor: '#c5a059'
-                    });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const row = document.getElementById(`banner-row-${bannerId}`);
+                            if (row) row.remove();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: data.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Failed to delete banner',
+                            confirmButtonColor: '#c5a059'
+                        });
+                    }
                 }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to update banner',
-                    confirmButtonColor: '#c5a059'
-                });
-            }
-        });
+            };
+
+            window.handleEditButtonClick = function (btn) {
+                const id = btn.getAttribute('data-id');
+                const title = btn.getAttribute('data-title');
+                const description = btn.getAttribute('data-description');
+                const start = btn.getAttribute('data-start');
+                const end = btn.getAttribute('data-end');
+                const link = btn.getAttribute('data-link');
+                const image = btn.getAttribute('data-image');
+                window.openEditModal(id, title, description, start, end, link, image);
+            };
+
+            window.openEditModal = function (bannerId, title, description, startDate, endDate, link, image) {
+                document.getElementById('editBannerId').value = bannerId;
+                document.getElementById('editTitle').value = title;
+                document.getElementById('editDescription').value = description;
+
+                // Format dates for input fields (YYYY-MM-DD)
+                const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
+                const formattedEndDate = new Date(endDate).toISOString().split('T')[0];
+                document.getElementById('editStartDate').value = formattedStartDate;
+                document.getElementById('editEndDate').value = formattedEndDate;
+
+                document.getElementById('editLink').value = link;
+                document.getElementById('editCurrentImage').src = `/uploads/banners/${image}`;
+                document.getElementById('editImagePreview').style.display = 'none';
+
+                // Show the modal
+                const editModalElement = document.getElementById('editBannerModal');
+                let modal = bootstrap.Modal.getInstance(editModalElement);
+                if (!modal) {
+                    modal = new bootstrap.Modal(editModalElement);
+                }
+                modal.show();
+            };
+
+            window.deleteBannerFromModal = function () {
+                const bannerId = document.getElementById('editBannerId').value;
+                window.deleteBanner(bannerId);
+                // Hide modal after starting delete process
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editBannerModal'));
+                if (modal) modal.hide();
+            };
+
+            window.previewEditImage = function (event) {
+                const preview = document.getElementById('editImagePreview');
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            window.initBanners();
+        })();
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

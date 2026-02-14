@@ -27,6 +27,7 @@ const ADMIN_ROUTES = {
     UNLIST_CATEGORY: '/unlistCategory',
     ADD_CATEGORY_OFFER: '/addCategoryOffer',
     REMOVE_CATEGORY_OFFER: '/removeCategoryOffer',
+    DELETE_CATEGORY: '/deleteCategory',
 
     // Brand Management
     BRANDS: '/brands',
@@ -60,6 +61,7 @@ const ADMIN_ROUTES = {
     // Coupon Management
     COUPON: '/coupon',
     CREATE_COUPON: '/createCoupon',
+    GET_COUPON: '/getCoupon',
     EDIT_COUPON: '/editCoupon',
     UPDATE_COUPON: '/updateCoupon',
     DELETE_COUPON: '/deleteCoupon/:id',

@@ -1,240 +1,729 @@
 <%- include("../../views/partials/admin/header") %>
-
-    <head>
-        <link rel="stylesheet" href="/styles/brands.css">
-    </head>
-
     <style>
+        :root {
+            --gold-primary: #a88732;
+            --gold-secondary: #9c7a2c;
+            --dark-bg: #0f172a;
+            --slate-800: #1e293b;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Outfit', sans-serif;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        *::-webkit-scrollbar {
+            display: none !important;
+        }
+
         .content-wrapper {
             padding: 2.5rem;
-            background-color: var(--admin-bg);
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .content-header {
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
 
         .content-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-bg);
+            letter-spacing: -0.025em;
         }
 
         .brands-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
-            gap: 2rem;
+            gap: 2.5rem;
+            align-items: start;
         }
 
         .premium-card {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(0, 0, 0, 0.02);
+            border-radius: 20px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            color: #1e293b;
+            color: var(--dark-bg);
         }
 
         .form-label {
-            color: #64748b;
             font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-            display: block;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.75rem;
         }
 
         .form-control {
-            border-radius: 10px;
-            padding: 0.7rem 1rem;
-            border: 1px solid #e2e8f0;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            transition: all 0.2s;
         }
 
         .form-control:focus {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 4px rgba(168, 135, 50, 0.1);
         }
 
         .btn-gold {
-            background: var(--accent-gold);
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
             color: white;
             border: none;
-            padding: 0.75rem;
-            border-radius: 10px;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
             font-weight: 600;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             width: 100%;
         }
 
         .btn-gold:hover {
-            background: var(--accent-gold-hover);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(168, 135, 50, 0.2);
         }
 
-        /* Table Styling */
+        .brand-table-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
         .table thead th {
             background: #f8fafc;
-            color: #64748b;
-            font-size: 0.75rem;
+            padding: 1.25rem;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 1rem 1.5rem;
-            border: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .table tbody td {
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem;
             vertical-align: middle;
-            border-top: 1px solid #f1f5f9;
-            font-size: 0.9rem;
-            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .brand-logo-wrap {
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             border-radius: 10px;
             overflow: hidden;
-            background: #f1f5f9;
+            background: #f8fafc;
+            padding: 4px;
+            border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #e2e8f0;
         }
 
         .brand-logo {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
         }
 
         .status-badge {
             padding: 0.35rem 0.75rem;
-            border-radius: 6px;
+            border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
-        .badge-active {
+        .badge-listed {
             background: #ecfdf5;
             color: #10b981;
         }
 
-        .badge-blocked {
-            background: #fff1f2;
-            color: #e11d48;
+        .badge-unlisted {
+            background: #fef2f2;
+            color: #ef4444;
         }
 
-        .action-btn {
-            padding: 0.45rem 0.9rem;
+        .search-wrapper {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-wrapper .form-control {
+            border-radius: 12px;
+            padding-left: 2.8rem;
+            height: 48px;
+            background: #f8fafc;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            z-index: 10;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
             border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-decoration: none;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .btn-block {
-            background: #fff1f2;
-            color: #e11d48;
-            border: 1px solid #ffe4e6;
-        }
-
-        .btn-unblock {
-            background: #ecfdf5;
-            color: #10b981;
-            border: 1px solid #d1fae5;
+        .dropdown-item:hover {
+            background-color: #f1f5f9;
         }
     </style>
 
     <div class="content-wrapper">
-        <div class="content-header">
-            <h2 class="content-title">Brand Collection</h2>
+        <div class="content-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h2 class="content-title">Brand Portfolio</h2>
+                <p class="text-muted small mb-0">Manage and track your global brand registry</p>
+            </div>
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="brandSearch" class="form-control" placeholder="Search brands..."
+                    onkeyup="handleSearch(this.value)" value="<%= search %>">
+            </div>
         </div>
 
         <div class="brands-grid">
-            <!-- Add Brand -->
             <div class="premium-card">
                 <h5 class="card-title">Register New Brand</h5>
-                <form method="POST" action="/admin/addBrand" enctype="multipart/form-data">
+                <form id="addBrandForm" onsubmit="return handleFormSubmit(event)">
                     <div class="mb-4">
                         <label class="form-label">Brand Identity</label>
-                        <input type="text" name="name" placeholder="Enter brand name" class="form-control" required />
+                        <input type="text" name="name" id="brandNameInput" placeholder="e.g. Rolex, Omega"
+                            class="form-control" />
+                        <div id="brandName-error" class="error-message"
+                            style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
                     </div>
                     <div class="mb-4">
                         <label class="form-label">Media Asset</label>
-                        <input class="form-control" name="image" type="file" required />
+                        <input class="form-control" name="image" id="brandImageInput" type="file" />
+                        <div id="brandImage-error" class="error-message"
+                            style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
+                        <p class="text-muted small mt-2">Recommended: PNG with transparent background</p>
                     </div>
-                    <button class="btn-gold" type="submit">Deploy Brand</button>
+                    <button class="btn-gold" type="submit">Establish Brand</button>
                 </form>
             </div>
 
-            <!-- Brand List -->
-            <div class="premium-card" style="padding: 0; overflow: hidden;">
+            <div class="brand-table-container">
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table" id="brandTable">
                         <thead>
                             <tr>
                                 <th>Brand Identity</th>
                                 <th class="text-center">Asset</th>
                                 <th class="text-center">Status</th>
-                                <th class="text-end">Lifecycle</th>
+                                <th class="text-end">Lifecycle Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <% data.forEach((brand)=> { %>
-                                <tr>
-                                    <td class="fw-bold">
-                                        <%= brand.brandName %>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="brand-logo-wrap mx-auto">
-                                            <img src="/uploads/re-image/<%= brand.brandImage %>"
-                                                alt="<%= brand.brandName %>" class="brand-logo" />
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span
-                                            class="status-badge <%= brand.isBlocked ? 'badge-blocked' : 'badge-active' %>">
-                                            <%= brand.isBlocked ? 'Inhibited' : 'Operational' %>
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <% if (!brand.isBlocked) { %>
-                                            <form method="POST" action="/admin/blockBrand/<%= brand._id %>"
-                                                style="display: inline;">
-                                                <button class="action-btn btn-block"><i class="fas fa-ban me-1"></i>
-                                                    Block</button>
-                                            </form>
-                                            <% } else { %>
-                                                <form method="POST" action="/admin/unblockBrand/<%= brand._id %>"
-                                                    style="display: inline;">
-                                                    <button class="action-btn btn-unblock"><i
-                                                            class="fas fa-unlock me-1"></i> Unblock</button>
-                                                </form>
-                                                <% } %>
-                                    </td>
-                                </tr>
-                                <% }); %>
+                        <tbody id="brandTableBody">
+                            <% if (data && data.length> 0) { %>
+                                <% data.forEach((brand)=> {
+                                    let escapedBrandName = (brand.brandName || "").replace(/'/g, "\\'");
+                                    %>
+                                    <tr>
+                                        <td class="fw-bold">
+                                            <%= brand.brandName %>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="brand-logo-wrap mx-auto">
+                                                <img src="/uploads/re-image/<%= brand.brandImage %>"
+                                                    alt="<%= brand.brandName %>" class="brand-logo" />
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="status-badge <%= brand.isBlocked ? 'badge-unlisted' : 'badge-listed' %>">
+                                                <%= brand.isBlocked ? 'Blocked' : 'Operational' %>
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <button class="btn btn-light btn-sm dropdown-toggle" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="javascript:void(0)"
+                                                            onclick="openEditModal(event, '<%= brand._id %>', '<%= escapedBrandName %>')"><i
+                                                                class="fas fa-edit me-2 text-primary"></i> Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="javascript:void(0)"
+                                                            onclick="toggleBrandStatus(event, '<%= brand._id %>', <%= brand.isBlocked %>)">
+                                                            <% if (brand.isBlocked) { %>
+                                                                <i class="fas fa-check-circle me-2 text-success"></i>
+                                                                Unblock
+                                                                <% } else { %>
+                                                                    <i class="fas fa-ban me-2 text-danger"></i> Block
+                                                                    <% } %>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="javascript:void(0)"
+                                                            onclick="deleteBrand(event, '<%= brand._id %>')">
+                                                            <i class="fas fa-trash-alt me-2"></i> Delete
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="4" class="text-center py-5 text-muted small">No brands
+                                                    found matching your search</td>
+                                            </tr>
+                                            <% } %>
                         </tbody>
                     </table>
+                </div>
+
+                <div id="brandPaginationContainer" class="p-3 border-top <%= totalPages <= 1 ? 'd-none' : '' %>">
+                    <ul class="pagination justify-content-center mb-0">
+                        <% if (totalPages> 1) {
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, currentPage + 2);
+                            if (currentPage <= 3) endPage=Math.min(totalPages, 5); if (currentPage> totalPages - 3)
+                                startPage = Math.max(1, totalPages - 4);
+                                %>
+                                <% if (currentPage> 1) { %>
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                                            onclick="changePage(event, <%= currentPage - 1 %>)">&laquo;</a></li>
+                                    <% } %>
+                                        <% if (startPage> 1) { %>
+                                            <li class="page-item"><a class="page-link" href="javascript:void(0)"
+                                                    onclick="changePage(event, 1)">1</a></li>
+                                            <% if (startPage> 2) { %>
+                                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                                <% } %>
+                                                    <% } %>
+                                                        <% for (let i=startPage; i <=endPage; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                                <a class="page-link" href="javascript:void(0)"
+                                                                    onclick="changePage(event, <%= i %>)">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+                                                                <% if (endPage < totalPages) { %>
+                                                                    <% if (endPage < totalPages - 1) { %>
+                                                                        <li class="page-item disabled"><span
+                                                                                class="page-link">...</span></li>
+                                                                        <% } %>
+                                                                            <li class="page-item"><a class="page-link"
+                                                                                    href="javascript:void(0)"
+                                                                                    onclick="changePage(event, <%= totalPages %>)">
+                                                                                    <%= totalPages %>
+                                                                                </a></li>
+                                                                            <% } %>
+                                                                                <% if (currentPage < totalPages) { %>
+                                                                                    <li class="page-item"><a
+                                                                                            class="page-link"
+                                                                                            href="javascript:void(0)"
+                                                                                            onclick="changePage(event, <%= currentPage + 1 %>)">&raquo;</a>
+                                                                                    </li>
+                                                                                    <% } %>
+                                                                                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Brand Modal -->
+    <div class="modal fade" id="editBrandModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-white">
+                    <h5 class="modal-title fw-bold">Refine Brand Identity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editBrandForm" onsubmit="return handleEditBrandSubmit(event)">
+                        <input type="hidden" name="brandId" id="editBrandId">
+                        <div class="mb-4">
+                            <label class="form-label">Revised Brand Name</label>
+                            <input type="text" name="brandName" id="editBrandName" class="form-control">
+                            <div id="editBrandName-error" class="error-message"
+                                style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Update Asset (Optional)</label>
+                            <input type="file" name="image" id="editBrandImage" class="form-control">
+                            <div id="editBrandImage-error" class="error-message"
+                                style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 4px;"></div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn-gold py-2">Commit Updates</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function confirmDelete() {
-            return confirm("Are you sure you want to delete this brand?");
-        }
-    </script>
+        (function () {
+            let editModal = null;
+            let searchTimeout = null;
 
+            window.initBrandModals = function () {
+                const el = document.getElementById('editBrandModal');
+                if (el) {
+                    editModal = bootstrap.Modal.getInstance(el);
+                    if (!editModal) editModal = new bootstrap.Modal(el);
+                }
+            };
+
+            window.handleSearch = function (query) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    window.fetchBrands(1, query);
+                }, 500);
+            };
+
+            window.changePage = function (event, page) {
+                if (event) event.preventDefault();
+                const el = document.getElementById('brandSearch');
+                const query = el ? el.value : "";
+                window.fetchBrands(page, query);
+            };
+
+            window.fetchBrands = function (page = 1, search = "") {
+                fetch('/admin/brands?page=' + page + '&search=' + encodeURIComponent(search), {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        window.updateTable(data.data);
+                        window.updatePagination(data.currentPage, data.totalPages);
+                    })
+                    .catch(err => console.error('Error fetching brands:', err));
+            };
+
+            window.updateTable = function (brands) {
+                const tbody = document.getElementById('brandTableBody');
+                if (!tbody) return;
+                if (!brands || brands.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted small">No brands found matching your search</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = brands.map(brand => {
+                    const escapedName = (brand.brandName || "").replace(/'/g, "\\'");
+                    const isBlocked = brand.isBlocked;
+                    const statusClass = isBlocked ? 'badge-unlisted' : 'badge-listed';
+                    const statusText = isBlocked ? 'Blocked' : 'Operational';
+                    const actionIcon = isBlocked ? 'fa-check-circle text-success' : 'fa-ban text-danger';
+                    const actionText = isBlocked ? 'Unblock' : 'Block';
+
+                    return '<tr>' +
+                        '<td class="fw-bold">' + brand.brandName + '</td>' +
+                        '<td class="text-center">' +
+                        '<div class="brand-logo-wrap mx-auto">' +
+                        '<img src="/uploads/re-image/' + brand.brandImage + '" alt="' + brand.brandName + '" class="brand-logo" />' +
+                        '</div>' +
+                        '</td>' +
+                        '<td class="text-center">' +
+                        '<span class="status-badge ' + statusClass + '">' + statusText + '</span>' +
+                        '</td>' +
+                        '<td class="text-end">' +
+                        '<div class="dropdown">' +
+                        '<button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>' +
+                        '<ul class="dropdown-menu shadow-sm border-0">' +
+                        '<li><a class="dropdown-item" href="javascript:void(0)" onclick="openEditModal(event, \'' + brand._id + '\', \'' + escapedName + '\')"><i class="fas fa-edit me-2 text-primary"></i> Edit</a></li>' +
+                        '<li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleBrandStatus(event, \'' + brand._id + '\', ' + isBlocked + ')"><i class="fas ' + actionIcon + ' me-2"></i> ' + actionText + '</a></li>' +
+                        '<li><hr class="dropdown-divider"></li>' +
+                        '<li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteBrand(event, \'' + brand._id + '\')"><i class="fas fa-trash-alt me-2"></i> Delete</a></li>' +
+                        '</ul>' +
+                        '</div>' +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+
+                if (typeof bootstrap !== 'undefined') {
+                    const dropdownElementList = [].slice.call(tbody.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                    dropdownElementList.map(function (dropdownToggleEl) {
+                        return new bootstrap.Dropdown(dropdownToggleEl);
+                    });
+                }
+            };
+
+            window.updatePagination = function (currentPage, totalPages) {
+                const container = document.getElementById('brandPaginationContainer');
+                if (!container) return;
+                if (totalPages <= 1) {
+                    container.classList.add('d-none');
+                    return;
+                }
+                container.classList.remove('d-none');
+
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+                if (currentPage <= 3) endPage = Math.min(totalPages, 5);
+                if (currentPage > totalPages - 3) startPage = Math.max(1, totalPages - 4);
+
+                let html = '<ul class="pagination justify-content-center mb-0">';
+                if (currentPage > 1) {
+                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(event, ' + (currentPage - 1) + ')">&laquo;</a></li>';
+                }
+
+                if (startPage > 1) {
+                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(event, 1)">1</a></li>';
+                    if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    html += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '"><a class="page-link" href="javascript:void(0)" onclick="changePage(event, ' + i + ')">' + i + '</a></li>';
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(event, ' + totalPages + ')">' + totalPages + '</a></li>';
+                }
+
+                if (currentPage < totalPages) {
+                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(event, ' + (currentPage + 1) + ')">&raquo;</a></li>';
+                }
+                html += '</ul>';
+                container.innerHTML = html;
+            };
+
+            window.handleFormSubmit = async function (event) {
+                event.preventDefault();
+                if (!window.validateBrandForm('add')) return;
+                const formData = new FormData(event.target);
+
+                try {
+                    const response = await fetch('/admin/addBrand', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await response.json();
+
+                    if (data.status) {
+                        Swal.fire('Success', data.message, 'success');
+                        event.target.reset();
+                        window.fetchBrands(1);
+                    } else {
+                        Swal.fire('Error', data.error || 'Failed to add brand', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Communication failure', 'error');
+                }
+            };
+
+            window.openEditModal = function (event, id, name) {
+                if (event) event.preventDefault();
+                window.initBrandModals();
+                document.getElementById('editBrandId').value = id;
+                document.getElementById('editBrandName').value = name;
+                if (editModal) editModal.show();
+            };
+
+            window.handleEditBrandSubmit = async function (event) {
+                event.preventDefault();
+                if (!window.validateBrandForm('edit')) return;
+                const formData = new FormData(event.target);
+                const el = document.getElementById('brandSearch');
+                const currentSearch = el ? el.value : "";
+
+                try {
+                    const response = await fetch('/admin/updateBrand', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire('Updated', data.message, 'success');
+                        if (editModal) editModal.hide();
+                        window.fetchBrands(window.getCurrentPage(), currentSearch);
+                    } else {
+                        Swal.fire('Error', data.message || 'Update failed', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Update failed', 'error');
+                }
+            };
+
+            window.toggleBrandStatus = async function (event, id, isBlocked) {
+                if (event) event.preventDefault();
+                const action = isBlocked ? 'unblock' : 'block';
+                const url = '/admin/' + action + 'Brand/' + id;
+                const el = document.getElementById('brandSearch');
+                const currentSearch = el ? el.value : "";
+
+                const result = await Swal.fire({
+                    title: 'Confirm Action',
+                    text: 'Are you sure you want to ' + action + ' this brand?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: isBlocked ? '#10b981' : '#e11d48'
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json' } });
+                        const data = await response.json();
+                        if (data.status) {
+                            Swal.fire('Success', data.message, 'success');
+                            window.fetchBrands(window.getCurrentPage(), currentSearch);
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Action failed', 'error');
+                    }
+                }
+            };
+
+            window.deleteBrand = async function (event, id) {
+                if (event) event.preventDefault();
+                const el = document.getElementById('brandSearch');
+                const currentSearch = el ? el.value : "";
+
+                const result = await Swal.fire({
+                    title: 'Extreme Caution',
+                    text: 'Brand deletion is permanent. Continue?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: 'Yes, Delete Completely'
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/deleteBrand?id=' + id, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (data.status) {
+                            Swal.fire('Deleted', 'Brand removed from registry', 'success');
+                            window.fetchBrands(window.getCurrentPage(), currentSearch);
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Deletion failed', 'error');
+                    }
+                }
+            };
+
+            window.getCurrentPage = function () {
+                const activeLink = document.querySelector('.page-item.active .page-link');
+                return activeLink ? parseInt(activeLink.innerText) : 1;
+            };
+
+            window.validateBrandForm = function (type) {
+                window.clearErrorMessages();
+                let isValid = true;
+
+                const nameInput = type === 'add' ? document.getElementById('brandNameInput') : document.getElementById('editBrandName');
+                const imageInput = type === 'add' ? document.getElementById('brandImageInput') : document.getElementById('editBrandImage');
+                const nameErrorId = type === 'add' ? 'brandName-error' : 'editBrandName-error';
+                const imageErrorId = type === 'add' ? 'brandImage-error' : 'editBrandImage-error';
+
+                const name = nameInput ? nameInput.value.trim() : "";
+
+                if (name === '') {
+                    window.displayErrorMessage(nameErrorId, 'Please enter a brand name');
+                    isValid = false;
+                } else if (!/^[a-zA-Z0-9\s&-]+$/.test(name)) {
+                    window.displayErrorMessage(nameErrorId, 'Only alphanumeric characters, spaces, & and - are allowed');
+                    isValid = false;
+                }
+
+                if (imageInput && imageInput.files.length > 0) {
+                    const file = imageInput.files[0];
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        window.displayErrorMessage(imageErrorId, 'Please select a valid image (JPG, PNG, WebP)');
+                        isValid = false;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        window.displayErrorMessage(imageErrorId, 'Image size should be less than 2MB');
+                        isValid = false;
+                    }
+                } else if (type === 'add') {
+                    window.displayErrorMessage(imageErrorId, 'Brand image is required');
+                    isValid = false;
+                }
+
+                return isValid;
+            };
+
+            window.displayErrorMessage = function (elementId, message) {
+                var errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.innerText = message;
+                    errorElement.style.display = 'block';
+                }
+            };
+
+            window.clearErrorMessages = function () {
+                const errorElements = document.querySelectorAll('.error-message');
+                errorElements.forEach((element) => {
+                    element.innerText = '';
+                    element.style.display = 'none';
+                });
+            };
+
+            window.initBrandModals();
+        })();
+    </script>
     <%- include("../../views/partials/admin/footer") %>

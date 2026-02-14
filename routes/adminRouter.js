@@ -48,6 +48,7 @@ router.get(ROUTES.LIST_CATEGORY, adminAuth, categoryController.getUnlistedCatego
 router.get(ROUTES.UNLIST_CATEGORY, adminAuth, categoryController.getListedCategory);
 router.get(ROUTES.EDIT_CATEGORY, adminAuth, categoryController.getEditCategory)
 router.post(ROUTES.EDIT_CATEGORY_BY_ID, adminAuth, categoryController.editCategory);
+router.get(ROUTES.DELETE_CATEGORY, adminAuth, categoryController.removeCategory);
 
 
 //Brand Management.........................
@@ -90,6 +91,7 @@ router.post(ROUTES.DELETE_ORDER, adminAuth, orderController.deleteOrderAdmin);
 
 router.get(ROUTES.COUPON, adminAuth, couponController.loadcoupon);
 router.post(ROUTES.CREATE_COUPON, adminAuth, couponController.createCoupon);
+router.get(ROUTES.GET_COUPON, adminAuth, couponController.getCoupon);
 router.get(ROUTES.EDIT_COUPON, adminAuth, couponController.editCoupon);
 router.post(ROUTES.UPDATE_COUPON, adminAuth, couponController.updateCoupon);
 router.delete(ROUTES.DELETE_COUPON, adminAuth, couponController.deleteCoupon);
