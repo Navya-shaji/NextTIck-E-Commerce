@@ -431,18 +431,156 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const periodSelect = document.getElementById('period');
-            const customDates = document.querySelectorAll('.custom-dates');
+        // Initialize elements
+        const periodSelect = document.getElementById('period');
+        const customDates = document.querySelectorAll('.custom-dates');
+        const filterForm = document.getElementById('filter-form');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
 
-            function toggleCustomDates() {
-                const isCustom = periodSelect.value === 'custom';
-                customDates.forEach(el => {
-                    el.style.display = isCustom ? 'block' : 'none';
-                });
+        // Toggle custom date fields
+        function toggleCustomDates() {
+            const isCustom = periodSelect.value === 'custom';
+            customDates.forEach(el => {
+                el.style.display = isCustom ? 'block' : 'none';
+                // Required attribute toggle for validation if needed
+                const input = el.querySelector('input');
+                if (input) {
+                    if (isCustom) input.setAttribute('required', 'required');
+                    else input.removeAttribute('required');
+                }
+            });
+        }
+
+        // Handle Filter without Page Refresh (AJAX)
+        async function updateReport(e) {
+            if (e) e.preventDefault();
+
+            // Validate custom dates if selected
+            if (periodSelect.value === 'custom') {
+                if (!startDateInput.value || !endDateInput.value) {
+                    // Don't submit if dates are missing in custom mode
+                    return;
+                }
             }
 
-            periodSelect.addEventListener('change', toggleCustomDates);
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+
+            // Fetch only the content part or partial
+            // In a real SPA we might fetch JSON and rebuild table, 
+            // but since we have EJS, we can fetch the page with query params 
+            // and parse the HTML to replace the table container.
+
+            const mainContentSelector = '.content-wrapper';
+            // Or specific container like '.report-card' if you only want to update table
+            // But summary cards also change, so wrapper is better.
+
+            try {
+                // Show loading
+                document.querySelector(mainContentSelector).style.opacity = '0.5';
+
+                const response = await fetch(`${window.location.pathname}?${params.toString()}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newContent = doc.querySelector(mainContentSelector);
+                if (newContent) {
+                    document.querySelector(mainContentSelector).replaceWith(newContent);
+
+                    // Update URL without reload
+                    window.history.pushState({ path: `${window.location.pathname}?${params.toString()}` }, '', `?${params.toString()}`);
+
+                    // Re-bind events since DOM was replaced
+                    bindEvents();
+
+                    // Re-initialize scripts if needed or just re-run toggleCustomDates
+                    const newPeriodSelect = document.getElementById('period');
+                    if (newPeriodSelect) {
+                        const newCustomDates = document.querySelectorAll('.custom-dates');
+                        const isCustom = newPeriodSelect.value === 'custom';
+                        newCustomDates.forEach(el => el.style.display = isCustom ? 'block' : 'none');
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating report:', error);
+                // Fallback to normal submit if fetch fails
+                // filterForm.submit(); 
+            } finally {
+                const wrapper = document.querySelector(mainContentSelector);
+                if (wrapper) wrapper.style.opacity = '1';
+            }
+        }
+
+        function bindEvents() {
+            const form = document.getElementById('filter-form');
+            if (form) {
+                form.addEventListener('submit', updateReport);
+
+                // Auto-submit on select change (optional, but good UX)
+                const period = document.getElementById('period');
+                if (period) {
+                    period.addEventListener('change', function () {
+                        toggleCustomDates();
+                        if (this.value !== 'custom') {
+                            // Trigger update immediately for non-custom
+                            form.requestSubmit();
+                        }
+                    });
+                }
+
+                // For custom dates, maybe wait for button click or both dates filled
+            }
+
+            // Pagination links handling
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (!href) return;
+
+                    // Extract page number from href or just use the href directly via fetch
+                    // The href already contains the correct query params from EJS render
+
+                    // We can reuse the SPA fetch logic or just call fetch(href)
+                    fetchPage(href);
+                });
+            });
+        }
+
+        async function fetchPage(url) {
+            const mainContentSelector = '.content-wrapper';
+            try {
+                document.querySelector(mainContentSelector).style.opacity = '0.5';
+                const response = await fetch(url);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector(mainContentSelector);
+                if (newContent) {
+                    document.querySelector(mainContentSelector).replaceWith(newContent);
+                    window.history.pushState({ path: url }, '', url);
+                    bindEvents(); // Re-bind
+                    // Re-init custom dates state
+                    const newPeriodSelect = document.getElementById('period');
+                    if (newPeriodSelect) {
+                        const newCustomDates = document.querySelectorAll('.custom-dates');
+                        const isCustom = newPeriodSelect.value === 'custom';
+                        newCustomDates.forEach(el => el.style.display = isCustom ? 'block' : 'none');
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                window.location.href = url;
+            }
+        }
+
+        // Initial Bind
+        document.addEventListener('DOMContentLoaded', () => {
+            bindEvents();
             toggleCustomDates();
         });
 

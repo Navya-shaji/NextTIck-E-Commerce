@@ -542,7 +542,7 @@
             </button>
 
             <div class="carousel-controls">
-              <% banners.forEach((_, index)=> { %>
+              <% banners.forEach(function(banner, index) { %>
                 <button class="carousel-dot <%= index === 0 ? 'active' : '' %>"
                   onclick="goToBanner(<%= index %>)"></button>
                 <% }); %>

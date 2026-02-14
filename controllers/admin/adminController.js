@@ -31,23 +31,24 @@ console.log(loadLogin)
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(req.body)
-        const admin = await User.findOne({ email, isAdmin: true })
+        console.log("Login Attempt:", req.body);
+        const admin = await User.findOne({ email, isAdmin: true });
+
         if (admin) {
             const passwordMatch = await bcrypt.compare(password, admin.password);
             if (passwordMatch) {
                 req.session.admin = true;
-                return res.redirect("/admin");
+                return res.json({ success: true, message: "Login successful", redirectUrl: "/admin" }); // Send JSON success
             } else {
-                return res.redirect("/admin/login");
+                return res.json({ success: false, message: "Invalid Password" }); // Send JSON error
             }
 
         } else {
-            return res.redirect("/admin/login")
+            return res.json({ success: false, message: "Admin not found" }); // Send JSON error
         }
     } catch (error) {
-        return res.redirect("/pageerror")
-
+        console.error("Login Error:", error);
+        return res.json({ success: false, message: "Something went wrong" }); // Send JSON error
     }
 }
 

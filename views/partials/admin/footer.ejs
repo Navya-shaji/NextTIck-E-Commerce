@@ -11,13 +11,82 @@
         document.querySelector('.navbar-aside').classList.remove('show');
     });
 
-    // Add active class to menu items based on URL
+    // SPA Navigation Script
     document.addEventListener('DOMContentLoaded', () => {
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.menu-link').forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.closest('.menu-item').classList.add('active');
+        const mainContentSelector = '.main-wrap';
+
+        // Function to update active menu item
+        const updateActiveMenuItem = (url) => {
+            document.querySelectorAll('.menu-link').forEach(link => {
+                const item = link.closest('.menu-item');
+                item.classList.remove('active');
+                if (link.getAttribute('href') === url) {
+                    item.classList.add('active');
+                }
+            });
+        };
+
+        // Initial active state
+        updateActiveMenuItem(window.location.pathname);
+
+        // Handle internal navigation (Sidebar + Pagination + Actions)
+        document.body.addEventListener('click', async (e) => {
+            const link = e.target.closest('.menu-link, .page-link, .spa-action-btn');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            // Allow logout or external links to function normally
+            if (!href || href === '/admin/logout' || href.startsWith('http') || href === '#') return;
+
+            e.preventDefault();
+
+            try {
+                // Show loading indicator
+                const mainContent = document.querySelector(mainContentSelector);
+                if (mainContent) mainContent.style.opacity = '0.5';
+
+                const response = await fetch(href);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newContent = doc.querySelector(mainContentSelector);
+                if (!newContent) {
+                    window.location.href = href; // Fallback if parsing fails
+                    return;
+                }
+
+                // Replace content
+                if (mainContent) mainContent.replaceWith(newContent);
+
+                // Update URL
+                window.history.pushState({ path: href }, '', href);
+
+                // Update active menu item
+                updateActiveMenuItem(href.split('?')[0]); // Use base path for sidebar highlighting
+
+                // Re-execute scripts in the new content
+                const scripts = newContent.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.textContent = oldScript.textContent;
+                    // We append to body or head to execute, or replace inside container if it was inline
+                    // Appending to the new content container is safer for scoped execution context
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+
+            } catch (error) {
+                console.error('Navigation error:', error);
+                window.location.href = href; // Fallback to full reload
             }
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', () => {
+            window.location.reload(); // Simple fallback for back button
         });
     });
 </script>

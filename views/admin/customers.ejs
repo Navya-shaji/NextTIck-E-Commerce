@@ -234,11 +234,15 @@
                                     </td>
                                     <td class="text-end">
                                         <% if (customer.isBlocked) { %>
-                                            <a href="/admin/unblock/<%= customer._id %>" class="action-btn btn-unblock">
+                                            <a href="/admin/unblock/<%= customer._id %>"
+                                                class="action-btn btn-unblock spa-action-btn"
+                                                data-id="<%= customer._id %>">
                                                 <i class="fas fa-unlock me-1"></i> Unblock
                                             </a>
                                             <% } else { %>
-                                                <a href="/admin/block/<%= customer._id %>" class="action-btn btn-block">
+                                                <a href="/admin/block/<%= customer._id %>"
+                                                    class="action-btn btn-block spa-action-btn"
+                                                    data-id="<%= customer._id %>">
                                                     <i class="fas fa-ban me-1"></i> Block
                                                 </a>
                                                 <% } %>

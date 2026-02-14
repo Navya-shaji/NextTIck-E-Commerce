@@ -519,19 +519,21 @@
             } catch (err) { console.error(err); }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initCharts();
+        // Initialize when script runs (safe since it's at bottom of body)
+        initCharts();
 
-            // Populate Year Filter
-            const yearSelect = document.getElementById('yearFilter');
-            const currYear = new Date().getFullYear();
-            for (let y = currYear; y >= currYear - 4; y--) {
-                yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
-            }
+        // Populate Year Filter
+        const yearSelect = document.getElementById('yearFilter');
+        const currYear = new Date().getFullYear();
+        for (let y = currYear; y >= currYear - 4; y--) {
+            yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+        }
 
-            document.getElementById('chartFilter').onchange = updateDashboardData;
-            document.getElementById('yearFilter').onchange = updateDashboardData;
-        });
+        const chartFilter = document.getElementById('chartFilter');
+        const yearFilter = document.getElementById('yearFilter');
+
+        if (chartFilter) chartFilter.onchange = updateDashboardData;
+        if (yearFilter) yearFilter.onchange = updateDashboardData;
     </script>
 
     <%- include("../partials/admin/footer") %>

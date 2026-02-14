@@ -8,20 +8,36 @@ const categoryInfo = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 4;
         const skip = (page - 1) * limit;
+        const search = req.query.search || "";
 
-        const categoryData = await Category.find({})
+        const query = {
+            name: { $regex: search, $options: "i" }
+        };
+
+        const categoryData = await Category.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        const totalCategories = await Category.countDocuments();
+        const totalCategories = await Category.countDocuments(query);
         const totalPages = Math.ceil(totalCategories / limit);
+
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({
+                cat: categoryData,
+                currentPage: page,
+                totalPages,
+                totalCategories,
+                search
+            });
+        }
 
         res.render("category", {
             cat: categoryData,
             currentPage: page,
             totalPages,
             totalCategories,
+            search
         });
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -156,12 +172,17 @@ const removeCategory = async (req, res) => {
 const getListedCategory = async (req, res) => {
     try {
         let id = req.query.id;
+        await Category.updateOne({ _id: id }, { $set: { isListed: false } });
 
-        await Category.updateOne({ _id: id }, { $set: { isListed: false } })
-        res.redirect("/admin/category")
-
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ status: true, message: "Category unlisted successfully" });
+        }
+        res.redirect("/admin/category");
     } catch (error) {
-        res.redirect("/pageerror")
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({ status: false, message: "Error unlisting category" });
+        }
+        res.redirect("/pageerror");
     }
 }
 
@@ -172,11 +193,17 @@ const getListedCategory = async (req, res) => {
 const getUnlistedCategory = async (req, res) => {
     try {
         let id = req.query.id;
+        await Category.updateOne({ _id: id }, { $set: { isListed: true } });
 
-        await Category.updateOne({ _id: id }, { $set: { isListed: true } })
-        res.redirect("/admin/category")
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ status: true, message: "Category listed successfully" });
+        }
+        res.redirect("/admin/category");
     } catch (error) {
-        res.redirect("/pageerror")
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({ status: false, message: "Error listing category" });
+        }
+        res.redirect("/pageerror");
     }
 }
 
@@ -217,7 +244,7 @@ const editCategory = async (req, res) => {
             return res.status(404).json({ error: "Category not found." });
         }
 
-        return res.redirect("/admin/category");
+        return res.json({ status: true, message: "Category updated successfully" });
     } catch (error) {
         console.error("Error updating category:", error);
         return res.status(500).json({ error: "Internal Server Error." });

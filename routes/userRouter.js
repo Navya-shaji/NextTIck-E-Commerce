@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/user/userController");
 const passport = require("../config/passport")
 const productController = require("../controllers/user/productController")
-const { userAuth } = require('../middlewares/auth');
+const { userAuth, checkBlockedStatus } = require('../middlewares/auth');
 const profileController = require("../controllers/user/profileController")
 const cartController = require("../controllers/user/cartController");
 const shopController = require("../controllers/user/shopController");
@@ -54,6 +54,7 @@ router.post(ROUTES.UPDATE_PROFILE, profileController.updateProfile);
 
 
 router.use(userAuth);
+router.use(checkBlockedStatus);
 router.get(ROUTES.USER_PROFILE, userAuth, profileController.userProfile);
 router.post(ROUTES.UPDATE_PROFILE_RAW, userAuth, profileController.updateProfile);
 router.get(ROUTES.CHANGE_EMAIL, userAuth, profileController.changeEmail);
