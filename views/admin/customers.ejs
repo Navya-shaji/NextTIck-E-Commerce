@@ -51,119 +51,43 @@
             font-size: 1rem;
         }
 
-        .premium-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(0, 0, 0, 0.02);
-            overflow: hidden;
-        }
-
-        /* Table Styles */
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background: #f8fafc;
-            color: #64748b;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 1rem 1.5rem;
-            border: none;
-        }
-
-        .table tbody td {
-            padding: 1.25rem 1.5rem;
-            vertical-align: middle;
-            border-top: 1px solid #f1f5f9;
-            font-size: 0.9rem;
-            color: #334155;
-        }
-
-        .status-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-        }
-
-        .badge-active {
-            background: #ecfdf5;
-            color: #10b981;
-        }
-
-        .badge-blocked {
-            background: #fff1f2;
-            color: #e11d48;
-        }
-
-        .action-btn {
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 2px;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .btn-unblock {
-            background: #ecfdf5;
-            color: #10b981;
-            border-color: #d1fae5;
-        }
-
-        .btn-unblock:hover {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        .btn-block {
-            background: #fff1f2;
-            color: #e11d48;
-            border-color: #ffe4e6;
-        }
-
-        .btn-block:hover {
-            background: #ffe4e6;
-            color: #be123c;
-        }
-
+        /* Page-specific styles */
         .pagination-container {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
 
         .page-link {
-            border: none;
-            color: #64748b;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            margin: 0 3px;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            margin: 0 2px;
+            background: white;
+        }
+
+        .page-link:hover {
+            background: #f9fafb;
+            color: #111827;
         }
 
         .page-item.active .page-link {
-            background: var(--accent-gold);
+            background: #111827;
             color: white;
+            border-color: #111827;
         }
 
         .empty-state {
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             text-align: center;
-            color: #94a3b8;
+            color: #9ca3af;
         }
 
         .empty-state i {
-            font-size: 3rem;
+            font-size: 2.5rem;
             display: block;
             margin-bottom: 1rem;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .clear-search {
@@ -171,7 +95,7 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #9ca3af;
             font-size: 1rem;
             cursor: pointer;
             text-decoration: none;
@@ -180,27 +104,6 @@
 
         .clear-search:hover {
             color: #ef4444;
-        }
-
-        /* Fix Dropdown Clipping */
-        .table-responsive {
-            overflow: visible !important;
-        }
-
-        .premium-card {
-            overflow: visible !important;
-        }
-
-        .dropdown-menu {
-            z-index: 1060 !important;
-            min-width: 160px;
-        }
-
-        .dropdown-item {
-            cursor: pointer;
-            padding: 0.6rem 1rem;
-            font-size: 0.85rem;
-            font-weight: 500;
         }
     </style>
 
@@ -222,75 +125,73 @@
         </div>
 
         <div class="premium-card">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Email</th>
-                            <th>Contact</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (customers && customers.length> 0) { %>
-                            <% customers.forEach((customer)=> { %>
-                                <tr>
-                                    <td class="fw-bold">
-                                        <%= customer.name || "Anonymous User" %>
-                                    </td>
-                                    <td>
-                                        <%= customer.email %>
-                                    </td>
-                                    <td>
-                                        <%= customer.phone || "Not specified" %>
-                                    </td>
-                                    <td class="text-center">
-                                        <% if (customer.isBlocked) { %>
-                                            <span class="status-badge badge-blocked">Blocked</span>
-                                            <% } else { %>
-                                                <span class="status-badge badge-active">Active</span>
-                                                <% } %>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
-                                                data-bs-toggle="dropdown">
-                                                Actions
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                                <li>
-                                                    <% if (customer.isBlocked) { %>
-                                                        <a class="dropdown-item py-2 text-success spa-action-btn"
-                                                            href="/admin/unblock/<%= customer._id %>">
-                                                            <i class="fas fa-unlock me-2"></i>Authorize Customer
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (customers && customers.length> 0) { %>
+                        <% customers.forEach((customer)=> { %>
+                            <tr>
+                                <td class="fw-bold">
+                                    <%= customer.name || "Anonymous User" %>
+                                </td>
+                                <td>
+                                    <%= customer.email %>
+                                </td>
+                                <td>
+                                    <%= customer.phone || "Not specified" %>
+                                </td>
+                                <td class="text-center">
+                                    <% if (customer.isBlocked) { %>
+                                        <span class="status-badge badge-blocked">Blocked</span>
+                                        <% } else { %>
+                                            <span class="status-badge badge-active">Active</span>
+                                            <% } %>
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li>
+                                                <% if (customer.isBlocked) { %>
+                                                    <a class="dropdown-item py-2 text-success spa-action-btn"
+                                                        href="/admin/unblock/<%= customer._id %>">
+                                                        <i class="fas fa-unlock me-2"></i>Authorize Customer
+                                                    </a>
+                                                    <% } else { %>
+                                                        <a class="dropdown-item py-2 text-danger spa-action-btn"
+                                                            href="/admin/block/<%= customer._id %>">
+                                                            <i class="fas fa-ban me-2"></i>Restrict Customer
                                                         </a>
-                                                        <% } else { %>
-                                                            <a class="dropdown-item py-2 text-danger spa-action-btn"
-                                                                href="/admin/block/<%= customer._id %>">
-                                                                <i class="fas fa-ban me-2"></i>Restrict Customer
-                                                            </a>
-                                                            <% } %>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <% }); %>
-                                    <% } else { %>
-                                        <tr>
-                                            <td colspan="5">
-                                                <div class="empty-state">
-                                                    <i class="fas fa-users-slash"></i>
-                                                    <p>No customers found</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                                                        <% } %>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <i class="fas fa-users-slash"></i>
+                                                <p>No customers found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
         </div>
 
         <% if (pagination && pagination.totalPages> 1) {
