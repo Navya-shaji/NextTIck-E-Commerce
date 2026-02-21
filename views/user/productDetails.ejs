@@ -2,16 +2,20 @@
 
     <style>
         :root {
-            --primary-color: #1a1a1a;
-            --secondary-color: #f4f4f4;
-            --accent-color: #c5a059;
-            --text-color: #333;
-            --light-text: #666;
-            --border-color: #e0e0e0;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
+            --primary-color: #0f1111;
+            --secondary-color: #f7f8f8;
+            --accent-color: #d4af37;
+            /* Metallic Gold */
+            --accent-light: #f1e5ac;
+            --text-color: #1a1a1a;
+            --light-text: #757575;
+            --white: #ffffff;
+            --border-color: #f0f0f0;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
             --font-heading: 'Cinzel', serif;
             --font-body: 'Outfit', sans-serif;
+            --glass-bg: rgba(255, 255, 255, 0.85);
         }
 
         body {
@@ -112,12 +116,12 @@
 
         .product-title {
             font-family: var(--font-heading);
-            font-size: 2.5rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 500;
+            margin-bottom: 15px;
             color: var(--primary-color);
-            line-height: 1.2;
-            text-transform: uppercase;
+            line-height: 1.1;
+            letter-spacing: -1px;
         }
 
         .product-meta {
@@ -142,26 +146,29 @@
         }
 
         .current-price {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 600;
             color: var(--primary-color);
             font-family: var(--font-body);
+            letter-spacing: -1px;
         }
 
         .original-price {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--light-text);
             text-decoration: line-through;
+            opacity: 0.6;
         }
 
         .discount-tag {
             background-color: var(--accent-color);
-            color: #fff;
-            padding: 4px 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            color: var(--primary-color);
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            border-radius: 4px;
         }
 
         .best-offer-info {
@@ -257,48 +264,70 @@
 
         .btn-add-cart {
             background-color: var(--primary-color);
-            color: #fff;
-            height: 50px;
-            padding: 0 40px;
+            color: var(--white);
+            height: 60px;
+            padding: 0 50px;
             font-family: var(--font-heading);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             font-weight: 600;
-            border: 1px solid var(--primary-color);
+            border: none;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             flex: 1;
-            max-width: 300px;
+            max-width: 320px;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-add-cart::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-add-cart:hover::after {
+            left: 100%;
         }
 
         .btn-add-cart:hover:not(:disabled) {
-            background-color: #333;
-            border-color: #333;
+            background-color: #222;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .btn-add-cart:disabled {
-            background-color: #ccc;
-            border-color: #ccc;
+            background-color: #eee;
+            color: #999;
             cursor: not-allowed;
         }
 
         .btn-wishlist {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 1px solid var(--border-color);
-            background: transparent;
+            background: var(--white);
             color: var(--primary-color);
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            border-radius: 4px;
         }
 
         .btn-wishlist:hover {
-            border-color: var(--primary-color);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         /* Related Products */
@@ -319,23 +348,27 @@
         }
 
         .premium-product-card {
-            background: #fff;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            background: var(--white);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            padding-bottom: 20px;
+            padding: 15px;
+            border-radius: 24px;
+            border: 1px solid transparent;
         }
 
         .premium-product-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-10px);
+            border-color: var(--border-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         }
 
         .premium-image-wrapper {
             position: relative;
-            background: #f9f9f9;
+            background: #fcfcfc;
             aspect-ratio: 1;
             overflow: hidden;
-            margin-bottom: 15px;
-            border-radius: 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
 
         .premium-card-img {
@@ -343,7 +376,7 @@
             height: 100%;
             object-fit: contain;
             padding: 15px;
-            transition: transform 0.6s ease;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .premium-product-card:hover .premium-card-img {
@@ -380,55 +413,100 @@
             border-top: 1px solid #eee;
         }
 
+        .avg-rating-box {
+            background: var(--white);
+            padding: 40px;
+            text-align: center;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .rating-distribution {
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .dist-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        .dist-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .dist-bar-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        .dist-count {
+            width: 30px;
+            text-align: right;
+            font-weight: 500;
+        }
+
         .review-card {
-            padding: 30px;
-            background: #fff;
-            border: 1px solid #eee;
+            padding: 35px;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
             margin-bottom: 25px;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .review-card:hover {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            transform: translateY(-5px);
             border-color: var(--accent-color);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
         }
 
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .reviewer-name {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--primary-color);
-        }
-
-        .review-date {
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        .review-stars {
-            color: #ffd700;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-        }
-
-        .review-comment {
-            font-size: 0.95rem;
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .avg-rating-box {
+        .reviewer-avatar {
+            width: 45px;
+            height: 45px;
             background: var(--secondary-color);
-            padding: 40px;
-            text-align: center;
-            border-radius: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .review-header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-info {
+            flex: 1;
+        }
+
+        .review-hint {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            padding: 15px 20px;
+            background: #fafafa;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-color);
+            margin-bottom: 40px;
         }
 
         .avg-number {
@@ -442,25 +520,36 @@
         .magnifying-glass {
             position: absolute;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             cursor: none;
-            width: 180px;
-            height: 180px;
+            width: 200px;
+            height: 200px;
             display: none;
             pointer-events: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            background-color: #fff;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            z-index: 100;
+            background-color: var(--white);
+            background-repeat: no-repeat;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Entrance Animations */
+        [data-aos] {
+            pointer-events: none;
+        }
+
+        .aos-animate {
+            pointer-events: auto;
         }
 
         @media (max-width: 768px) {
-            .product-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
+            .product-detail-container {
+                padding-bottom: 100px;
             }
 
             .product-info-wrapper {
                 padding-left: 0;
+                margin-top: 30px;
             }
 
             .controls-wrapper {
@@ -468,15 +557,24 @@
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: #fff;
-                padding: 15px;
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+                background: var(--white);
+                padding: 15px 25px;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08);
                 margin: 0;
-                z-index: 100;
+                z-index: 1000;
+                display: flex;
+                gap: 15px;
+                backdrop-filter: blur(10px);
             }
 
-            .product-detail-container {
-                padding-bottom: 100px;
+            .btn-add-cart {
+                height: 50px;
+                font-size: 0.9rem;
+            }
+
+            .btn-wishlist {
+                height: 50px;
+                width: 50px;
             }
         }
     </style>
@@ -526,20 +624,19 @@
             </div>
 
             <!-- Details -->
-            <div class="col-lg-6">
+            <div class="col-lg-6" data-aos="fade-left">
                 <div class="product-info-wrapper">
                     <div class="product-meta">
                         <% if (product.category) { %>
-                            <span class="text-uppercase">
+                            <span class="text-uppercase fw-600" style="letter-spacing: 2px;">
                                 <%= product.category.name %>
                             </span>
                             <% } %>
-                                <% if (product.quantity> 0) { %>
-                                    <span class="stock-badge in-stock"><i class="fas fa-check"></i> In Stock</span>
-                                    <% } else { %>
-                                        <span class="stock-badge out-stock"><i class="fas fa-times"></i> Out of
-                                            Stock</span>
-                                        <% } %>
+                                <span class="stock-badge <%= product.quantity > 0 ? 'in-stock' : 'out-stock' %>">
+                                    <i
+                                        class="fas <%= product.quantity > 0 ? 'fa-check-circle' : 'fa-times-circle' %>"></i>
+                                    <%= product.quantity> 0 ? 'In Stock' : 'Out of Stock' %>
+                                </span>
                     </div>
 
                     <h1 class="product-title">
@@ -553,9 +650,11 @@
                             regularPrice=product.salesPrice || 0; const discountAmount=regularPrice * (bestOffer / 100);
                             const salesPrice=regularPrice - discountAmount; %>
 
-                            <span class="current-price">₹<%= salesPrice.toFixed(2) %></span>
+                            <span class="current-price">₹<%= salesPrice.toLocaleString('en-IN', {minimumFractionDigits:
+                                    2}) %></span>
                             <% if (bestOffer> 0) { %>
-                                <span class="original-price">₹<%= regularPrice.toFixed(2) %></span>
+                                <span class="original-price">₹<%= regularPrice.toLocaleString('en-IN',
+                                        {minimumFractionDigits: 2}) %></span>
                                 <span class="discount-tag">
                                     <%= bestOffer %>% OFF
                                 </span>
@@ -564,17 +663,17 @@
 
                     <% if (bestOffer> 0) { %>
                         <div class="best-offer-info">
-                            <i class="fas fa-tag me-2"></i>
+                            <i class="fas fa-gem me-2" style="color: var(--accent-color);"></i>
                             <% if (productOffer> categoryOffer) { %>
-                                Special Product Offer Applied
+                                Exclusive Product Privilege Applied
                                 <% } else { %>
-                                    Category Offer Applied
+                                    Seasonal Category Benefit Applied
                                     <% } %>
                         </div>
                         <% } %>
 
                             <div class="description-wrapper">
-                                <p>
+                                <p class="mb-0">
                                     <%= product.description %>
                                 </p>
                             </div>
@@ -590,50 +689,57 @@
                                     </button>
                                 </div>
                                 <% } else { %>
-                                    <div class="alert alert-danger mb-4">
-                                        This item is currently out of stock. <a href="#" class="alert-link">Notify me
-                                            when available</a>
+                                    <div class="alert alert-soft-dark d-flex align-items-center mb-4"
+                                        style="background: var(--secondary-color); border: none; border-radius: 12px; padding: 20px;">
+                                        <i class="fas fa-envelope-open-text me-3 opacity-50"></i>
+                                        <div>
+                                            <div class="fw-bold">Currently Unavailable</div>
+                                            <div class="small opacity-75">We can notify you when this masterpiece
+                                                returns to our collection.</div>
+                                        </div>
                                     </div>
                                     <% } %>
 
                                         <!-- Additional Info -->
-                                        <div class="accordion accordion-flush mt-4" id="productAccordion">
-                                            <div class="accordion-item">
+                                        <div class="accordion accordion-flush mt-5" id="productAccordion">
+                                            <div class="accordion-item"
+                                                style="border-top: 1px solid var(--border-color);">
                                                 <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed" type="button"
-                                                        data-bs-toggle="collapse" data-bs-target="#shipping">
-                                                        THIS PRODUCT
+                                                    <button class="accordion-button collapsed fw-500" type="button"
+                                                        data-bs-toggle="collapse" data-bs-target="#specifications"
+                                                        style="font-family: var(--font-heading); letter-spacing: 2px; font-size: 11px;">
+                                                        SPECIFICATIONS
                                                     </button>
                                                 </h2>
-                                                <div id="shipping" class="accordion-collapse collapse"
+                                                <div id="specifications" class="accordion-collapse collapse"
                                                     data-bs-parent="#productAccordion">
-                                                    <div class="accordion-body text-muted small">
-                                                        <div class="d-flex justify-content-between mb-2">
+                                                    <div class="accordion-body text-muted small px-0">
+                                                        <div class="d-flex justify-content-between mb-3">
                                                             <span>Brand</span>
-                                                            <span class="text-dark fw-bold">
+                                                            <span class="text-dark fw-600">
                                                                 <%= product.brand ? product.brand.brandName : 'Luxury'
                                                                     %>
                                                             </span>
                                                         </div>
-                                                        <div class="d-flex justify-content-between mb-2">
-                                                            <span>Category</span>
-                                                            <span class="text-dark fw-bold">
-                                                                <%= product.category ? product.category.name : 'Watches'
-                                                                    %>
+                                                        <div class="d-flex justify-content-between mb-3">
+                                                            <span>Collection</span>
+                                                            <span class="text-dark fw-600">
+                                                                <%= product.category ? product.category.name
+                                                                    : 'Exquisite' %>
                                                             </span>
                                                         </div>
                                                         <% if (product.color) { %>
-                                                            <div class="d-flex justify-content-between mb-2">
-                                                                <span>Color</span>
-                                                                <span class="text-dark fw-bold">
+                                                            <div class="d-flex justify-content-between mb-3">
+                                                                <span>Finishing</span>
+                                                                <span class="text-dark fw-600">
                                                                     <%= product.color %>
                                                                 </span>
                                                             </div>
                                                             <% } %>
                                                                 <div class="d-flex justify-content-between">
-                                                                    <span>Movement</span>
-                                                                    <span
-                                                                        class="text-dark fw-bold">Automatic/Quartz</span>
+                                                                    <span>Authenticity</span>
+                                                                    <span class="text-dark fw-600">Heritage
+                                                                        Certified</span>
                                                                 </div>
                                                     </div>
                                                 </div>
@@ -644,51 +750,84 @@
         </div>
 
         <!-- Reviews Section -->
-        <div class="reviews-section">
-            <div class="row mb-5 align-items-center">
+        <div class="reviews-section" id="reviews">
+            <div class="row mb-5 align-items-center" data-aos="fade-up">
                 <div class="col-md-6">
-                    <h2 class="section-heading mb-0">Customer Reviews</h2>
+                    <h2 class="section-heading mb-0" style="text-align: left;">Customer Reviews</h2>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <span class="text-muted">
-                        <%= reviews.length %> Reviews
+                    <span class="text-muted fw-500">
+                        <%= reviews.length %> Authenticated Reviews
                     </span>
                 </div>
             </div>
 
+            <div class="review-hint" data-aos="fade-up">
+                <i class="fas fa-info-circle me-2"></i>
+                To maintain authenticity, reviews can only be submitted by owners of this timepiece via their <a
+                    href="/userProfile" class="text-dark fw-bold">Order History</a> after delivery.
+            </div>
+
             <div class="row">
                 <% if (reviews && reviews.length> 0) { %>
-                    <div class="col-lg-4 mb-5">
-                        <div class="avg-rating-box shadow-sm">
+                    <div class="col-lg-4 mb-5" data-aos="fade-right">
+                        <div class="avg-rating-box">
                             <% let totalRating=reviews.reduce((acc, curr)=> acc + curr.rating, 0);
                                 let avg = (totalRating / reviews.length).toFixed(1);
-                                %>
-                                <span class="avg-number">
-                                    <%= avg %>
-                                </span>
-                                <div class="review-stars mb-2">
-                                    <% for(let i=1; i<=5; i++) { %>
-                                        <i class="<%= i <= Math.round(avg) ? 'fas' : 'far' %> fa-star"></i>
-                                        <% } %>
-                                </div>
-                                <p class="text-muted small mb-0">Based on <%= reviews.length %> verified ratings</p>
+                                let distribution = [0, 0, 0, 0, 0];
+                                reviews.forEach(r => { if(r.rating >= 1 && r.rating <= 5) distribution[r.rating - 1]++;
+                                    }); %>
+                                    <span class="avg-number">
+                                        <%= avg %>
+                                    </span>
+                                    <div class="review-stars mb-2" style="color: var(--accent-color);">
+                                        <% for(let i=1; i<=5; i++) { %>
+                                            <i class="<%= i <= Math.round(avg) ? 'fas' : 'far' %> fa-star"></i>
+                                            <% } %>
+                                    </div>
+                                    <p class="text-muted small mb-0">Based on <%= reviews.length %> verified ratings</p>
+
+                                    <div class="rating-distribution">
+                                        <% for(let i=5; i>=1; i--) {
+                                            let count = distribution[i-1];
+                                            let percentage = (count / reviews.length * 100).toFixed(0);
+                                            %>
+                                            <div class="dist-row">
+                                                <span>
+                                                    <%= i %> <i class="fas fa-star" style="font-size: 0.7rem;"></i>
+                                                </span>
+                                                <div class="dist-bar-bg">
+                                                    <div class="dist-bar-fill" style="width: <%= percentage %>%;"></div>
+                                                </div>
+                                                <span class="dist-count">
+                                                    <%= count %>
+                                                </span>
+                                            </div>
+                                            <% } %>
+                                    </div>
                         </div>
                     </div>
                     <div class="col-lg-8">
-                        <% reviews.forEach(review=> { %>
-                            <div class="review-card">
-                                <div class="review-header">
-                                    <span class="reviewer-name">
-                                        <%= review.userName %>
-                                    </span>
+                        <% reviews.forEach((review, index)=> { %>
+                            <div class="review-card" data-aos="fade-up" data-aos-delay="<%= 100 * (index % 3) %>">
+                                <div class="review-header-top">
+                                    <div class="reviewer-avatar">
+                                        <%= review.userName.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-name">
+                                            <%= review.userName %>
+                                        </div>
+                                        <div class="review-stars"
+                                            style="color: var(--accent-color); font-size: 0.75rem;">
+                                            <% for(let i=1; i<=5; i++) { %>
+                                                <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
+                                                <% } %>
+                                        </div>
+                                    </div>
                                     <span class="review-date">
-                                        <%= new Date(review.createdOn).toLocaleDateString() %>
+                                        <%= new Date(review.createdOn).toLocaleDateString('en-GB') %>
                                     </span>
-                                </div>
-                                <div class="review-stars">
-                                    <% for(let i=1; i<=5; i++) { %>
-                                        <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
-                                        <% } %>
                                 </div>
                                 <p class="review-comment">
                                     <%= review.comment %>
@@ -697,12 +836,14 @@
                             <% }); %>
                     </div>
                     <% } else { %>
-                        <div class="col-12 text-center py-5">
-                            <div class="text-muted mb-3">
-                                <i class="far fa-comment-dots fa-3x opacity-25"></i>
+                        <div class="col-12 text-center py-5" data-aos="zoom-in">
+                            <div class="text-muted mb-4">
+                                <i class="fas fa-award fa-4x opacity-25" style="color: var(--accent-color);"></i>
                             </div>
-                            <h4 class="font-heading">No reviews yet</h4>
-                            <p class="text-muted">Be the first to share your thoughts after purchasing.</p>
+                            <h4 class="font-heading" style="color: var(--primary-color);">Be the First to Review</h4>
+                            <p class="text-muted mx-auto" style="max-width: 400px;">Share your experience with this
+                                exclusive timepiece. Reviews are exclusive to verified purchasers.</p>
+                            <a href="/shop" class="btn btn-outline-dark rounded-pill px-4 mt-3">Continue Exploring</a>
                         </div>
                         <% } %>
             </div>

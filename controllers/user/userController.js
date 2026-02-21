@@ -169,6 +169,17 @@ const verifyOtp = async (req, res) => {
         console.log(otp);
         if (otp === String(req.session.userOtp)) {
             const user = req.session.userData;
+
+            // Guard against duplicate submissions (e.g. OTP re-submitted or user already exists)
+            const existingUser = await User.findOne({ email: user.email });
+            if (existingUser) {
+                // User was already created (duplicate OTP submit), just log them in
+                delete req.session.userOtp;
+                delete req.session.userData;
+                req.session.user = existingUser;
+                return res.json({ success: true, redirectUrl: "/" });
+            }
+
             const passwordHash = await securePassword(user.password);
             const saveUserData = new User({
                 name: user.name,
@@ -179,7 +190,6 @@ const verifyOtp = async (req, res) => {
             await saveUserData.save();
             req.session.user = saveUserData;
 
-
             delete req.session.userOtp;
             delete req.session.userData;
 
@@ -189,6 +199,10 @@ const verifyOtp = async (req, res) => {
         }
     } catch (error) {
         console.error("Error Verifying OTP", error);
+        // Handle MongoDB duplicate key error gracefully (E11000)
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: "An account with this email already exists. Please login." });
+        }
         res.status(500).json({ success: false, message: "An error occurred" });
     }
 };

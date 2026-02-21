@@ -433,6 +433,15 @@
     if (loader) {
       setTimeout(() => {
         loader.style.display = 'none';
+        // Initialize AOS after loader is gone
+        if (typeof AOS !== 'undefined') {
+          AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+          });
+        }
       }, 1000);
     }
   });

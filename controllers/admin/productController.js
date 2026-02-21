@@ -32,58 +32,35 @@ const addProducts = async (req, res) => {
         const images = req.files ? req.files.map(file => file.filename) : [];
 
         // Validate required fields
-        if (!products.productName || !products.description || !products.brand ||
-            !products.category || !products.regularPrice || !products.quantity || images.length < 3) {
-            return res.status(400).json({
-                success: false,
-                error: "All fields are required, including at least 3 images"
-            });
-        }
+        if (!products.productName) return res.status(400).json({ success: false, error: "Product Name is required" });
+        if (!products.description) return res.status(400).json({ success: false, error: "Description is required" });
+        if (!products.brand) return res.status(400).json({ success: false, error: "Brand is required" });
+        if (!products.category) return res.status(400).json({ success: false, error: "Category is required" });
+        if (!products.regularPrice) return res.status(400).json({ success: false, error: "Regular Price is required" });
+        if (!products.quantity) return res.status(400).json({ success: false, error: "Quantity is required" });
+        if (images.length < 3) return res.status(400).json({ success: false, error: "Please upload at least 3 images" });
 
         // Validate brand ID
         if (!mongoose.Types.ObjectId.isValid(products.brand)) {
-            return res.status(400).json({
-                success: false,
-                error: "Invalid brand ID format"
-            });
+            return res.status(400).json({ success: false, error: "Invalid brand ID format" });
         }
 
-        const productExists = await Product.findOne({
-            productName: products.productName,
-        });
-
+        const productExists = await Product.findOne({ productName: products.productName });
         if (productExists) {
-            return res.status(400).json({
-                success: false,
-                error: "Product already exists. Please try with another name."
-            });
+            return res.status(400).json({ success: false, error: "Product already exists" });
         }
 
         const categoryId = await Category.findOne({ name: products.category });
         if (!categoryId) {
-            return res.status(400).json({
-                success: false,
-                error: "Invalid category name"
-            });
+            return res.status(400).json({ success: false, error: "Invalid category" });
         }
 
-        // Check if brand exists and is not blocked
-        const brand = await Brand.findOne({
-            _id: products.brand,
-            isBlocked: false
-        });
-
+        const brand = await Brand.findOne({ _id: products.brand, isBlocked: false });
         if (!brand) {
-            return res.status(400).json({
-                success: false,
-                error: "Selected brand not found or is blocked"
-            });
+            return res.status(400).json({ success: false, error: "Brand not found or blocked" });
         }
 
-        // Ensure salesPrice is set, even if it's the same as regularPrice
-        const salesPrice = products.salePrice && products.salePrice.trim() !== ''
-            ? parseFloat(products.salePrice)
-            : parseFloat(products.regularPrice);
+        const salesPrice = products.salePrice ? parseFloat(products.salePrice) : parseFloat(products.regularPrice);
 
         const newProduct = new Product({
             productName: products.productName,

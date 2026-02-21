@@ -54,6 +54,7 @@ router.get(ROUTES.DELETE_CATEGORY, adminAuth, categoryController.removeCategory)
 //Brand Management.........................
 router.get(ROUTES.BRANDS, adminAuth, brandController.getBrandPage);
 router.post(ROUTES.ADD_BRAND, adminAuth, productUploads.single("image"), brandController.addBrand);
+router.post(ROUTES.UPDATE_BRAND, adminAuth, productUploads.single("image"), brandController.updateBrand);
 router.post(ROUTES.BLOCK_BRAND, adminAuth, brandController.blockBrand);
 router.post(ROUTES.UNBLOCK_BRAND, adminAuth, brandController.unblockBrand);
 router.post(ROUTES.DELETE_BRAND, adminAuth, brandController.deleteBrand)

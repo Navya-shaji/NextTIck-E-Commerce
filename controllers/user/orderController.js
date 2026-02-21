@@ -3,7 +3,8 @@ const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Address = require("../../models/addressSchema");
 const Order = require('../../models/orderSchema');
-const Wallet = require("../../models/walletSchema")
+const Wallet = require("../../models/walletSchema");
+const Review = require("../../models/reviewSchema");
 const mongoose = require('mongoose');
 
 //for getting the order history page..........................................
@@ -218,17 +219,34 @@ const viewOrderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
         const order = await Order.findById(orderId)
-            .populate('orderItems.product')
-
-        const addresses = await Address.find({ userId: order.userId });
-        const address = addresses.flatMap(addr => addr.address).find(add => {
-            return add._id.toString() == order.address.toString()// Use equals for ObjectId comparison
-        });
+            .populate('orderItems.product');
 
         if (!order) {
             return res.status(404).send('Order not found');
         }
-        res.render('order-details-full', { order, address });
+
+        const addresses = await Address.find({ userId: order.userId });
+        const address = addresses.flatMap(addr => addr.address).find(add => {
+            return add._id.toString() == order.address.toString();
+        });
+
+        // Fetch which products in this order the logged-in user has already reviewed
+        const userId = req.session.user?._id;
+        const productIds = order.orderItems
+            .filter(item => item.product)
+            .map(item => item.product._id);
+
+        const existingReviews = await Review.find({
+            userId,
+            productId: { $in: productIds }
+        }).select('productId');
+
+        // Build a Set of productId strings for O(1) lookup in the template
+        const reviewedProductIds = new Set(
+            existingReviews.map(r => r.productId.toString())
+        );
+
+        res.render('order-details-full', { order, address, reviewedProductIds });
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).send('Server error');

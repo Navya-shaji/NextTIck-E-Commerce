@@ -231,46 +231,87 @@
                 <div class="order-items-card">
                     <h2 class="summary-title">Items Ordered</h2>
                     <% order.orderItems.forEach(item=> { %>
-                        <div class="order-item-row" id="item-<%= item.product._id %>">
-                            <img src="/uploads/re-image/<%= item.product.productImage[0] %>"
-                                alt="<%= item.product.productName %>" class="item-image">
-                            <div class="item-details">
-                                <h3 class="item-name">
-                                    <%= item.product.productName %>
-                                </h3>
-                                <div class="item-meta">
-                                    <span>Quantity: <%= item.quantity %></span>
-                                    <% if (item.variant) { %><span class="ms-3">Variant: <%= item.variant %></span>
-                                        <% } %>
+                        <% if (item.product) { %>
+                            <div class="order-item-row" id="item-<%= item.product._id %>">
+                                <img src="/uploads/re-image/<%= item.product.productImage[0] %>"
+                                    alt="<%= item.product.productName %>" class="item-image">
+                                <div class="item-details">
+                                    <h3 class="item-name">
+                                        <%= item.product.productName %>
+                                    </h3>
+                                    <div class="item-meta">
+                                        <span>Quantity: <%= item.quantity %></span>
+                                        <% if (item.variant) { %><span class="ms-3">Variant: <%= item.variant %></span>
+                                            <% } %>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fw-bold text-dark">₹<%= item.price.toFixed(2) %></span>
+                                        <span class="badge rounded-pill bg-light text-dark border"
+                                            style="font-size: 0.7rem;">
+                                            <%= item.status || order.status %>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="fw-bold text-dark">₹<%= item.price.toFixed(2) %></span>
-                                    <span class="badge rounded-pill bg-light text-dark border"
-                                        style="font-size: 0.7rem;">
-                                        <%= item.status || order.status %>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="text-end" style="min-width: 150px;">
-                                <div class="fw-bold mb-2">₹<%= (item.price * item.quantity).toFixed(2) %>
-                                </div>
+                                <div class="text-end" style="min-width: 150px;">
+                                    <div class="fw-bold mb-2">₹<%= (item.price * item.quantity).toFixed(2) %>
+                                    </div>
 
-                                <% if (['Pending', 'Processing' ].includes(order.status) && item.status !=='Cancelled'
-                                    && item.status !=='Returned' ) { %>
-                                    <button onclick="cancelSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
-                                        class="btn-action-small btn-cancel">Cancel Item</button>
-                                    <% } else if ((order.status==='Delivered' || item.status==='Delivered' ) &&
-                                        !['Cancelled', 'Returned' , 'Return Request' ].includes(item.status)) { %>
+                                    <% if (['Pending', 'Processing' ].includes(order.status) && item.status
+                                        !=='Cancelled' && item.status !=='Returned' ) { %>
+                                        <button
+                                            onclick="cancelSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
+                                            class="btn-action-small btn-cancel">Cancel Item</button>
                                         <button
                                             onclick="returnSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
                                             class="btn-action-small btn-return">Return Item</button>
 
-                                        <button
-                                            onclick="openReviewModal('<%= item.product._id %>', '<%= item.product.productName %>', '<%= order._id %>')"
-                                            class="btn-action-small ms-2"
-                                            style="color: #28a745; border-color: #28a745;">Review Product</button>
-                                        <% } %>
+                                        <% if (reviewedProductIds.has(item.product._id.toString())) { %>
+                                            <span class="btn-action-small ms-2"
+                                                style="color:#28a745;border-color:#28a745;cursor:default;opacity:0.75;">
+                                                ✓ Reviewed
+                                            </span>
+                                            <% } else { %>
+                                                <button
+                                                    onclick="openReviewModal('<%= item.product._id %>', '<%= item.product.productName %>', '<%= order._id %>')"
+                                                    class="btn-action-small ms-2"
+                                                    style="color: #28a745; border-color: #28a745;">Review
+                                                    Product</button>
+                                                <% } %>
+                                                    <% } %>
 
+                                                        <% if (item.status==='Cancelled' ) { %>
+                                                            <div class="text-danger small">Cancelled</div>
+                                                            <% } else if (item.status==='Return Request' ) { %>
+                                                                <div class="text-warning small">Return Requested</div>
+                                                                <% } else if (item.status==='Returned' ) { %>
+                                                                    <div class="text-success small">Returned</div>
+                                                                    <% } %>
+                                </div>
+                            </div>
+                            <% } else { %>
+                                <% /* Product was deleted from the catalogue after order was placed */%>
+                                    <div class="order-item-row">
+                                        <div class="item-image d-flex align-items-center justify-content-center bg-light text-muted"
+                                            style="width:100px;height:120px;border:1px solid var(--border-color);font-size:0.75rem;text-align:center;padding:5px;">
+                                            No Image
+                                        </div>
+                                        <div class="item-details">
+                                            <h3 class="item-name" style="color:var(--light-text);">[Product No Longer
+                                                Available]</h3>
+                                            <div class="item-meta">
+                                                <span>Quantity: <%= item.quantity %></span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="fw-bold text-dark">₹<%= item.price.toFixed(2) %></span>
+                                                <span class="badge rounded-pill bg-light text-dark border"
+                                                    style="font-size: 0.7rem;">
+                                                    <%= item.status || order.status %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end" style="min-width: 150px;">
+                                            <div class="fw-bold mb-2">₹<%= (item.price * item.quantity).toFixed(2) %>
+                                            </div>
                                             <% if (item.status==='Cancelled' ) { %>
                                                 <div class="text-danger small">Cancelled</div>
                                                 <% } else if (item.status==='Return Request' ) { %>
@@ -278,30 +319,33 @@
                                                     <% } else if (item.status==='Returned' ) { %>
                                                         <div class="text-success small">Returned</div>
                                                         <% } %>
-                            </div>
-                        </div>
-                        <% }); %>
-
-                            <div class="address-box mt-5">
-                                <h3 class="summary-title"
-                                    style="font-size: 1.1rem; border-bottom: none; margin-bottom: 15px;">Shipping
-                                    Destination</h3>
-                                <% if (address) { %>
-                                    <div class="fw-bold text-dark mb-1">
-                                        <%= address.name %>
-                                    </div>
-                                    <div class="text-muted small mb-2">
-                                        <%= address.addressType %>
-                                    </div>
-                                    <div class="text-muted">
-                                        <%= address.city %>, <%= address.state %>
-                                                <%= address.pincode %><br>
-                                                    <% if (address.landMark) { %>Landmark: <%= address.landMark %><br>
-                                                            <% } %>
-                                                                Phone: <%= address.phone %>
+                                        </div>
                                     </div>
                                     <% } %>
-                            </div>
+                                        <% }); %>
+
+                                            <div class="address-box mt-5">
+                                                <h3 class="summary-title"
+                                                    style="font-size: 1.1rem; border-bottom: none; margin-bottom: 15px;">
+                                                    Shipping
+                                                    Destination</h3>
+                                                <% if (address) { %>
+                                                    <div class="fw-bold text-dark mb-1">
+                                                        <%= address.name %>
+                                                    </div>
+                                                    <div class="text-muted small mb-2">
+                                                        <%= address.addressType %>
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        <%= address.city %>, <%= address.state %>
+                                                                <%= address.pincode %><br>
+                                                                    <% if (address.landMark) { %>Landmark: <%=
+                                                                            address.landMark %><br>
+                                                                            <% } %>
+                                                                                Phone: <%= address.phone %>
+                                                    </div>
+                                                    <% } %>
+                                            </div>
                 </div>
 
                 <div class="order-summary-card">

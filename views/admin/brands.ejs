@@ -294,6 +294,7 @@
                                                 <ul class="dropdown-menu">
                                                     <li>
                                                         <a class="dropdown-item" href="javascript:void(0)"
+                                                            data-bs-toggle="modal" data-bs-target="#editBrandModal"
                                                             onclick="openEditModal(event, '<%= brand._id %>', '<%= escapedBrandName %>')"><i
                                                                 class="fas fa-edit me-2 text-primary"></i> Edit</a>
                                                     </li>
@@ -486,7 +487,7 @@
                         '<div class="dropdown">' +
                         '<button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>' +
                         '<ul class="dropdown-menu shadow-sm border-0">' +
-                        '<li><a class="dropdown-item" href="javascript:void(0)" onclick="openEditModal(event, \'' + brand._id + '\', \'' + escapedName + '\')"><i class="fas fa-edit me-2 text-primary"></i> Edit</a></li>' +
+                        '<li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#editBrandModal" onclick="openEditModal(event, \'' + brand._id + '\', \'' + escapedName + '\')"><i class="fas fa-edit me-2 text-primary"></i> Edit</a></li>' +
                         '<li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleBrandStatus(event, \'' + brand._id + '\', ' + isBlocked + ')"><i class="fas ' + actionIcon + ' me-2"></i> ' + actionText + '</a></li>' +
                         '<li><hr class="dropdown-divider"></li>' +
                         '<li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteBrand(event, \'' + brand._id + '\')"><i class="fas fa-trash-alt me-2"></i> Delete</a></li>' +

@@ -32,6 +32,7 @@ const ADMIN_ROUTES = {
     // Brand Management
     BRANDS: '/brands',
     ADD_BRAND: '/addBrand',
+    UPDATE_BRAND: '/updateBrand',
     BLOCK_BRAND: '/blockBrand/:id',
     UNBLOCK_BRAND: '/unblockBrand/:id',
     DELETE_BRAND: '/deleteBrand',

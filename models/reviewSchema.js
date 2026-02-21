@@ -37,5 +37,8 @@ const reviewSchema = new Schema({
     }
 }, { timestamps: true });
 
+// Enforce one review per user per product at database level
+reviewSchema.index({ userId: 1, productId: 1 }, { unique: true });
+
 const Review = mongoose.model("Review", reviewSchema);
 module.exports = Review;
