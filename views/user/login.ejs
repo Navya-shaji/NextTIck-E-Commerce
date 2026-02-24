@@ -53,20 +53,6 @@
             <% } %>
 
               <button type="submit" class="auth-btn">SIGN IN</button>
-
-              <div class="social-login">
-                <a href="/auth/google" class="social-btn">
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                  Sign in with Google
-                </a>
-              </div>
-
-              <div class="demo-login" style="margin-top: 20px;">
-                <button type="button" onclick="loadDemoCredentials()" class="auth-btn demo-btn"
-                  style="background: #f8f8f8; color: #1a1a1a; border: 1px solid #ddd;">
-                  USE DEMO LOGIN
-                </button>
-              </div>
         </form>
 
         <p class="switch-auth">
@@ -171,18 +157,6 @@
         });
       }
     });
-
-    function loadDemoCredentials() {
-      const emailEl = document.getElementById('email');
-      const passEl = document.getElementById('password');
-      if (emailEl) emailEl.value = 'user@example.com';
-      if (passEl) passEl.value = 'Password@123';
-      // Clear any existing errors
-      const emailErr = document.getElementById('emailError');
-      const passErr = document.getElementById('passwordError');
-      if (emailErr) emailErr.textContent = '';
-      if (passErr) passErr.textContent = '';
-    }
   </script>
 </body>
 

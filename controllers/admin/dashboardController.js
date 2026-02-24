@@ -40,16 +40,17 @@ const loadDashboard = async (req, res) => {
             getTopBrands()
         ]);
 
-        // Monthly Data (Current Year)
-        const currentYear = new Date().getFullYear();
+        // Monthly Data (Last 12 Months)
+        const twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+        twelveMonthsAgo.setDate(1);
+        twelveMonthsAgo.setHours(0, 0, 0, 0);
+
         const monthlyData = await Order.aggregate([
             {
                 $match: {
                     status: { $nin: ['Cancelled', 'Returned'] },
-                    createdOn: {
-                        $gte: new Date(currentYear, 0, 1),
-                        $lt: new Date(currentYear + 1, 0, 1)
-                    }
+                    createdOn: { $gte: twelveMonthsAgo }
                 }
             },
             {
@@ -62,11 +63,25 @@ const loadDashboard = async (req, res) => {
         ]);
 
         const months = Array(12).fill(0);
-        monthlyData.forEach(item => {
-            months[item._id - 1] = item.total;
-        });
+        const labels = [];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        for (let i = 0; i < 12; i++) {
+            const date = new Date(twelveMonthsAgo);
+            date.setMonth(twelveMonthsAgo.getMonth() + i);
+            const mIdx = date.getMonth();
+            labels.push(monthNames[mIdx]);
+
+            const match = monthlyData.find(item => item._id === (mIdx + 1));
+            months[i] = match ? match.total : 0;
+        }
+
+        console.log('Dashboard Data Summary:', {
+            activeRevenue,
+            totalOrders: totalOrdersCount,
+            topProductsCount: topProducts.length,
+            monthlyDataCount: monthlyData.length
+        });
 
         res.render('dashboard', {
             admin: req.session.admin,
@@ -96,7 +111,7 @@ const loadDashboard = async (req, res) => {
 async function getTopProducts() {
     try {
         const result = await Order.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
+            { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
             { $unwind: '$orderItems' },
             {
                 $lookup: {
@@ -106,14 +121,14 @@ async function getTopProducts() {
                     as: 'productInfo'
                 }
             },
-            { $unwind: '$productInfo' },
+            { $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: '$orderItems.product',
                     name: { $first: '$productInfo.productName' },
                     count: { $sum: '$orderItems.quantity' },
                     revenue: {
-                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
+                        $sum: { $multiply: [{ $ifNull: [{ $toDouble: '$orderItems.price' }, 0] }, { $ifNull: ['$orderItems.quantity', 0] }] }
                     }
                 }
             },
@@ -130,7 +145,7 @@ async function getTopProducts() {
 async function getTopCategories() {
     try {
         const result = await Order.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
+            { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
             { $unwind: '$orderItems' },
             {
                 $lookup: {
@@ -140,7 +155,7 @@ async function getTopCategories() {
                     as: 'productInfo'
                 }
             },
-            { $unwind: '$productInfo' },
+            { $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {
                     from: 'categories',
@@ -149,14 +164,14 @@ async function getTopCategories() {
                     as: 'categoryInfo'
                 }
             },
-            { $unwind: '$categoryInfo' },
+            { $unwind: { path: '$categoryInfo', preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: '$productInfo.category',
                     name: { $first: '$categoryInfo.name' },
                     count: { $sum: '$orderItems.quantity' },
                     revenue: {
-                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
+                        $sum: { $multiply: [{ $ifNull: [{ $toDouble: '$orderItems.price' }, 0] }, { $ifNull: ['$orderItems.quantity', 0] }] }
                     }
                 }
             },
@@ -173,7 +188,7 @@ async function getTopCategories() {
 async function getTopBrands() {
     try {
         const result = await Order.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
+            { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
             { $unwind: '$orderItems' },
             {
                 $lookup: {
@@ -183,7 +198,7 @@ async function getTopBrands() {
                     as: 'productInfo'
                 }
             },
-            { $unwind: '$productInfo' },
+            { $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {
                     from: 'brands',
@@ -192,14 +207,14 @@ async function getTopBrands() {
                     as: 'brandInfo'
                 }
             },
-            { $unwind: '$brandInfo' },
+            { $unwind: { path: '$brandInfo', preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: '$productInfo.brand',
                     name: { $first: '$brandInfo.brandName' },
                     count: { $sum: '$orderItems.quantity' },
                     revenue: {
-                        $sum: { $multiply: [{ $toDouble: '$orderItems.price' }, '$orderItems.quantity'] }
+                        $sum: { $multiply: [{ $ifNull: [{ $toDouble: '$orderItems.price' }, 0] }, { $ifNull: ['$orderItems.quantity', 0] }] }
                     },
                     totalOrderCount: { $sum: 1 }
                 }
