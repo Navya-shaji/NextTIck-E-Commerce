@@ -386,44 +386,63 @@ const getDateFilter = (period, startDate, endDate) => {
 
     switch (period) {
         case 'daily':
-            const today = new Date(now);
-            today.setHours(0, 0, 0, 0);
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999);
             dateFilter = {
                 createdOn: {
-                    $gte: today,
-                    $lte: new Date(now)
+                    $gte: startOfDay,
+                    $lte: endOfDay
                 }
             };
             break;
         case 'weekly':
-            const weekAgo = new Date(now);
+            const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
+            weekAgo.setHours(0, 0, 0, 0);
             dateFilter = { createdOn: { $gte: weekAgo } };
             break;
         case 'monthly':
-            const monthAgo = new Date(now);
+            const monthAgo = new Date();
             monthAgo.setMonth(monthAgo.getMonth() - 1);
+            monthAgo.setHours(0, 0, 0, 0);
             dateFilter = { createdOn: { $gte: monthAgo } };
             break;
         case 'yearly':
-            const yearAgo = new Date(now);
+            const yearAgo = new Date();
             yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+            yearAgo.setHours(0, 0, 0, 0);
             dateFilter = { createdOn: { $gte: yearAgo } };
             break;
         case 'custom':
             if (startDate && endDate) {
-                const endDateTime = new Date(endDate);
-                endDateTime.setHours(23, 59, 59, 999);
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
                 dateFilter = {
                     createdOn: {
-                        $gte: new Date(startDate),
-                        $lte: endDateTime
+                        $gte: start,
+                        $lte: end
                     }
                 };
             }
             break;
+        case 'all':
+        default:
+            dateFilter = {};
+            break;
     }
     return dateFilter;
+};
+
+// Helper used by generateSalesReport
+const fetchSalesData = async (period, startDate, endDate) => {
+    const dateFilter = getDateFilter(period, startDate, endDate);
+    const orders = await Order.find(dateFilter).populate('userId', 'name').lean();
+    const totals = await calculateTotals(orders);
+    return { orders, totals };
 };
 
 
@@ -503,65 +522,86 @@ const calculateTotals = async (orders) => {
 };
 
 
-// loading the salereport page.........................................................
-// Backend modifications (in the loadSalesReport function)
-
-
 const loadSalesReport = async (req, res) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
-        const limit = 20;
+        const limit = parseInt(req.query.limit, 10) || 20;
         const skip = (page - 1) * limit;
 
-        let dateFilter = {};
-        const period = req.query.period || 'all';
-        const startDate = req.query.startDate;
-        const endDate = req.query.endDate;
+        const status = req.query.status || 'all';
 
-        dateFilter = getDateFilter(period, startDate, endDate);
+        // Filter based ONLY on status (All Time)
+        let filter = {};
+        if (status && status !== 'all') {
+            filter.status = status;
+        }
 
-        // Get order statistics
-        const [
-            totalOrdersCount,
-            activeRevenueResult,
-            totalRevenueResult,
-            pendingOrdersCount,
-            completedOrdersCount
-        ] = await Promise.all([
-            Order.countDocuments(dateFilter),
+        console.log('Sales Report Status Filter:', status);
+
+        // Consolidated stats aggregation for performance and correctness
+        const [statsResult, productsSoldResult] = await Promise.all([
             Order.aggregate([
-                {
-                    $match: {
-                        ...dateFilter,
-                        status: { $nin: ['Cancelled', 'Returned'] }
-                    }
-                },
+                { $match: filter },
                 {
                     $group: {
                         _id: null,
-                        total: { $sum: '$finalAmount' }
+                        totalOrders: { $sum: 1 },
+                        totalRevenue: {
+                            $sum: {
+                                $convert: {
+                                    input: '$finalAmount',
+                                    to: 'double',
+                                    onError: 0,
+                                    onNull: 0
+                                }
+                            }
+                        },
+                        activeRevenue: {
+                            $sum: {
+                                $cond: [
+                                    { $not: [{ $in: ['$status', ['Cancelled', 'Returned']] }] },
+                                    {
+                                        $convert: {
+                                            input: '$finalAmount',
+                                            to: 'double',
+                                            onError: 0,
+                                            onNull: 0
+                                        }
+                                    },
+                                    0
+                                ]
+                            }
+                        },
+                        pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } },
+                        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0] } },
+                        cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'Cancelled'] }, 1, 0] } },
+                        returnedOrders: { $sum: { $cond: [{ $eq: ['$status', 'Returned'] }, 1, 0] } },
+                        uniqueUserIds: { $addToSet: '$userId' }
                     }
                 }
             ]),
             Order.aggregate([
-                {
-                    $match: dateFilter
-                },
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$finalAmount' }
-                    }
-                }
-            ]),
-            Order.countDocuments({ ...dateFilter, status: 'Pending' }),
-            Order.countDocuments({ ...dateFilter, status: 'Delivered' })
+                { $match: filter },
+                { $unwind: '$orderItems' },
+                { $group: { _id: null, total: { $sum: { $ifNull: ['$orderItems.quantity', 0] } } } }
+            ])
         ]);
 
-        const activeRevenue = activeRevenueResult[0]?.total || 0;
-        const totalRevenue = totalRevenueResult[0]?.total || 0;
+        const stats = statsResult[0] || {
+            totalOrders: 0,
+            totalRevenue: 0,
+            activeRevenue: 0,
+            pendingOrders: 0,
+            completedOrders: 0,
+            cancelledOrders: 0,
+            returnedOrders: 0,
+            uniqueUserIds: []
+        };
 
-        const orders = await Order.find(dateFilter)
+        const productsSold = productsSoldResult[0]?.total || 0;
+        const totalUsers = stats.uniqueUserIds.length;
+
+        const orders = await Order.find(filter)
             .populate('userId', 'name email')
             .populate('orderItems.product')
             .populate('address')
@@ -577,54 +617,23 @@ const loadSalesReport = async (req, res) => {
             offerDetails: order.offerApplied ? order.offerDetails : 'No offer applied.'
         }));
 
-        const totalOrders = await Order.countDocuments(dateFilter);
-        const totalPages = Math.ceil(totalOrders / limit);
-
-        // Get additional statistics
-        const [
-            totalUsers,
-            productsSoldResult,
-            cancelledOrdersCount,
-            returnedOrdersCount
-        ] = await Promise.all([
-            User.countDocuments({}),
-            Order.aggregate([
-                {
-                    $match: dateFilter
-                },
-                {
-                    $unwind: '$orderItems'
-                },
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$orderItems.quantity' }
-                    }
-                }
-            ]),
-            Order.countDocuments({ ...dateFilter, status: 'Cancelled' }),
-            Order.countDocuments({ ...dateFilter, status: 'Returned' })
-        ]);
-
-        const productsSold = productsSoldResult[0]?.total || 0;
+        const totalPages = Math.ceil(stats.totalOrders / limit);
 
         res.render('salesReport', {
             orders: processedOrders,
             currentPage: page,
             totalPages,
-            period,
-            startDate,
-            endDate,
+            status,
             limit,
-            totalOrders: totalOrdersCount,
-            activeRevenue,
-            totalRevenue,
-            pendingOrders: pendingOrdersCount,
-            completedOrders: completedOrdersCount,
+            totalOrders: stats.totalOrders,
+            activeRevenue: stats.activeRevenue,
+            totalRevenue: stats.totalRevenue,
+            pendingOrders: stats.pendingOrders,
+            completedOrders: stats.completedOrders,
             totalUsers,
             productsSold,
-            cancelledOrders: cancelledOrdersCount,
-            returnedOrders: returnedOrdersCount,
+            cancelledOrders: stats.cancelledOrders,
+            returnedOrders: stats.returnedOrders,
             title: 'Sales Report'
         });
 
@@ -646,21 +655,14 @@ const generatePaginationUrl = (currentUrl, newPage) => {
 //downloading the sales report ...................................
 const downloadSalesReport = async (req, res) => {
     try {
-        const { format, period, startDate, endDate } = req.query;
-        function convertToIST(inputTime) {
-            const date = new Date(inputTime);
+        const { format, status } = req.query;
 
-            const istOffset = 330; // 5 hours and 30 minutes in minutes
-            const istTime = new Date(date.getTime() + (istOffset * 60000));
-
-            return istTime;
+        let filter = {};
+        if (status && status !== 'all') {
+            filter.status = status;
         }
-        const dateFilter = getDateFilter(period, convertToIST(startDate), convertToIST(endDate));
 
-        const orders = await Order.find({
-            ...dateFilter,
-            status: { $nin: ['Pending', 'Processing'] }
-        })
+        const orders = await Order.find(filter)
             .populate('userId', 'name')
             .sort({ createdOn: -1 });
 
@@ -832,7 +834,7 @@ const downloadSalesReport = async (req, res) => {
             worksheet.addRow([]);
             worksheet.addRow(['Summary']);
             worksheet.addRow(['Total Orders', totals.count]);
-            worksheet.addRow(['Total Amount', totals.orderAmount]);
+            worksheet.addRow(['Total Amount', totals.totalAmount]);
             worksheet.addRow(['Final Amount', totals.finalAmount]);
             worksheet.addRow(['Cancelled Orders', totals.cancelledCount]);
             worksheet.addRow(['Returned Orders', totals.returnedCount]);

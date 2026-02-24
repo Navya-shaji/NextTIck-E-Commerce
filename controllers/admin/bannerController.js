@@ -17,7 +17,7 @@ const loadBanners = async (req, res) => {
 // Add Banner
 const addBanner = async (req, res) => {
     try {
-        const { title, description, startDate, endDate, link } = req.body;
+        const { title, description, startDate, endDate } = req.body;
         const image = req.file ? req.file.filename : null;
 
         if (!image) {
@@ -30,7 +30,6 @@ const addBanner = async (req, res) => {
             description,
             startDate,
             endDate,
-            link: link || '',
             isActive: true
         });
 
@@ -66,7 +65,7 @@ const toggleBannerStatus = async (req, res) => {
 const editBanner = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, startDate, endDate, link } = req.body;
+        const { title, description, startDate, endDate } = req.body;
         const banner = await Banner.findById(id);
 
         if (!banner) {
@@ -78,7 +77,6 @@ const editBanner = async (req, res) => {
         banner.description = description;
         banner.startDate = startDate;
         banner.endDate = endDate;
-        banner.link = link || '';
 
         // If new image is uploaded, delete old image and update
         if (req.file) {

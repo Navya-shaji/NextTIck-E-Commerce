@@ -277,7 +277,6 @@
                                                         data-description="<%= banner.description %>"
                                                         data-start="<%= banner.startDate %>"
                                                         data-end="<%= banner.endDate %>"
-                                                        data-link="<%= banner.link || '' %>"
                                                         data-image="<%= banner.image %>"
                                                         onclick="handleEditButtonClick(this); return false;">
                                                         <i class="fas fa-edit me-2"></i>Edit
@@ -344,10 +343,7 @@
                                 <input type="date" class="form-control" name="endDate" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Link (Optional)</label>
-                            <input type="url" class="form-control" name="link" placeholder="https://example.com">
-                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Banner Image *</label>
                             <input type="file" class="form-control" name="image" accept="image/*" required
@@ -393,11 +389,7 @@
                                 <input type="date" class="form-control" id="editEndDate" name="endDate" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Link (Optional)</label>
-                            <input type="url" class="form-control" id="editLink" name="link"
-                                placeholder="https://example.com">
-                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Current Image</label>
                             <div>
@@ -618,12 +610,11 @@
                 const description = btn.getAttribute('data-description');
                 const start = btn.getAttribute('data-start');
                 const end = btn.getAttribute('data-end');
-                const link = btn.getAttribute('data-link');
                 const image = btn.getAttribute('data-image');
-                window.openEditModal(id, title, description, start, end, link, image);
+                window.openEditModal(id, title, description, start, end, image);
             };
 
-            window.openEditModal = function (bannerId, title, description, startDate, endDate, link, image) {
+            window.openEditModal = function (bannerId, title, description, startDate, endDate, image) {
                 document.getElementById('editBannerId').value = bannerId;
                 document.getElementById('editTitle').value = title;
                 document.getElementById('editDescription').value = description;
@@ -634,7 +625,6 @@
                 document.getElementById('editStartDate').value = formattedStartDate;
                 document.getElementById('editEndDate').value = formattedEndDate;
 
-                document.getElementById('editLink').value = link;
                 document.getElementById('editCurrentImage').src = `/uploads/banners/${image}`;
                 document.getElementById('editImagePreview').style.display = 'none';
 

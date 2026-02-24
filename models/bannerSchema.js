@@ -30,10 +30,6 @@ const bannerSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    link: {
-        type: String,
-        default: ''
-    }
 })
 
 const Banner = mongoose.model("Banner", bannerSchema)

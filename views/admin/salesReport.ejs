@@ -314,31 +314,22 @@
         <!-- Filters -->
         <div class="filter-card">
             <form id="filter-form" method="GET" class="row g-3 align-items-end">
-                <div class="col-12 col-md-3">
-                    <label for="period" class="form-label">Time Period</label>
-                    <select id="period" name="period" class="form-select">
-                        <option value="daily" <%=period==='daily' ? 'selected' : '' %>>Daily</option>
-                        <option value="weekly" <%=period==='weekly' ? 'selected' : '' %>>Weekly</option>
-                        <option value="monthly" <%=period==='monthly' ? 'selected' : '' %>>Monthly</option>
-                        <option value="yearly" <%=period==='yearly' ? 'selected' : '' %>>Yearly</option>
-                        <option value="custom" <%=period==='custom' ? 'selected' : '' %>>Custom Range</option>
+                <div class="col-12 col-md-4">
+                    <label for="status" class="form-label">Order Status Filter</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="all" <%=status==='all' ? 'selected' : '' %>>All Status (All Time)</option>
+                        <option value="Pending" <%=status==='Pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="Processing" <%=status==='Processing' ? 'selected' : '' %>>Processing</option>
+                        <option value="Shipped" <%=status==='Shipped' ? 'selected' : '' %>>Shipped</option>
+                        <option value="Delivered" <%=status==='Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%=status==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Returned" <%=status==='Returned' ? 'selected' : '' %>>Returned</option>
                     </select>
                 </div>
 
-                <div class="col-12 col-md-3 custom-dates" style="display: none;">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control"
-                        value="<%= startDate || '' %>">
-                </div>
-
-                <div class="col-12 col-md-3 custom-dates" style="display: none;">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" value="<%= endDate || '' %>">
-                </div>
-
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <button type="submit" class="btn-gold w-100">
-                        <i class="fas fa-sync-alt"></i> Update Report
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
 
@@ -402,16 +393,14 @@
                     <ul class="pagination">
                         <% if (currentPage> 1) { %>
                             <li class="page-item">
-                                <a class="page-link"
-                                    href="?page=<%= currentPage - 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><i
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>&status=<%= status %>"><i
                                         class="fas fa-chevron-left"></i></a>
                             </li>
                             <% } %>
 
                                 <% for(let i=1; i <=totalPages; i++) { %>
                                     <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                        <a class="page-link"
-                                            href="?page=<%= i %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
+                                        <a class="page-link" href="?page=<%= i %>&status=<%= status %>">
                                             <%= i %>
                                         </a>
                                     </li>
@@ -420,7 +409,7 @@
                                         <% if (currentPage < totalPages) { %>
                                             <li class="page-item">
                                                 <a class="page-link"
-                                                    href="?page=<%= currentPage + 1 %>&period=<%= period %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><i
+                                                    href="?page=<%= currentPage + 1 %>&status=<%= status %>"><i
                                                         class="fas fa-chevron-right"></i></a>
                                             </li>
                                             <% } %>
@@ -431,54 +420,21 @@
     </div>
 
     <script>
-        // Initialize elements
-        const periodSelect = document.getElementById('period');
-        const customDates = document.querySelectorAll('.custom-dates');
-        const filterForm = document.getElementById('filter-form');
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-
-        // Toggle custom date fields
-        function toggleCustomDates() {
-            const isCustom = periodSelect.value === 'custom';
-            customDates.forEach(el => {
-                el.style.display = isCustom ? 'block' : 'none';
-                // Required attribute toggle for validation if needed
-                const input = el.querySelector('input');
-                if (input) {
-                    if (isCustom) input.setAttribute('required', 'required');
-                    else input.removeAttribute('required');
-                }
-            });
-        }
-
         // Handle Filter without Page Refresh (AJAX)
         async function updateReport(e) {
             if (e) e.preventDefault();
 
-            // Validate custom dates if selected
-            if (periodSelect.value === 'custom') {
-                if (!startDateInput.value || !endDateInput.value) {
-                    // Don't submit if dates are missing in custom mode
-                    return;
-                }
-            }
+            const form = document.getElementById('filter-form');
+            if (!form) return;
 
-            const formData = new FormData(filterForm);
+            const formData = new FormData(form);
             const params = new URLSearchParams(formData);
 
-            // Fetch only the content part or partial
-            // In a real SPA we might fetch JSON and rebuild table, 
-            // but since we have EJS, we can fetch the page with query params 
-            // and parse the HTML to replace the table container.
-
             const mainContentSelector = '.content-wrapper';
-            // Or specific container like '.report-card' if you only want to update table
-            // But summary cards also change, so wrapper is better.
 
             try {
-                // Show loading
-                document.querySelector(mainContentSelector).style.opacity = '0.5';
+                const wrapper = document.querySelector(mainContentSelector);
+                if (wrapper) wrapper.style.opacity = '0.5';
 
                 const response = await fetch(`${window.location.pathname}?${params.toString()}`);
                 if (!response.ok) throw new Error('Network response was not ok');
@@ -490,71 +446,24 @@
                 const newContent = doc.querySelector(mainContentSelector);
                 if (newContent) {
                     document.querySelector(mainContentSelector).replaceWith(newContent);
-
-                    // Update URL without reload
                     window.history.pushState({ path: `${window.location.pathname}?${params.toString()}` }, '', `?${params.toString()}`);
-
-                    // Re-bind events since DOM was replaced
                     bindEvents();
-
-                    // Re-initialize scripts if needed or just re-run toggleCustomDates
-                    const newPeriodSelect = document.getElementById('period');
-                    if (newPeriodSelect) {
-                        const newCustomDates = document.querySelectorAll('.custom-dates');
-                        const isCustom = newPeriodSelect.value === 'custom';
-                        newCustomDates.forEach(el => el.style.display = isCustom ? 'block' : 'none');
-                    }
                 }
             } catch (error) {
                 console.error('Error updating report:', error);
-                // Fallback to normal submit if fetch fails
-                // filterForm.submit(); 
+                form.submit(); // Fallback
             } finally {
                 const wrapper = document.querySelector(mainContentSelector);
                 if (wrapper) wrapper.style.opacity = '1';
             }
         }
 
-        function bindEvents() {
-            const form = document.getElementById('filter-form');
-            if (form) {
-                form.addEventListener('submit', updateReport);
-
-                // Auto-submit on select change (optional, but good UX)
-                const period = document.getElementById('period');
-                if (period) {
-                    period.addEventListener('change', function () {
-                        toggleCustomDates();
-                        if (this.value !== 'custom') {
-                            // Trigger update immediately for non-custom
-                            form.requestSubmit();
-                        }
-                    });
-                }
-
-                // For custom dates, maybe wait for button click or both dates filled
-            }
-
-            // Pagination links handling
-            document.querySelectorAll('.page-link').forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const href = this.getAttribute('href');
-                    if (!href) return;
-
-                    // Extract page number from href or just use the href directly via fetch
-                    // The href already contains the correct query params from EJS render
-
-                    // We can reuse the SPA fetch logic or just call fetch(href)
-                    fetchPage(href);
-                });
-            });
-        }
-
         async function fetchPage(url) {
             const mainContentSelector = '.content-wrapper';
             try {
-                document.querySelector(mainContentSelector).style.opacity = '0.5';
+                const wrapper = document.querySelector(mainContentSelector);
+                if (wrapper) wrapper.style.opacity = '0.5';
+
                 const response = await fetch(url);
                 const html = await response.text();
                 const parser = new DOMParser();
@@ -563,25 +472,44 @@
                 if (newContent) {
                     document.querySelector(mainContentSelector).replaceWith(newContent);
                     window.history.pushState({ path: url }, '', url);
-                    bindEvents(); // Re-bind
-                    // Re-init custom dates state
-                    const newPeriodSelect = document.getElementById('period');
-                    if (newPeriodSelect) {
-                        const newCustomDates = document.querySelectorAll('.custom-dates');
-                        const isCustom = newPeriodSelect.value === 'custom';
-                        newCustomDates.forEach(el => el.style.display = isCustom ? 'block' : 'none');
-                    }
+                    bindEvents();
                 }
             } catch (e) {
                 console.error(e);
                 window.location.href = url;
+            } finally {
+                const wrapper = document.querySelector(mainContentSelector);
+                if (wrapper) wrapper.style.opacity = '1';
             }
+        }
+
+        function bindEvents() {
+            const form = document.getElementById('filter-form');
+            if (!form) return;
+
+            form.addEventListener('submit', updateReport);
+
+            const status = document.getElementById('status');
+            if (status) {
+                status.addEventListener('change', function () {
+                    updateReport();
+                });
+            }
+
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        fetchPage(href);
+                    }
+                });
+            });
         }
 
         // Initial Bind
         document.addEventListener('DOMContentLoaded', () => {
             bindEvents();
-            toggleCustomDates();
         });
 
         // function downloadReport(format) {
@@ -598,23 +526,9 @@
         // }
         function downloadReport(format) {
             console.log('Download initiated', { format });
+            const status = document.getElementById('status')?.value || 'all';
 
-            const period = document.getElementById('period')?.value;
-            const startDate = document.getElementById('startDate')?.value;
-            const endDate = document.getElementById('endDate')?.value;
-
-            console.log('Form values:', { period, startDate, endDate });
-
-            if (!period) {
-                console.error('Period is required');
-                return;
-            }
-
-            let url = `/admin/sales-report/download?format=${encodeURIComponent(format)}&period=${encodeURIComponent(period)}`;
-
-            if (period === 'custom' && startDate && endDate) {
-                url += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
-            }
+            let url = `/admin/sales-report/download?format=${encodeURIComponent(format)}&status=${encodeURIComponent(status)}`;
 
             console.log('Generated URL:', url);
             window.location.href = url;
