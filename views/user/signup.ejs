@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Signup Page</title>
   <link rel="stylesheet" href="/styles/signup.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -59,6 +60,14 @@
             <% } %>
 
               <button type="submit" class="auth-btn">SIGN UP</button>
+
+              <div class="divider">
+                <span>OR</span>
+              </div>
+
+              <a href="/auth/google" class="google-btn">
+                <i class="fab fa-google"></i> Continue with Google
+              </a>
         </form>
 
         <p class="switch-auth">

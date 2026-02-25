@@ -27,6 +27,12 @@ router.post(ROUTES.RESEND_OTP, userController.resendOtp)
 router.get(ROUTES.ABOUT, shopController.loadAboutPage);
 router.get(ROUTES.CONTACT, shopController.loadContactPage);
 
+// Google Auth Routes
+router.get(ROUTES.AUTH_GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(ROUTES.AUTH_GOOGLE_CALLBACK, passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+    res.redirect('/');
+});
+
 // login page........................................................................................................
 router.get(ROUTES.PAGE_NOT_FOUND, userController.pageNotFound)
 router.get(ROUTES.LOGIN, userController.loadLogin)
