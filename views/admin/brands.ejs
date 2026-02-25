@@ -10,212 +10,196 @@
         body {
             background-color: #f8fafc;
             font-family: 'Outfit', sans-serif;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
 
-        body::-webkit-scrollbar {
-            display: none;
-        }
+            .content-wrapper {
+                padding: 2.5rem;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
 
-        * {
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
-        }
+            .content-header {
+                margin-bottom: 3rem;
+            }
 
-        *::-webkit-scrollbar {
-            display: none !important;
-        }
+            .content-title {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--dark-bg);
+                letter-spacing: -0.025em;
+            }
 
-        .content-wrapper {
-            padding: 2.5rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+            .brands-grid {
+                display: grid;
+                grid-template-columns: 350px 1fr;
+                gap: 2.5rem;
+                align-items: start;
+            }
 
-        .content-header {
-            margin-bottom: 3rem;
-        }
+            .premium-card {
+                background: white;
+                border-radius: 20px;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+                padding: 2rem;
+            }
 
-        .content-title {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--dark-bg);
-            letter-spacing: -0.025em;
-        }
+            .card-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: var(--dark-bg);
+            }
 
-        .brands-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 2.5rem;
-            align-items: start;
-        }
+            .form-label {
+                font-weight: 600;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #64748b;
+                margin-bottom: 0.75rem;
+            }
 
-        .premium-card {
-            background: white;
-            border-radius: 20px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
-            padding: 2rem;
-        }
+            .form-control {
+                border-radius: 12px;
+                padding: 0.75rem 1rem;
+                border: 1.5px solid #e2e8f0;
+                transition: all 0.2s;
+            }
 
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--dark-bg);
-        }
+            .form-control:focus {
+                border-color: var(--gold-primary);
+                box-shadow: 0 0 0 4px rgba(168, 135, 50, 0.1);
+            }
 
-        .form-label {
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            margin-bottom: 0.75rem;
-        }
+            .btn-gold {
+                background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 0.75rem 1.5rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                width: 100%;
+            }
 
-        .form-control {
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            border: 1.5px solid #e2e8f0;
-            transition: all 0.2s;
-        }
+            .btn-gold:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 15px rgba(168, 135, 50, 0.2);
+            }
 
-        .form-control:focus {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 0 4px rgba(168, 135, 50, 0.1);
-        }
+            .brand-table-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+                overflow: hidden;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+            }
 
-        .btn-gold {
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
+            .table {
+                margin-bottom: 0;
+            }
 
-        .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(168, 135, 50, 0.2);
-        }
+            .table thead th {
+                background: #f8fafc;
+                padding: 1.25rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.05em;
+                color: #64748b;
+                border-bottom: 1px solid #e2e8f0;
+            }
 
-        .brand-table-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
+            .table tbody td {
+                padding: 1.25rem;
+                vertical-align: middle;
+                border-bottom: 1px solid #f1f5f9;
+            }
 
-        .table {
-            margin-bottom: 0;
-        }
+            .brand-logo-wrap {
+                width: 48px;
+                height: 48px;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #f8fafc;
+                padding: 4px;
+                border: 1px solid #e2e8f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-        .table thead th {
-            background: #f8fafc;
-            padding: 1.25rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-        }
+            .brand-logo {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
 
-        .table tbody td {
-            padding: 1.25rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #f1f5f9;
-        }
+            .status-badge {
+                padding: 0.35rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
 
-        .brand-logo-wrap {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #f8fafc;
-            padding: 4px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+            .badge-listed {
+                background: #ecfdf5;
+                color: #10b981;
+            }
 
-        .brand-logo {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
+            .badge-unlisted {
+                background: #fef2f2;
+                color: #ef4444;
+            }
 
-        .status-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+            .search-wrapper {
+                position: relative;
+                max-width: 400px;
+            }
 
-        .badge-listed {
-            background: #ecfdf5;
-            color: #10b981;
-        }
+            .search-wrapper .form-control {
+                border-radius: 12px;
+                padding-left: 2.8rem;
+                height: 48px;
+                background: #f8fafc;
+            }
 
-        .badge-unlisted {
-            background: #fef2f2;
-            color: #ef4444;
-        }
+            .search-wrapper i {
+                position: absolute;
+                left: 1.25rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                z-index: 10;
+            }
 
-        .search-wrapper {
-            position: relative;
-            max-width: 400px;
-        }
+            .modal-content {
+                border-radius: 20px;
+                border: none;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            }
 
-        .search-wrapper .form-control {
-            border-radius: 12px;
-            padding-left: 2.8rem;
-            height: 48px;
-            background: #f8fafc;
-        }
+            .dropdown-menu {
+                border: none;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                border-radius: 12px;
+                padding: 0.5rem;
+            }
 
-        .search-wrapper i {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            z-index: 10;
-        }
+            .dropdown-item {
+                border-radius: 8px;
+                padding: 0.6rem 1rem;
+                font-weight: 500;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
 
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            padding: 0.5rem;
-        }
-
-        .dropdown-item {
-            border-radius: 8px;
-            padding: 0.6rem 1rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f1f5f9;
-        }
+            .dropdown-item:hover {
+                background-color: #f1f5f9;
+            }
     </style>
 
     <div class="content-wrapper">

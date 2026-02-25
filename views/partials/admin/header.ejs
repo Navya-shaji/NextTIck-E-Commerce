@@ -12,6 +12,8 @@
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
         :root {
             --admin-bg: #f4f7f6;
@@ -32,30 +34,26 @@
             background-color: var(--admin-bg);
             color: #334155;
             margin: 0;
-            /* Hide scrollbar while maintaining scroll functionality */
-            overflow-y: scroll;
-            scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-            /* IE and Edge */
+            overflow-y: auto;
         }
 
-        body::-webkit-scrollbar {
-            display: none;
-            /* Chrome, Safari, Opera */
+        /* Standard scrollbar styling (optional but better than hiding) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-        /* Hide scrollbars globally for all elements */
-        * {
-            scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-            /* IE and Edge */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
 
-        *::-webkit-scrollbar {
-            display: none;
-            /* Chrome, Safari, Opera */
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b38e4d;
         }
 
         /* Sidebar Sidebar */

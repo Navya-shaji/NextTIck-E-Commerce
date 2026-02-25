@@ -14,21 +14,6 @@
             body {
                 background-color: #f8fafc;
                 font-family: 'Outfit', sans-serif;
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-            }
-
-            body::-webkit-scrollbar {
-                display: none;
-            }
-
-            * {
-                scrollbar-width: none !important;
-                -ms-overflow-style: none !important;
-            }
-
-            *::-webkit-scrollbar {
-                display: none !important;
             }
 
             .content-wrapper {
@@ -402,7 +387,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
     <script>
         (function () {
@@ -412,11 +396,14 @@
             let isProcessing = false;
             let cropModal = null;
 
-            // Initialize Modal at the start
-            document.addEventListener('DOMContentLoaded', function () {
+            window.initProductAdd = function () {
+                console.log("Initializing Product Add page components...");
                 const modalElement = document.getElementById('cropModal');
                 if (modalElement) {
-                    cropModal = new bootstrap.Modal(modalElement);
+                    cropModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    // Remove old listeners to avoid duplicates
+                    modalElement.removeEventListener('shown.bs.modal', onModalShown);
+                    modalElement.removeEventListener('hidden.bs.modal', onModalHidden);
                     modalElement.addEventListener('shown.bs.modal', onModalShown);
                     modalElement.addEventListener('hidden.bs.modal', onModalHidden);
                 }
@@ -425,7 +412,7 @@
                 if (cropBtn) {
                     cropBtn.onclick = onCropButtonClick;
                 }
-            });
+            };
 
             window.handleImageSelect = function (event) {
                 const files = event.target.files;
@@ -573,6 +560,18 @@
                     isValid = false;
                 }
 
+                const salePriceVal = document.getElementsByName('salePrice')[0].value;
+                if (salePriceVal !== "") {
+                    const salePrice = parseFloat(salePriceVal);
+                    if (isNaN(salePrice) || salePrice < 0) {
+                        window.displayErrorMessage('salePrice-error', 'Provide a valid sale price');
+                        isValid = false;
+                    } else if (salePrice > regularPrice) {
+                        window.displayErrorMessage('salePrice-error', 'Sale price cannot exceed regular price');
+                        isValid = false;
+                    }
+                }
+
                 const qty = document.getElementsByName('quantity')[0].value;
                 if (qty === '' || parseInt(qty) < 0) {
                     window.displayErrorMessage('quantity-error', 'Valid quantity required');
@@ -634,6 +633,8 @@
                     if (submitSpinner) submitSpinner.classList.add('d-none');
                 }
             };
+
+            window.initProductAdd();
         })();
     </script>
 

@@ -13,88 +13,95 @@ const mongoose = require('mongoose')
 
 const getProductAddPage = async (req, res) => {
     try {
-        const category = await Category.find({ isListed: true })
-        const brand = await Brand.find({ isBlocked: false })
+        const category = await Category.find({ isListed: true });
+        const brand = await Brand.find({ isBlocked: false });
 
         res.render("product-add", {
             cat: category,
             brand: brand
-        })
-
+        });
     } catch (error) {
         console.error("Error in getProductAddPage:", error);
-        res.redirect("/admin/error")
+        res.redirect("/admin/pageerror");
     }
-}
+};
+
 const addProducts = async (req, res) => {
     try {
         const products = req.body;
+        console.log("Adding Product Request Data:", { ...products, imagesCount: req.files?.length || 0 });
+
         const images = req.files ? req.files.map(file => file.filename) : [];
 
-        // Validate required fields
-        if (!products.productName) return res.status(400).json({ success: false, error: "Product Name is required" });
-        if (!products.description) return res.status(400).json({ success: false, error: "Description is required" });
-        if (!products.brand) return res.status(400).json({ success: false, error: "Brand is required" });
-        if (!products.category) return res.status(400).json({ success: false, error: "Category is required" });
-        if (!products.regularPrice) return res.status(400).json({ success: false, error: "Regular Price is required" });
-        if (!products.quantity) return res.status(400).json({ success: false, error: "Quantity is required" });
-        if (images.length < 1) return res.status(400).json({ success: false, error: "Please upload at least 1 image" });
+        // Comprehensive Validation
+        const errors = [];
+        if (!products.productName?.trim()) errors.push("Product Name is required");
+        if (!products.description?.trim()) errors.push("Description is required");
+        if (!products.brand) errors.push("Brand is required");
+        if (!products.category) errors.push("Category is required");
+        if (!products.regularPrice || isNaN(products.regularPrice)) errors.push("Valid Regular Price is required");
+        if (!products.quantity || isNaN(products.quantity)) errors.push("Valid Quantity is required");
+        if (images.length < 1) errors.push("Please upload at least one product image");
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, error: errors.join(", ") });
+        }
 
         // Validate brand ID
         if (!mongoose.Types.ObjectId.isValid(products.brand)) {
-            return res.status(400).json({ success: false, error: "Invalid brand ID format" });
+            return res.status(400).json({ success: false, error: "Invalid brand selection format" });
         }
 
-        const productExists = await Product.findOne({ productName: products.productName });
+        const productExists = await Product.findOne({ productName: { $regex: new RegExp(`^${products.productName.trim()}$`, 'i') } });
         if (productExists) {
-            return res.status(400).json({ success: false, error: "Product already exists" });
+            return res.status(400).json({ success: false, error: "A product with this name already exists in the inventory" });
         }
 
-        const categoryId = await Category.findOne({ name: products.category });
-        if (!categoryId) {
-            return res.status(400).json({ success: false, error: "Invalid category" });
+        const categoryData = await Category.findOne({ name: { $regex: new RegExp(`^${products.category}$`, "i") } });
+        if (!categoryData) {
+            console.log("Category not found:", products.category);
+            return res.status(400).json({ success: false, error: "Selected category is no longer available or was not found" });
         }
 
-        const brand = await Brand.findOne({ _id: products.brand, isBlocked: false });
-        if (!brand) {
-            return res.status(400).json({ success: false, error: "Brand not found or blocked" });
+        const brandData = await Brand.findOne({ _id: products.brand, isBlocked: false });
+        if (!brandData) {
+            console.log("Brand not found or blocked:", products.brand);
+            return res.status(400).json({ success: false, error: "Selected brand is restricted or not found" });
         }
 
-        const salesPrice = products.salePrice ? parseFloat(products.salePrice) : parseFloat(products.regularPrice);
+        const regularPrice = parseFloat(products.regularPrice);
+        const salePrice = products.salePrice ? parseFloat(products.salePrice) : regularPrice;
+
+        if (salePrice > regularPrice) {
+            return res.status(400).json({ success: false, error: "Sale price cannot be greater than regular price" });
+        }
 
         const newProduct = new Product({
-            productName: products.productName,
-            description: products.description,
+            productName: products.productName.trim(),
+            description: products.description.trim(),
             brand: products.brand,
-            category: categoryId._id,
-            regularPrice: parseFloat(products.regularPrice),
-            salesPrice: salesPrice,
+            category: categoryData._id,
+            regularPrice: regularPrice,
+            salesPrice: salePrice,
             createdOn: new Date(),
             quantity: parseInt(products.quantity),
             productImage: images,
-            status: "Available",
+            status: parseInt(products.quantity) > 0 ? "Available" : "out of stock",
             isReturnable: products.isReturnable === 'true' || products.isReturnable === true
         });
 
-        const savedProduct = await newProduct.save();
+        await newProduct.save();
 
-        if (savedProduct) {
-            return res.status(200).json({
-                success: true,
-                message: "Product added successfully",
-                product: savedProduct
-            });
-        } else {
-            return res.status(500).json({
-                success: false,
-                error: "Failed to save the product"
-            });
-        }
+        return res.status(200).json({
+            success: true,
+            message: "Product added to the registry successfully"
+        });
+
     } catch (error) {
-        console.error("Error in addProducts:", error);
+        console.error("CRITICAL ERROR in addProducts:", error);
         return res.status(500).json({
             success: false,
-            error: "Internal server error: " + error.message
+            error: "A system error occurred while adding the product: " + error.message
         });
     }
 };
