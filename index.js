@@ -34,8 +34,10 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    const userId = req.session.user?._id || req.session.passport?.user;
-    if (userId) {
+    const sessionUser = req.session.user || req.session.passport?.user;
+    const userId = sessionUser?._id || sessionUser;
+
+    if (userId && typeof userId === 'string' || userId instanceof require('mongoose').Types.ObjectId) {
       const cart = await Cart.findOne({ userId });
       res.locals.cartCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
     } else {

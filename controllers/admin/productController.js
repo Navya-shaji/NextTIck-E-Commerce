@@ -38,7 +38,7 @@ const addProducts = async (req, res) => {
         if (!products.category) return res.status(400).json({ success: false, error: "Category is required" });
         if (!products.regularPrice) return res.status(400).json({ success: false, error: "Regular Price is required" });
         if (!products.quantity) return res.status(400).json({ success: false, error: "Quantity is required" });
-        if (images.length < 3) return res.status(400).json({ success: false, error: "Please upload at least 3 images" });
+        if (images.length < 1) return res.status(400).json({ success: false, error: "Please upload at least 1 image" });
 
         // Validate brand ID
         if (!mongoose.Types.ObjectId.isValid(products.brand)) {
@@ -414,8 +414,8 @@ const updateProduct = async (req, res) => {
         };
 
         if (image.length > 0) {
-            if (image.length < 3) {
-                return res.status(400).json({ success: false, message: "Please provide at least 3 images" });
+            if (image.length < 1) {
+                return res.status(400).json({ success: false, message: "Please provide at least 1 image" });
             }
             updateFields.productImage = image;
         }
@@ -467,11 +467,11 @@ const deleteSingleImage = async (req, res) => {
             });
         }
 
-        // Enforce minimum 3 images
-        if (product.productImage.length <= 3) {
+        // Enforce minimum 1 image
+        if (product.productImage.length <= 1) {
             return res.status(400).json({
                 success: false,
-                error: "Product must have at least 3 images"
+                error: "Product must have at least 1 image"
             });
         }
 

@@ -725,7 +725,8 @@
       <script>
         function addToCart(e, productId) {
           e.preventDefault();
-          const b = e.target;
+          const b = e.currentTarget || e.target;
+          const originalText = b.innerText;
           b.disabled = true;
           b.innerText = 'PROCESSING...';
 
@@ -746,6 +747,21 @@
                   timer: 2000
                 });
                 $('.cart-count').text(d.cartCount);
+              } else if (d.status === 'already_in_cart') {
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Already in your bag',
+                  text: d.message,
+                  showCancelButton: true,
+                  confirmButtonColor: '#000',
+                  cancelButtonColor: '#6c757d',
+                  confirmButtonText: 'Go to Cart',
+                  cancelButtonText: 'Continue Shopping'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = '/cart';
+                  }
+                });
               } else {
                 Swal.fire('Note', d.message || 'Operation failed', 'info');
               }
@@ -753,7 +769,7 @@
             .catch(() => Swal.fire('Error', 'Connection failed', 'error'))
             .finally(() => {
               b.disabled = false;
-              b.innerText = 'ADD TO BAG';
+              b.innerText = originalText;
             });
         }
 

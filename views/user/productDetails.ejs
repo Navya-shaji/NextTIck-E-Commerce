@@ -662,7 +662,7 @@
                     </div>
 
                     <% if (bestOffer> 0) { %>
-                        <div class="best-offer-info">
+                        <div class="best-offer-info mb-4">
                             <i class="fas fa-gem me-2" style="color: var(--accent-color);"></i>
                             <% if (productOffer> categoryOffer) { %>
                                 Exclusive Product Privilege Applied
@@ -672,79 +672,115 @@
                         </div>
                         <% } %>
 
-                            <div class="description-wrapper">
-                                <p class="mb-0">
-                                    <%= product.description %>
-                                </p>
-                            </div>
-
-                            <% if (product.quantity> 0) { %>
-                                <div class="controls-wrapper">
-                                    <button onclick="addToCart('<%= product._id %>')" class="btn-add-cart">Add to
-                                        Bag</button>
-
-                                    <button onclick="addToWishlist('<%= product._id %>')" class="btn-wishlist"
-                                        title="Add to Wishlist">
-                                        <i class="far fa-heart"></i>
-                                    </button>
-                                </div>
-                                <% } else { %>
-                                    <div class="alert alert-soft-dark d-flex align-items-center mb-4"
-                                        style="background: var(--secondary-color); border: none; border-radius: 12px; padding: 20px;">
-                                        <i class="fas fa-envelope-open-text me-3 opacity-50"></i>
-                                        <div>
-                                            <div class="fw-bold">Currently Unavailable</div>
-                                            <div class="small opacity-75">We can notify you when this masterpiece
-                                                returns to our collection.</div>
-                                        </div>
-                                    </div>
-                                    <% } %>
-
-                                        <!-- Additional Info -->
-                                        <div class="accordion accordion-flush mt-5" id="productAccordion">
-                                            <div class="accordion-item"
-                                                style="border-top: 1px solid var(--border-color);">
-                                                <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed fw-500" type="button"
-                                                        data-bs-toggle="collapse" data-bs-target="#specifications"
-                                                        style="font-family: var(--font-heading); letter-spacing: 2px; font-size: 11px;">
-                                                        SPECIFICATIONS
-                                                    </button>
-                                                </h2>
-                                                <div id="specifications" class="accordion-collapse collapse"
-                                                    data-bs-parent="#productAccordion">
-                                                    <div class="accordion-body text-muted small px-0">
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <span>Brand</span>
-                                                            <span class="text-dark fw-600">
-                                                                <%= product.brand ? product.brand.brandName : 'Luxury'
-                                                                    %>
-                                                            </span>
+                            <!-- Coupons Section -->
+                            <% if (availableCoupons && availableCoupons.length> 0) { %>
+                                <div class="available-coupons-wrapper mb-4">
+                                    <h6 class="text-uppercase fw-bold mb-3"
+                                        style="font-size: 0.75rem; letter-spacing: 1.5px; color: var(--light-text);">
+                                        Available Offers</h6>
+                                    <div class="d-flex flex-column gap-2">
+                                        <% availableCoupons.forEach(coupon=> { %>
+                                            <div class="coupon-tag p-2 border rounded-3 d-flex align-items-center justify-content-between"
+                                                style="background: #fdfaf3; border-style: dashed !important; border-color: var(--accent-light) !important;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-ticket-alt"
+                                                        style="color: var(--accent-color);"></i>
+                                                    <div>
+                                                        <div class="fw-bold small" style="color: var(--primary-color);">
+                                                            <%= coupon.name %>
                                                         </div>
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <span>Collection</span>
-                                                            <span class="text-dark fw-600">
-                                                                <%= product.category ? product.category.name
-                                                                    : 'Exquisite' %>
-                                                            </span>
+                                                        <div class="text-muted" style="font-size: 0.7rem;">
+                                                            Min Purchase: ₹<%= coupon.minimumPrice %>
                                                         </div>
-                                                        <% if (product.color) { %>
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <span>Finishing</span>
-                                                                <span class="text-dark fw-600">
-                                                                    <%= product.color %>
-                                                                </span>
-                                                            </div>
-                                                            <% } %>
-                                                                <div class="d-flex justify-content-between">
-                                                                    <span>Authenticity</span>
-                                                                    <span class="text-dark fw-600">Heritage
-                                                                        Certified</span>
-                                                                </div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="fw-bold" style="color: var(--success-color);">
+                                                        ₹<%= coupon.offerPrice %> OFF
                                                     </div>
                                                 </div>
                                             </div>
+                                            <% }) %>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                    <div class="description-wrapper">
+                                        <p class="mb-0">
+                                            <%= product.description %>
+                                        </p>
+                                    </div>
+
+                                    <% if (product.quantity> 0) { %>
+                                        <div class="controls-wrapper">
+                                            <button onclick="addToCart('<%= product._id %>')" class="btn-add-cart">Add
+                                                to
+                                                Bag</button>
+
+                                            <button onclick="addToWishlist('<%= product._id %>')" class="btn-wishlist"
+                                                title="Add to Wishlist">
+                                                <i class="far fa-heart"></i>
+                                            </button>
                                         </div>
+                                        <% } else { %>
+                                            <div class="alert alert-soft-dark d-flex align-items-center mb-4"
+                                                style="background: var(--secondary-color); border: none; border-radius: 12px; padding: 20px;">
+                                                <i class="fas fa-envelope-open-text me-3 opacity-50"></i>
+                                                <div>
+                                                    <div class="fw-bold">Currently Unavailable</div>
+                                                    <div class="small opacity-75">We can notify you when this
+                                                        masterpiece
+                                                        returns to our collection.</div>
+                                                </div>
+                                            </div>
+                                            <% } %>
+
+                                                <!-- Additional Info -->
+                                                <div class="accordion accordion-flush mt-5" id="productAccordion">
+                                                    <div class="accordion-item"
+                                                        style="border-top: 1px solid var(--border-color);">
+                                                        <h2 class="accordion-header">
+                                                            <button class="accordion-button collapsed fw-500"
+                                                                type="button" data-bs-toggle="collapse"
+                                                                data-bs-target="#specifications"
+                                                                style="font-family: var(--font-heading); letter-spacing: 2px; font-size: 11px;">
+                                                                SPECIFICATIONS
+                                                            </button>
+                                                        </h2>
+                                                        <div id="specifications" class="accordion-collapse collapse"
+                                                            data-bs-parent="#productAccordion">
+                                                            <div class="accordion-body text-muted small px-0">
+                                                                <div class="d-flex justify-content-between mb-3">
+                                                                    <span>Brand</span>
+                                                                    <span class="text-dark fw-600">
+                                                                        <%= product.brand ? product.brand.brandName
+                                                                            : 'Luxury' %>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between mb-3">
+                                                                    <span>Collection</span>
+                                                                    <span class="text-dark fw-600">
+                                                                        <%= product.category ? product.category.name
+                                                                            : 'Exquisite' %>
+                                                                    </span>
+                                                                </div>
+                                                                <% if (product.color) { %>
+                                                                    <div class="d-flex justify-content-between mb-3">
+                                                                        <span>Finishing</span>
+                                                                        <span class="text-dark fw-600">
+                                                                            <%= product.color %>
+                                                                        </span>
+                                                                    </div>
+                                                                    <% } %>
+                                                                        <div class="d-flex justify-content-between">
+                                                                            <span>Authenticity</span>
+                                                                            <span class="text-dark fw-600">Heritage
+                                                                                Certified</span>
+                                                                        </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                 </div>
             </div>
         </div>
@@ -978,11 +1014,26 @@
                         if (response.cartCount !== undefined) {
                             $('.cart-count').text(response.cartCount);
                         }
+                    } else if (response.status === "already_in_cart") {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Already in your bag',
+                            text: response.message,
+                            showCancelButton: true,
+                            confirmButtonColor: '#000',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Go to Cart',
+                            cancelButtonText: 'Continue Shopping'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/cart';
+                            }
+                        });
                     } else {
                         Swal.fire({
                             icon: 'info',
-                            title: 'Note',
-                            text: response.message
+                            title: 'Information',
+                            text: response.message || "Unable to add product to cart"
                         });
                     }
                 },

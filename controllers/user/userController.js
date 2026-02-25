@@ -277,7 +277,10 @@ const login = async (req, res) => {
         }
 
         req.session.user = findUser;
-        res.redirect("/");
+        req.session.save((err) => {
+            if (err) console.error("Session save error:", err);
+            res.redirect("/");
+        });
     } catch (error) {
         console.error("login error", error);
         res.render("login", { message: "Login failed. Please try again later." });

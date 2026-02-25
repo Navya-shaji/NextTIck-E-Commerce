@@ -314,10 +314,13 @@
                                                 >Delivered</option>
                                             <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
                                                 >Cancelled</option>
-                                            <option value="Return Request" <%=order.status==='Return Request'
-                                                ? 'selected' : '' %>>Return Request</option>
-                                            <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
-                                                >Returned</option>
+                                            <% if (['Delivered', 'Return Request' , 'Returned' ].includes(order.status))
+                                                { %>
+                                                <option value="Return Request" <%=order.status==='Return Request'
+                                                    ? 'selected' : '' %>>Return Request</option>
+                                                <option value="Returned" <%=order.status==='Returned' ? 'selected' : ''
+                                                    %>>Returned</option>
+                                                <% } %>
                                         </select>
                                     </div>
                                 </td>

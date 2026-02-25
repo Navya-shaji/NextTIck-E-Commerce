@@ -127,10 +127,17 @@ const cancelOrder = async (req, res) => {
         // Handle refund if payment was completed
         if (order.paymentStatus === 'Completed') {
             try {
-                await addRefundToWallet(order.userId, order.finalAmount, orderId);
+                const wallet = await addRefundToWallet(order.userId, order.finalAmount, orderId);
+                order.paymentStatus = 'Refunded';
+                await order.save();
+
                 return res.status(200).json({
                     success: true,
-                    message: 'Order cancelled successfully and amount refunded to wallet'
+                    message: 'Order cancelled successfully and amount refunded to wallet',
+                    wallet: {
+                        totalBalance: wallet.totalBalance,
+                        transactions: wallet.transactions
+                    }
                 });
             } catch (refundError) {
                 console.error('Error processing refund:', refundError);

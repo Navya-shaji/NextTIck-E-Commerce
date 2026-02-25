@@ -46,7 +46,15 @@ const getBrandPage = async (req, res) => {
 const addBrand = async (req, res) => {
     try {
         const brand = req.body.name;
-        const findBrand = await Brand.findOne({ brandName: { $regex: `^${brand}$`, $options: "i" } });
+        if (!brand) {
+            return res.status(400).json({ error: "Brand name is required" });
+        }
+
+        const escapeRegex = (string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+
+        const findBrand = await Brand.findOne({ brandName: { $regex: `^${escapeRegex(brand.trim())}$`, $options: "i" } });
 
         if (findBrand) {
             return res.status(400).json({ error: "Brand already exists" });
@@ -58,19 +66,19 @@ const addBrand = async (req, res) => {
 
         const image = req.file.filename;
         const newBrand = new Brand({
-            brandName: brand,
+            brandName: brand.trim(),
             brandImage: image,
         });
         await newBrand.save();
 
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
             return res.json({ status: true, message: "Brand added successfully" });
         }
         res.redirect("/admin/brands");
     } catch (error) {
         console.error("Error adding brand:", error);
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(500).json({ error: "Internal server error" });
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+            return res.status(500).json({ error: "Internal server error: " + error.message });
         }
         res.redirect("/pageerror");
     }
@@ -133,9 +141,17 @@ const updateBrand = async (req, res) => {
         const brandName = req.body.brandName;
         const imageFile = req.file;
 
+        if (!id || !brandName) {
+            return res.status(400).json({ success: false, message: "ID and Brand Name are required" });
+        }
+
+        const escapeRegex = (string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+
         // Check if another brand with same name exists (case-insensitive)
         const existingBrand = await Brand.findOne({
-            brandName: { $regex: `^${brandName}$`, $options: "i" },
+            brandName: { $regex: `^${escapeRegex(brandName.trim())}$`, $options: "i" },
             _id: { $ne: id }
         });
 
@@ -143,7 +159,7 @@ const updateBrand = async (req, res) => {
             return res.status(400).json({ success: false, message: "Brand name already exists" });
         }
 
-        const updateData = { brandName: brandName };
+        const updateData = { brandName: brandName.trim() };
         if (imageFile) {
             updateData.brandImage = imageFile.filename;
         }

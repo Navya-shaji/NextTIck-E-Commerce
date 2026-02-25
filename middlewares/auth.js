@@ -2,24 +2,34 @@ const User = require("../models/userSchema")
 
 //userAuth............
 const userAuth = (req, res, next) => {
-    if (req.session.user) {
+    // Check both manual session and Passport session
+    const userId = req.session.user?._id || req.session.user || req.session.passport?.user || req.user?._id;
 
-        User.findById(req.session.user._id)
+    if (userId) {
+        User.findById(userId)
             .then(data => {
                 if (data && !data.isBlocked) {
+                    // Always ensure req.session.user is the full object for controllers
+                    req.session.user = data;
                     next();
                 } else {
-                    req.session.user = null
-                    res.redirect("/login")
+                    // Clear session if user is blocked or not found
+                    req.session.user = null;
+                    if (req.session.passport) req.session.passport.user = null;
+
+                    req.session.save(() => {
+                        res.redirect("/login?message=Unauthorized or Blocked");
+                    });
                 }
             })
             .catch(error => {
-                res.status(500).send("internal server error")
-            })
+                console.error("Auth Middleware Error:", error);
+                res.status(500).send("Internal server error");
+            });
     } else {
-        res.redirect("/login")
+        res.redirect("/login");
     }
-}
+};
 
 
 //adminAuth...........

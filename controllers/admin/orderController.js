@@ -373,6 +373,7 @@ const updateItemStatus = async (req, res) => {
                 if (order.paymentStatus === 'Completed') {
                     const refundAmount = item.price * item.quantity;
                     await addRefundToWallet(order.userId, refundAmount, orderId);
+                    order.paymentStatus = 'Refunded';
                 }
             }
         }

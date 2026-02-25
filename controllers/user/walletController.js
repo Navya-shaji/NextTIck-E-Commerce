@@ -1,6 +1,6 @@
 const Razorpay = require('razorpay');
 const User = require('../../models/userSchema');
-const Wallet=require("../../models/walletSchema");
+const Wallet = require("../../models/walletSchema");
 const Order = require('../../models/orderSchema')
 
 const razorpayInstance = new Razorpay({
@@ -27,7 +27,7 @@ const createRazorpayOrder = async (req, res) => {
     const receiptId = `wallet_${userId}_${Date.now()}`.slice(0, 40);
 
     const order = await razorpayInstance.orders.create({
-      amount: amount * 100, 
+      amount: amount * 100,
       currency: 'INR',
       receipt: receiptId,
     });
@@ -66,7 +66,7 @@ const updateWalletBalance = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    user.walletBalance += amount; 
+    user.walletBalance += amount;
 
     user.walletTransactions.push({
       date: new Date(),
@@ -110,7 +110,7 @@ const updateWalletAfterPayment = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    user.walletBalance += amount; 
+    user.walletBalance += amount;
 
     user.walletTransactions.push({
       date: new Date(),
@@ -131,39 +131,41 @@ const updateWalletAfterPayment = async (req, res) => {
 
 
 const handleReturnRefund = async (orderId, userId, refundAmount) => {
-    try {
-        const wallet = await Wallet.findOne({ user: userId });
-        
-        if (!wallet) {
-            const newWallet = new Wallet({
-                user: userId,
-                balance: refundAmount,
-                history: [{
-                    status: 'refund',
-                    payment: refundAmount,
-                    date: new Date(),
-                    description: `Refund for Order #${orderId}`,
-                    orderId: orderId
-                }]
-            });
-            await newWallet.save();
-        } else {
-            wallet.balance += refundAmount;
-            wallet.history.push({
-                status: 'refund',
-                payment: refundAmount,
-                date: new Date(),
-                description: `Refund for Order #${orderId}`,
-                orderId: orderId
-            });
-            await wallet.save();
-        }
-        
-        return true;
-    } catch (error) {
-        console.error('Error processing refund:', error);
-        return false;
+  try {
+    const wallet = await Wallet.findOne({ userId: userId });
+
+    if (!wallet) {
+      const newWallet = new Wallet({
+        userId: userId,
+        totalBalance: refundAmount,
+        transactions: [{
+          type: 'Refund',
+          amount: refundAmount,
+          date: new Date(),
+          description: `Refund for Order #${orderId}`,
+          orderId: orderId,
+          status: 'Completed'
+        }]
+      });
+      await newWallet.save();
+    } else {
+      wallet.totalBalance += refundAmount;
+      wallet.transactions.push({
+        type: 'Refund',
+        amount: refundAmount,
+        date: new Date(),
+        description: `Refund for Order #${orderId}`,
+        orderId: orderId,
+        status: 'Completed'
+      });
+      await wallet.save();
     }
+
+    return true;
+  } catch (error) {
+    console.error('Error processing refund:', error);
+    return false;
+  }
 };
 
 
@@ -172,7 +174,7 @@ const processReturn = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { returnReason, comments, selectedProducts } = req.body;
-    
+
     if (!selectedProducts || selectedProducts.length === 0) {
       return res.status(400).json({
         success: false,
@@ -235,17 +237,33 @@ const processReturn = async (req, res) => {
     });
 
     // Update user's wallet balance
-    const previousBalance = user.walletBalance || 0;
-    user.walletBalance = previousBalance + refundAmount;
-
-    // Add transaction to wallet history
-    user.walletHistory = user.walletHistory || [];
-    user.walletHistory.push({
-      amount: refundAmount,
-      type: 'credit',
-      description: `Refund for Order #${order.orderId} - Partial Return`,
-      date: new Date()
-    });
+    const wallet = await Wallet.findOne({ userId: userId });
+    if (wallet) {
+      wallet.totalBalance += refundAmount;
+      wallet.transactions.push({
+        type: 'Refund',
+        amount: refundAmount,
+        description: `Refund for Order #${order.orderId} - Partial Return`,
+        date: new Date(),
+        orderId: order._id.toString(),
+        status: 'Completed'
+      });
+      await wallet.save();
+    } else {
+      const newWallet = new Wallet({
+        userId: userId,
+        totalBalance: refundAmount,
+        transactions: [{
+          type: 'Refund',
+          amount: refundAmount,
+          description: `Refund for Order #${order.orderId} - Partial Return`,
+          date: new Date(),
+          orderId: order._id.toString(),
+          status: 'Completed'
+        }]
+      });
+      await newWallet.save();
+    }
 
     // Update order status and details
     if (remainingProducts.length === 0) {
@@ -254,26 +272,22 @@ const processReturn = async (req, res) => {
       order.returnReason = returnReason;
       order.returnComments = comments;
       order.returnDate = new Date();
+      order.paymentStatus = 'Refunded';
     } else {
       // Partial return
       order.status = 'Partially Returned';
       order.products = remainingProducts;
       order.returnedProducts = order.returnedProducts || [];
       order.returnedProducts.push(...returnedProducts);
+      order.paymentStatus = 'Refunded';
     }
 
-    // Save all changes
-    await Promise.all([
-      user.save(),
-      order.save()
-    ]);
+    await order.save();
 
     return res.status(200).json({
       success: true,
       message: remainingProducts.length === 0 ? 'Return processed successfully' : 'Partial return processed successfully',
       refundAmount,
-      previousBalance,
-      newBalance: user.walletBalance,
       orderId: order.orderId
     });
 
@@ -289,53 +303,45 @@ const processReturn = async (req, res) => {
 
 
 const refundToWallet = async (req, res) => {
-  const { amount,orderId  } = req.body;
-  const userId =req.session.user._id; 
+  const { amount, orderId } = req.body;
+  const userId = req.session.user._id;
   try {
-  
-      let wallet = await Wallet.findOne({ userId: userId });
 
-      if (!wallet) {
+    let wallet = await Wallet.findOne({ userId: userId });
 
-        wallet = new Wallet({
-            userId: userId,
-            balance: 0
-          });
-          await wallet.save();
-      }
-
-      wallet.balance += amount;
-      wallet.transactions.push({
-        type: 'Refund',
-        amount: amount,
-        orderId: orderId,  
-        status: 'Completed',
-        description: `Refund for order ${orderId}`,
+    if (!wallet) {
+      wallet = new Wallet({
+        userId: userId,
+        totalBalance: 0,
+        transactions: []
       });
-  
-      await wallet.save();
-
-      const user = await User.findById(userId);
-
-      user.walletBalance = wallet.balance;
- if (user) {
-      user.walletBalance = wallet.balance;
-      await user.save();
-    } else {
     }
-      res.json({ success: true, message: `₹${amount} has been added to your wallet.`,      balance: wallet.balance
-      });
+
+    wallet.totalBalance += amount;
+    wallet.transactions.push({
+      type: 'Refund',
+      amount: amount,
+      orderId: orderId,
+      status: 'Completed',
+      description: `Refund for order ${orderId}`,
+    });
+
+    await wallet.save();
+
+    res.json({
+      success: true, message: `₹${amount} has been added to your wallet.`, balance: wallet.totalBalance
+    });
 
 
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'An error occurred while processing the refund.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while processing the refund.' });
   }
 };
 module.exports = {
   createRazorpayOrder,
   updateWalletBalance,
-  updateWalletAfterPayment, 
+  updateWalletAfterPayment,
   handleReturnRefund,
   processReturn,
   refundToWallet

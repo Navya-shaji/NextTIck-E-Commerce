@@ -70,7 +70,7 @@ const getcheckoutPage = async (req, res) => {
         const addressData = address || { address: [] };
 
         const availableCoupons = await Coupon.find({
-            isActive: true,
+            isList: true,
             expireOn: { $gt: new Date() },
         });
         if (!productId) {

@@ -412,7 +412,8 @@
             let isProcessing = false;
             let cropModal = null;
 
-            window.initAddProduct = function () {
+            // Initialize Modal at the start
+            document.addEventListener('DOMContentLoaded', function () {
                 const modalElement = document.getElementById('cropModal');
                 if (modalElement) {
                     cropModal = new bootstrap.Modal(modalElement);
@@ -424,7 +425,7 @@
                 if (cropBtn) {
                     cropBtn.onclick = onCropButtonClick;
                 }
-            };
+            });
 
             window.handleImageSelect = function (event) {
                 const files = event.target.files;
@@ -445,9 +446,19 @@
                 reader.onload = function (e) {
                     const image = document.getElementById('cropImage');
                     if (image) {
+                        image.onload = function () {
+                            if (cropModal) {
+                                cropModal.show();
+                            } else {
+                                // Fallback if DOMContentLoaded hasn't fired yet
+                                const modalElement = document.getElementById('cropModal');
+                                cropModal = new bootstrap.Modal(modalElement);
+                                modalElement.addEventListener('shown.bs.modal', onModalShown);
+                                modalElement.addEventListener('hidden.bs.modal', onModalHidden);
+                                cropModal.show();
+                            }
+                        };
                         image.src = e.target.result;
-                        if (!cropModal) window.initAddProduct();
-                        if (cropModal) cropModal.show();
                     }
                 };
                 reader.readAsDataURL(currentFile);
@@ -461,7 +472,9 @@
                     viewMode: 1,
                     aspectRatio: NaN,
                     autoCropArea: 0.8,
-                    background: true
+                    background: true,
+                    responsive: true,
+                    restore: false
                 });
             }
 
@@ -566,8 +579,8 @@
                     isValid = false;
                 }
 
-                if (selectedFiles.length < 3) {
-                    window.displayErrorMessage('images-error', 'Minimum 3 images required');
+                if (selectedFiles.length < 1) {
+                    window.displayErrorMessage('images-error', 'Minimum 1 image required');
                     isValid = false;
                 }
 
@@ -621,9 +634,6 @@
                     if (submitSpinner) submitSpinner.classList.add('d-none');
                 }
             };
-
-            // Initialize
-            window.initAddProduct();
         })();
     </script>
 

@@ -175,31 +175,10 @@ const addToCart = async (req, res) => {
     );
 
     if (existingItem) {
-      if (existingItem.quantity >= 5) {
-        return res.status(200).json({
-          success: false,
-          status: "limit_reached",
-          message: "Maximum limit of 5 items reached for this product",
-          cartCount: cart.items.reduce((total, item) => total + item.quantity, 0)
-        });
-      }
-
-      if (existingItem.quantity + 1 > product.quantity) {
-        return res.status(200).json({
-          success: false,
-          message: `Only ${product.quantity} units available in stock.`
-        });
-      }
-
-      existingItem.quantity += 1;
-      existingItem.totalPrice = existingItem.quantity * existingItem.price;
-
-      await cart.save();
-
-      return res.json({
-        success: true,
-        message: "Quantity updated in your bag",
-        cartCount: cart.items.reduce((total, item) => total + item.quantity, 0)
+      return res.status(200).json({
+        success: false,
+        status: "already_in_cart",
+        message: "Product already in cart. Please increase the quantity in the cart page.",
       });
     }
 

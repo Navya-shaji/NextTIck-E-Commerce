@@ -371,9 +371,10 @@
 
             function addToCartHandler(event, productId) {
                 event.preventDefault();
-                const btn = event.target;
+                const btn = event.currentTarget || event.target;
+                const originalText = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerText = "Processing...";
+                btn.innerHTML = "Processing...";
 
                 fetch('/addToCart', {
                     method: 'POST',
@@ -384,14 +385,29 @@
                     .then(data => {
                         if (data.success) {
                             Swal.fire({
-                                title: 'Timeless Addition',
-                                text: 'Product successfully added to your bag.',
                                 icon: 'success',
+                                title: 'Item Added',
+                                toast: true,
+                                position: 'top-end',
                                 showConfirmButton: false,
-                                timer: 1500
-                            }).then(() => {
-                                if (data.cartCount !== undefined) {
-                                    document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
+                                timer: 2000
+                            });
+                            if (data.cartCount !== undefined) {
+                                document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cartCount);
+                            }
+                        } else if (data.status === 'already_in_cart') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Already in your bag',
+                                text: data.message,
+                                showCancelButton: true,
+                                confirmButtonColor: '#000',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: 'Go to Cart',
+                                cancelButtonText: 'Continue Shopping'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/cart';
                                 }
                             });
                         } else {
@@ -399,7 +415,7 @@
                         }
                     })
                     .catch(error => {
-                        if (error.message.includes('login')) {
+                        if (error.message && error.message.includes('login')) {
                             Swal.fire({
                                 title: 'Restricted Access',
                                 text: 'Please sign in to manage your bag.',
@@ -409,12 +425,12 @@
                                 confirmButtonColor: '#1a1a1a'
                             }).then((r) => r.isConfirmed && (window.location.href = '/login'));
                         } else {
-                            Swal.fire({ icon: 'info', title: 'Note', text: error.message });
+                            Swal.fire({ icon: 'info', title: 'Note', text: error.message || 'Product already in cart or out of stock' });
                         }
                     })
                     .finally(() => {
                         btn.disabled = false;
-                        btn.innerText = "Add to Cart";
+                        btn.innerHTML = originalText;
                     });
             }
         </script>

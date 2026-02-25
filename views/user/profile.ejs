@@ -638,6 +638,43 @@
                 statusBadge.textContent = 'Cancelled';
                 statusBadge.className = 'badge-premium badge-danger';
               }
+
+              const paymentBadge = document.getElementById(`payment-status-${orderId}`);
+              if (paymentBadge) {
+                paymentBadge.textContent = 'Refunded';
+                paymentBadge.className = 'text-info';
+              }
+
+              if (data.wallet) {
+                const walletAmtEl = document.querySelector('.wallet-amount');
+                if (walletAmtEl) {
+                  walletAmtEl.textContent = `₹${data.wallet.totalBalance.toFixed(2)}`;
+                }
+
+                const walletTableBody = document.getElementById('walletTableBody');
+                if (walletTableBody && data.wallet.transactions) {
+                  // Sort by date descending
+                  const sortedTx = [...data.wallet.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+                  let tableHtml = '';
+                  sortedTx.forEach(tx => {
+                    const dateStr = new Date(tx.date).toLocaleDateString();
+                    const isDebit = tx.type === 'Withdrawal' || tx.type === 'Purchase';
+                    const typeBadge = isDebit ? 'badge-danger' : 'badge-success';
+                    const amountClass = isDebit ? 'text-danger' : 'text-success';
+                    const sign = isDebit ? '-' : '+';
+
+                    tableHtml += `
+                      <tr>
+                        <td>${dateStr}</td>
+                        <td class="text-muted">${tx.description || 'Wallet Tx'}</td>
+                        <td><span class="badge-premium ${typeBadge}">${tx.type}</span></td>
+                        <td class="fw-bold ${amountClass}">${sign}₹${tx.amount}</td>
+                      </tr>
+                    `;
+                  });
+                  walletTableBody.innerHTML = tableHtml;
+                }
+              }
               const actionDropdown = document.getElementById(`action-dropdown-${orderId}`);
               if (actionDropdown) {
                 const cancelBtn = actionDropdown.querySelector('.text-danger');

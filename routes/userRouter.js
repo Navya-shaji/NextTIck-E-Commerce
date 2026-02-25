@@ -30,7 +30,10 @@ router.get(ROUTES.CONTACT, shopController.loadContactPage);
 // Google Auth Routes
 router.get(ROUTES.AUTH_GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get(ROUTES.AUTH_GOOGLE_CALLBACK, passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-    res.redirect('/');
+    req.session.save((err) => {
+        if (err) console.error("Google Auth Session Save Error:", err);
+        res.redirect('/');
+    });
 });
 
 // login page........................................................................................................
@@ -56,12 +59,12 @@ router.post(ROUTES.UPDATE_PROFILE, profileController.updateProfile);
 
 router.use(userAuth);
 router.use(checkBlockedStatus);
-router.get(ROUTES.USER_PROFILE, userAuth, profileController.userProfile);
-router.post(ROUTES.UPDATE_PROFILE_RAW, userAuth, profileController.updateProfile);
-router.get(ROUTES.CHANGE_EMAIL, userAuth, profileController.changeEmail);
-router.post(ROUTES.CHANGE_EMAIL, userAuth, profileController.changeEmailValid);
-router.post(ROUTES.VERIFY_EMAIL_OTP, userAuth, profileController.verifyEmailOtp);
-router.post(ROUTES.UPDATE_EMAIL, userAuth, profileController.updateEmail)
+router.get(ROUTES.USER_PROFILE, profileController.userProfile);
+router.post(ROUTES.UPDATE_PROFILE_RAW, profileController.updateProfile);
+router.get(ROUTES.CHANGE_EMAIL, profileController.changeEmail);
+router.post(ROUTES.CHANGE_EMAIL, profileController.changeEmailValid);
+router.post(ROUTES.VERIFY_EMAIL_OTP, profileController.verifyEmailOtp);
+router.post(ROUTES.UPDATE_EMAIL, profileController.updateEmail)
 router.get(ROUTES.PROFILE, profileController.userProfile);
 router.delete(ROUTES.DELETE_ORDER, profileController.deleteOrder);
 
@@ -75,12 +78,12 @@ router.post(ROUTES.CHANGE_PASSWORD_DIRECT, userAuth, profileController.changePas
 
 //Address Management...............................................................................................
 
-router.get(ROUTES.ADD_ADDRESS, userAuth, profileController.addAddress);
-router.post(ROUTES.POST_ADD_ADDRESS, userAuth, profileController.postAddAddress);
-router.get(ROUTES.USER_ADDRESS, userAuth, profileController.getAddressPage);
-router.get(ROUTES.EDIT_ADDRESS, userAuth, profileController.editAddress);
-router.post(ROUTES.POST_EDIT_ADDRESS, userAuth, profileController.postEditAddress);
-router.post(ROUTES.DELETE_ADDRESS, userAuth, profileController.deleteAddress);
+router.get(ROUTES.ADD_ADDRESS, profileController.addAddress);
+router.post(ROUTES.POST_ADD_ADDRESS, profileController.postAddAddress);
+router.get(ROUTES.USER_ADDRESS, profileController.getAddressPage);
+router.get(ROUTES.EDIT_ADDRESS, profileController.editAddress);
+router.post(ROUTES.POST_EDIT_ADDRESS, profileController.postEditAddress);
+router.post(ROUTES.DELETE_ADDRESS, profileController.deleteAddress);
 
 
 //wishlist Management...............................................................................................
@@ -113,22 +116,22 @@ router.post(ROUTES.RETRY_PAYMENT, userAuth, checkoutController.retryPayment);
 
 //order management...............................................................................................
 
-router.get(ROUTES.ORDER_HISTORY, userAuth, orderController.getOrderHistory);
-router.post(ROUTES.CANCEL_ORDER, userAuth, orderController.cancelOrder);
-router.get(ROUTES.ORDER_STATUS, userAuth, orderController.getOrderStatus);
-router.get(ROUTES.ORDER_DETAILS, userAuth, orderController.getOrderDetails);
-router.put(ROUTES.CHANGE_ORDER_STATUS, userAuth, orderController.changeOrderStatus);
-router.get(ROUTES.VIEW_ORDER_DETAILS, userAuth, orderController.viewOrderDetails);
-router.post(ROUTES.UPDATE_ORDER_STATUS, userAuth, orderController.updateOrderStatus);
-router.get(ROUTES.RETURN_REASON, userAuth, orderController.showReturnReasonPage);
-router.post(ROUTES.PROCESS_RETURN, userAuth, orderController.submitReturnReason);
-router.post(ROUTES.UPDATE_STATUS_RAW, userAuth, orderController.updateOrderStatus);
-router.get(ROUTES.RETURN_REASON_BY_ID, userAuth, orderController.showReturnReasonPage);
+router.get(ROUTES.ORDER_HISTORY, orderController.getOrderHistory);
+router.post(ROUTES.CANCEL_ORDER, orderController.cancelOrder);
+router.get(ROUTES.ORDER_STATUS, orderController.getOrderStatus);
+router.get(ROUTES.ORDER_DETAILS, orderController.getOrderDetails);
+router.put(ROUTES.CHANGE_ORDER_STATUS, orderController.changeOrderStatus);
+router.get(ROUTES.VIEW_ORDER_DETAILS, orderController.viewOrderDetails);
+router.post(ROUTES.UPDATE_ORDER_STATUS, orderController.updateOrderStatus);
+router.get(ROUTES.RETURN_REASON, orderController.showReturnReasonPage);
+router.post(ROUTES.PROCESS_RETURN, orderController.submitReturnReason);
+router.post(ROUTES.UPDATE_STATUS_RAW, orderController.updateOrderStatus);
+router.get(ROUTES.RETURN_REASON_BY_ID, orderController.showReturnReasonPage);
 router.post(ROUTES.UPDATE_WALLET_AFTER_PAYMENT, walletController.updateWalletAfterPayment);
 router.post(ROUTES.PROCESS_RETURN_BY_ID, walletController.processReturn);
-router.get(ROUTES.ORDER_PRODUCTS, userAuth, orderController.getOrderProducts);
-router.post(ROUTES.CANCEL_ORDER_PRODUCTS, userAuth, orderController.cancelOrderProducts);
-router.post(ROUTES.RETURN_ORDER_PRODUCTS, userAuth, orderController.returnOrderProducts);
+router.get(ROUTES.ORDER_PRODUCTS, orderController.getOrderProducts);
+router.post(ROUTES.CANCEL_ORDER_PRODUCTS, orderController.cancelOrderProducts);
+router.post(ROUTES.RETURN_ORDER_PRODUCTS, orderController.returnOrderProducts);
 
 // wallet.........................................................................................................................
 

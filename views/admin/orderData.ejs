@@ -391,12 +391,20 @@
                                                 >Delivered</option>
                                             <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
                                                 >Cancelled</option>
-                                            <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
-                                                >Returned</option>
+                                            <% if (['Delivered', 'Return Request' , 'Returned' ].includes(order.status))
+                                                { %>
+                                                <option value="Return Request" <%=order.status==='Return Request'
+                                                    ? 'selected' : '' %>>Return Request</option>
+                                                <option value="Returned" <%=order.status==='Returned' ? 'selected' : ''
+                                                    %>>Returned</option>
+                                                <% } %>
                                         </select>
                                         <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) { %>
-                                            <button type="submit" class="btn btn-dark w-100"
+                                            <button type="submit" class="btn btn-dark w-100 mb-2"
                                                 style="border-radius: 10px;">Update Logistics</button>
+                                            <button type="button" class="btn btn-outline-danger w-100"
+                                                style="border-radius: 10px;"
+                                                onclick="cancelOrderDetail('<%= order._id %>')">Cancel Order</button>
                                             <% } %>
                                     </form>
                                 </div>
@@ -483,6 +491,50 @@
                 } catch (error) {
                     console.error('Error updating item status:', error);
                     Swal.fire('Error', 'An internal error occurred', 'error');
+                }
+            };
+
+            window.cancelOrderDetail = async function (orderId) {
+                const { value: reason } = await Swal.fire({
+                    title: 'Cancel Order?',
+                    input: 'textarea',
+                    inputLabel: 'Reason for cancellation',
+                    inputPlaceholder: 'Enter reason here...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Confirm Cancellation',
+                    inputValidator: (value) => {
+                        if (!value) return 'You need to provide a reason!'
+                    }
+                });
+
+                if (reason) {
+                    try {
+                        const response = await fetch('/admin/orders/cancel-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId, reason })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Cancelled!',
+                                text: 'Order has been cancelled.',
+                                icon: 'success'
+                            }).then(() => {
+                                if (window.loadContent) {
+                                    window.loadContent(window.location.href);
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    }
                 }
             };
 

@@ -38,12 +38,8 @@ const productDetail = async (req, res) => {
         // Fetch available coupons
         const availableCoupons = await Coupon.find({
             expireOn: { $gt: new Date() },
-            isActive: true,
-            $or: [
-                { applicableProducts: productId },
-                { applicableCategories: findCategory._id }
-            ]
-        });
+            isList: true
+        }).limit(5);
 
         // Fetch reviews for this product
         const reviews = await Review.find({ productId }).sort({ createdOn: -1 });
