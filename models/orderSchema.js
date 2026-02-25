@@ -102,10 +102,6 @@ const orderSchema = new Schema({
         type: String,
         required: false
     },
-    paymentId: {
-        type: String,
-        required: false
-    },
     cancellationReason: {
         type: String,
         default: null

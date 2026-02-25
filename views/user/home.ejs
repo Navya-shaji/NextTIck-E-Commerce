@@ -377,6 +377,7 @@
         gap: 10px;
       }
 
+
       .price-now {
         font-weight: 700;
         color: var(--primary-color);
@@ -739,7 +740,7 @@
       <% banners.forEach((banner, index)=> { %>
         <div class="banner-slide <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
           <img src="/uploads/banners/<%= banner.image %>" alt="<%= banner.title %>" class="banner-image"
-            onerror="this.src='/images/banner-bg.jpg'">
+            onerror="this.src='/images/1.jpg'">
           <div class="banner-content">
             <span class="hero-subtitle" data-aos="fade-down">EXCLUSIVE RELEASE</span>
             <h2 class="banner-title" data-aos="fade-up" data-aos-delay="200">
@@ -776,8 +777,8 @@
     <% } else { %>
       <!-- Newgen Hero Section -->
       <section class="hero-section">
-        <video class="hero-video-bg" autoplay muted loop playsinline poster="/images/banner-bg.jpg">
-          <source src="/images/watch-hero.mp4" type="video/mp4">
+        <video class="hero-video-bg" autoplay muted loop playsinline poster="/images/1.jpg">
+          <source src="/images/banner%20video.mp4" type="video/mp4">
         </video>
         <div class="hero-content">
           <span class="hero-subtitle">Elevate Your Presence</span>

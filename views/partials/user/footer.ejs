@@ -194,10 +194,15 @@
     height: 100%;
     background: rgba(15, 15, 15, 0.95);
     z-index: 10000;
-    display: flex;
+    display: none;
+    /* Hidden by default */
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(5px);
+  }
+
+  #ftco-loader.show {
+    display: flex;
   }
 
   #ftco-loader .circular {
@@ -396,22 +401,20 @@
   </svg>
 </div>
 
-<script src="js/jquery.min.js"></script>
-<script src="js/jquery-migrate-3.0.1.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/jquery.easing.1.3.js"></script>
-<script src="js/jquery.waypoints.min.js"></script>
-<script src="js/jquery.stellar.min.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/aos.js"></script>
-<script src="js/jquery.animateNumber.min.js"></script>
-<script src="js/bootstrap-datepicker.js"></script>
-<script src="js/scrollax.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.5/sweetalert2.min.js"></script>
-<script src="js/google-map.js"></script>
-<script src="js/main.js"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/jquery-migrate-3.0.1.min.js"></script>
+<script src="/js/popper.min.js"></script>
+<script src="/js/jquery.easing.1.3.js"></script>
+<script src="/js/jquery.waypoints.min.js"></script>
+<script src="/js/jquery.stellar.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/jquery.magnific-popup.min.js"></script>
+<script src="/js/aos.js"></script>
+<script src="/js/jquery.animateNumber.min.js"></script>
+<script src="/js/bootstrap-datepicker.js"></script>
+<script src="/js/scrollax.min.js"></script>
+<!-- Global scripts removed for map - load them only on contact page if needed -->
+<script src="/js/main.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
@@ -432,7 +435,11 @@
     const loader = document.getElementById('ftco-loader');
     if (loader) {
       setTimeout(() => {
-        loader.style.display = 'none';
+        loader.style.opacity = '0';
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 500);
+
         // Initialize AOS after loader is gone
         if (typeof AOS !== 'undefined') {
           AOS.init({
@@ -442,8 +449,15 @@
             mirror: false
           });
         }
-      }, 1000);
+      }, 500);
     }
+
+    // Fallback: Force hide loader after 5 seconds no matter what
+    setTimeout(() => {
+      if (loader && loader.style.display !== 'none') {
+        loader.style.display = 'none';
+      }
+    }, 5000);
   });
 </script>
 
