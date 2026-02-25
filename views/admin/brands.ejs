@@ -234,7 +234,7 @@
         <div class="brands-grid">
             <div class="premium-card">
                 <h5 class="card-title">Register New Brand</h5>
-                <form id="addBrandForm" onsubmit="return handleFormSubmit(event)">
+                <form id="addBrandForm" onsubmit="return handleFormSubmit(event)" enctype="multipart/form-data">
                     <div class="mb-4">
                         <label class="form-label">Brand Identity</label>
                         <input type="text" name="name" id="brandNameInput" placeholder="e.g. Rolex, Omega"
@@ -395,7 +395,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form id="editBrandForm" onsubmit="return handleEditBrandSubmit(event)">
+                    <form id="editBrandForm" onsubmit="return handleEditBrandSubmit(event)"
+                        enctype="multipart/form-data">
                         <input type="hidden" name="brandId" id="editBrandId">
                         <div class="mb-4">
                             <label class="form-label">Revised Brand Name</label>

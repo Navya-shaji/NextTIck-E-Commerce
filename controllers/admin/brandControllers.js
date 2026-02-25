@@ -20,7 +20,7 @@ const getBrandPage = async (req, res) => {
         const totalBrands = await Brand.countDocuments(query);
         const totalPages = Math.ceil(totalBrands / limit);
 
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
             return res.json({
                 data: brandData,
                 currentPage: page,
@@ -39,15 +39,15 @@ const getBrandPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching brand data:", error);
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 };
 
 const addBrand = async (req, res) => {
     try {
         const brand = req.body.name;
-        if (!brand) {
-            return res.status(400).json({ error: "Brand name is required" });
+        if (!brand || brand.trim() === "") {
+            return res.status(400).json({ status: false, error: "Brand name is required" });
         }
 
         const escapeRegex = (string) => {
@@ -57,11 +57,11 @@ const addBrand = async (req, res) => {
         const findBrand = await Brand.findOne({ brandName: { $regex: `^${escapeRegex(brand.trim())}$`, $options: "i" } });
 
         if (findBrand) {
-            return res.status(400).json({ error: "Brand already exists" });
+            return res.status(400).json({ status: false, error: "Brand already exists in the registry" });
         }
 
         if (!req.file) {
-            return res.status(400).json({ error: "Brand image is required" });
+            return res.status(400).json({ status: false, error: "Brand image asset is required" });
         }
 
         const image = req.file.filename;
@@ -72,15 +72,15 @@ const addBrand = async (req, res) => {
         await newBrand.save();
 
         if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
-            return res.json({ status: true, message: "Brand added successfully" });
+            return res.status(200).json({ status: true, message: "Brand registry updated successfully" });
         }
         res.redirect("/admin/brands");
     } catch (error) {
-        console.error("Error adding brand:", error);
+        console.error("CRITICAL: Error adding brand:", error);
         if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
-            return res.status(500).json({ error: "Internal server error: " + error.message });
+            return res.status(500).json({ status: false, error: "System failure occurred while adding brand. Details: " + error.message });
         }
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 };
 

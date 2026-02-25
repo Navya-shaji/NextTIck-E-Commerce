@@ -256,36 +256,42 @@
                                     <div class="fw-bold mb-2">₹<%= (item.price * item.quantity).toFixed(2) %>
                                     </div>
 
-                                    <% if (['Pending', 'Processing' ].includes(order.status) && item.status
-                                        !=='Cancelled' && item.status !=='Returned' ) { %>
-                                        <button
-                                            onclick="cancelSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
-                                            class="btn-action-small btn-cancel">Cancel Item</button>
-                                        <button
-                                            onclick="returnSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
-                                            class="btn-action-small btn-return">Return Item</button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <% if (['Pending', 'Processing' ].includes(order.status) && item.status
+                                            !=='Cancelled' && item.status !=='Returned' ) { %>
+                                            <button
+                                                onclick="cancelSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
+                                                class="btn-action-small btn-cancel">Cancel Item</button>
+                                            <% } %>
 
-                                        <% if (reviewedProductIds.has(item.product._id.toString())) { %>
-                                            <span class="btn-action-small ms-2"
-                                                style="color:#28a745;border-color:#28a745;cursor:default;opacity:0.75;">
-                                                ✓ Reviewed
-                                            </span>
-                                            <% } else { %>
-                                                <button
-                                                    onclick="openReviewModal('<%= item.product._id %>', '<%= item.product.productName %>', '<%= order._id %>')"
-                                                    class="btn-action-small ms-2"
-                                                    style="color: #28a745; border-color: #28a745;">Review
-                                                    Product</button>
+                                                <% if (order.status==='Delivered' && item.status !=='Cancelled' &&
+                                                    item.status !=='Returned' ) { %>
+                                                    <button
+                                                        onclick="returnSingleProduct('<%= order._id %>', '<%= item.product._id %>')"
+                                                        class="btn-action-small btn-return">Return Item</button>
+
+                                                    <% if (reviewedProductIds.has(item.product._id.toString())) { %>
+                                                        <span class="btn-action-small ms-2"
+                                                            style="color:#28a745;border-color:#28a745;cursor:default;opacity:0.75;">
+                                                            ✓ Reviewed
+                                                        </span>
+                                                        <% } else { %>
+                                                            <button
+                                                                onclick="openReviewModal('<%= item.product._id %>', '<%= item.product.productName %>', '<%= order._id %>')"
+                                                                class="btn-action-small ms-2"
+                                                                style="color: #28a745; border-color: #28a745;">Review
+                                                                Product</button>
+                                                            <% } %>
+                                                                <% } %>
+                                    </div>
+
+                                    <% if (item.status==='Cancelled' ) { %>
+                                        <div class="text-danger small">Cancelled</div>
+                                        <% } else if (item.status==='Return Request' ) { %>
+                                            <div class="text-warning small">Return Requested</div>
+                                            <% } else if (item.status==='Returned' ) { %>
+                                                <div class="text-success small">Returned</div>
                                                 <% } %>
-                                                    <% } %>
-
-                                                        <% if (item.status==='Cancelled' ) { %>
-                                                            <div class="text-danger small">Cancelled</div>
-                                                            <% } else if (item.status==='Return Request' ) { %>
-                                                                <div class="text-warning small">Return Requested</div>
-                                                                <% } else if (item.status==='Returned' ) { %>
-                                                                    <div class="text-success small">Returned</div>
-                                                                    <% } %>
                                 </div>
                             </div>
                             <% } else { %>
