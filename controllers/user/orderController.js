@@ -232,11 +232,6 @@ const viewOrderDetails = async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
-        const addresses = await Address.find({ userId: order.userId });
-        const address = addresses.flatMap(addr => addr.address).find(add => {
-            return add._id.toString() == order.address.toString();
-        });
-
         // Fetch which products in this order the logged-in user has already reviewed
         const userId = req.session.user?._id;
         const productIds = order.orderItems
@@ -253,7 +248,7 @@ const viewOrderDetails = async (req, res) => {
             existingReviews.map(r => r.productId.toString())
         );
 
-        res.render('order-details-full', { order, address, reviewedProductIds });
+        res.render('order-details-full', { order, reviewedProductIds });
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).send('Server error');

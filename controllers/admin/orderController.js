@@ -247,8 +247,7 @@ const getAdminOrderDetails = async (req, res) => {
 
         const order = await Order.findById(orderId)
             .populate('userId', 'name email')
-            .populate('orderItems.product', 'name price productImage') // Add productImage to population
-            .populate('address', 'street city postalCode')
+            .populate('orderItems.product', 'name price productImage')
             .lean();
 
         if (!order) {

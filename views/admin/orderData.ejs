@@ -344,12 +344,9 @@
                             </p>
                         </div>
                         <div class="info-item">
-                            <label>Shipping Identity</label>
+                            <label>Shipping Address</label>
                             <p>
-                                <%= order.address?.street %>, <%= order.address?.city %>
-                            </p>
-                            <p class="text-muted small">
-                                <%= order.address?.postalCode %>
+                                <%= order.shippingAddress || 'Address not available' %>
                             </p>
                         </div>
                     </div>

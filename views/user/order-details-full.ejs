@@ -335,22 +335,9 @@
                                                     style="font-size: 1.1rem; border-bottom: none; margin-bottom: 15px;">
                                                     Shipping
                                                     Destination</h3>
-                                                <% if (address) { %>
-                                                    <div class="fw-bold text-dark mb-1">
-                                                        <%= address.name %>
-                                                    </div>
-                                                    <div class="text-muted small mb-2">
-                                                        <%= address.addressType %>
-                                                    </div>
-                                                    <div class="text-muted">
-                                                        <%= address.city %>, <%= address.state %>
-                                                                <%= address.pincode %><br>
-                                                                    <% if (address.landMark) { %>Landmark: <%=
-                                                                            address.landMark %><br>
-                                                                            <% } %>
-                                                                                Phone: <%= address.phone %>
-                                                    </div>
-                                                    <% } %>
+                                                <div class="text-muted">
+                                                    <%= order.shippingAddress || 'Address not available' %>
+                                                </div>
                                             </div>
                 </div>
 
