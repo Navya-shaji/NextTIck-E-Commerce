@@ -24,8 +24,15 @@ app.use(
   })
 );
 
+app.use(express.static(path.join(__dirname, "public")));
+
+const guestMiddleware = require("./middlewares/guestMiddleware");
+const { guestRateLimiter } = require("./middlewares/rateLimiter");
+
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(guestRateLimiter);
+app.use(guestMiddleware);
 
 app.use((req, res, next) => {
   res.set("cache-control", "no-store");
@@ -35,9 +42,9 @@ app.use((req, res, next) => {
 app.use(async (req, res, next) => {
   try {
     const sessionUser = req.session.user || req.session.passport?.user;
-    const userId = sessionUser?._id || sessionUser;
+    const userId = sessionUser?._id || sessionUser || req.session.guestUserId;
 
-    if (userId && typeof userId === 'string' || userId instanceof require('mongoose').Types.ObjectId) {
+    if (userId) {
       const cart = await Cart.findOne({ userId });
       res.locals.cartCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
     } else {
@@ -52,9 +59,6 @@ app.use(async (req, res, next) => {
 });
 
 app.set("view engine", "ejs");
-
-
-app.use(express.static(path.join(__dirname, "public")));
 
 app.set("views", [
   path.join(__dirname, "views/user"),

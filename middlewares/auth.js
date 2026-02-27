@@ -76,7 +76,12 @@ module.exports = {
             }
         }
         next();
+    },
+    blockGuests: (req, res, next) => {
+        const user = req.session.user || req.user;
+        if (user && user.isGuest) {
+            return res.redirect("/signup?message=Please create an account to access this feature");
+        }
+        next();
     }
-
-
-}
+};

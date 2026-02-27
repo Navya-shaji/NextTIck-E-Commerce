@@ -372,6 +372,11 @@
 
 <body class="goto-here">
   <header class="main-header">
+    <% if (locals.isGuest) { %>
+      <div class="guest-banner text-center py-1" style="background: var(--header-accent); color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+        Shopping as Guest. <a href="/signup" style="color: white; text-decoration: underline; margin-left: 5px;">Create an account</a> to save your orders!
+      </div>
+    <% } %>
     <div class="header-container">
       <a href="/" class="brand-logo">
         <h1>NexTick</h1>
@@ -404,7 +409,7 @@
         </a>
 
         <div class="dropdown">
-          <% if (locals.user) { %>
+          <% if (locals.user && !locals.isGuest) { %>
             <a href="/userProfile" class="action-icon d-flex align-items-center">
               <i class="fas fa-user-circle"></i>
               <span class="user-name-text">
@@ -412,12 +417,15 @@
               </span>
             </a>
             <% } else { %>
-              <a href="/login" class="action-icon">
+              <a href="/login" class="action-icon d-flex align-items-center">
                 <i class="fas fa-user-circle"></i>
+                <% if (locals.isGuest) { %>
+                  <span class="user-name-text">Guest</span>
+                <% } %>
               </a>
               <% } %>
                 <div class="dropdown-menu">
-                  <% if (locals.user) { %>
+                  <% if (locals.user && !locals.isGuest) { %>
                     <a href="/userProfile" class="dropdown-item">Profile</a>
                     <a href="/logout" class="dropdown-item">Logout</a>
                     <% } else { %>
@@ -440,8 +448,8 @@
       <i class="fas fa-times"></i>
     </button>
     <ul class="mobile-menu-items">
-      <li><a href="/">Home</a></li>
       <li><a href="/shop">Shop</a></li>
+      <li><a href="/">Home</a></li>
       <% if (locals.user) { %>
         <li><a href="/userProfile">My Account</a></li>
         <li><a href="/wishlist">Wishlist</a></li>

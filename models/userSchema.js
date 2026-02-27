@@ -4,12 +4,13 @@ const { Schema } = mongoose; // Correct import of Schema
 const userSchema = new Schema({
   name: {
     type: String,
-    required: true,
+    required: false,
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
   },
   phone: {
     type: String,
@@ -17,6 +18,20 @@ const userSchema = new Schema({
     unique: false,
     sparse: true,
     default: null,
+  },
+  isGuest: {
+    type: Boolean,
+    default: false,
+  },
+  guestId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  expiresAt: {
+    type: Date,
+    default: null,
+    index: { expires: 0 }, // TTL index
   },
   googleId: {
     type: String,

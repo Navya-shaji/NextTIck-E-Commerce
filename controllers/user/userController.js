@@ -9,6 +9,7 @@ const brand = require("../../models/brandSchema");
 const Banner = require("../../models/bannerSchema");
 const PDFDocument = require('pdfkit');
 const Order = require('../../models/orderSchema');
+const { migrateGuestData } = require("../../helpers/migrationHelper");
 
 
 
@@ -188,6 +189,13 @@ const verifyOtp = async (req, res) => {
                 password: passwordHash,
             });
             await saveUserData.save();
+
+            // Migrate guest data if exists
+            if (req.session.guestUserId) {
+                await migrateGuestData(req.session.guestUserId, saveUserData._id);
+                delete req.session.guestUserId;
+            }
+
             req.session.user = saveUserData;
 
             delete req.session.userOtp;
@@ -274,6 +282,12 @@ const login = async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
             return res.render("login", { message: "Incorrect Password" });
+        }
+
+        // Migrate guest data if exists
+        if (req.session.guestUserId) {
+            await migrateGuestData(req.session.guestUserId, findUser._id);
+            delete req.session.guestUserId;
         }
 
         req.session.user = findUser;

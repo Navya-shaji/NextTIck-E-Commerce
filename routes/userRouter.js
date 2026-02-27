@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/user/userController");
 const passport = require("../config/passport")
 const productController = require("../controllers/user/productController")
-const { userAuth, checkBlockedStatus } = require('../middlewares/auth');
+const { userAuth, checkBlockedStatus, blockGuests } = require('../middlewares/auth');
 const profileController = require("../controllers/user/profileController")
 const cartController = require("../controllers/user/cartController");
 const shopController = require("../controllers/user/shopController");
@@ -27,6 +27,11 @@ router.post(ROUTES.RESEND_OTP, userController.resendOtp)
 router.get(ROUTES.ABOUT, shopController.loadAboutPage);
 router.get(ROUTES.CONTACT, shopController.loadContactPage);
 
+
+router.get(ROUTES.SHOP, shopController.loadshoppingPage);
+router.get(ROUTES.SEARCH, shopController.searchProducts);
+router.get(ROUTES.FILTER, shopController.loadshoppingPage);
+router.get(ROUTES.SORT, shopController.loadshoppingPage);
 // Google Auth Routes
 router.get(ROUTES.AUTH_GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get(ROUTES.AUTH_GOOGLE_CALLBACK, passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
@@ -59,7 +64,7 @@ router.post(ROUTES.UPDATE_PROFILE, profileController.updateProfile);
 
 router.use(userAuth);
 router.use(checkBlockedStatus);
-router.get(ROUTES.USER_PROFILE, profileController.userProfile);
+router.get(ROUTES.USER_PROFILE, blockGuests, profileController.userProfile);
 router.post(ROUTES.UPDATE_PROFILE_RAW, profileController.updateProfile);
 router.get(ROUTES.CHANGE_EMAIL, profileController.changeEmail);
 router.post(ROUTES.CHANGE_EMAIL, profileController.changeEmailValid);
@@ -80,7 +85,7 @@ router.post(ROUTES.CHANGE_PASSWORD_DIRECT, userAuth, profileController.changePas
 
 router.get(ROUTES.ADD_ADDRESS, profileController.addAddress);
 router.post(ROUTES.POST_ADD_ADDRESS, profileController.postAddAddress);
-router.get(ROUTES.USER_ADDRESS, profileController.getAddressPage);
+router.get(ROUTES.USER_ADDRESS, blockGuests, profileController.getAddressPage);
 router.get(ROUTES.EDIT_ADDRESS, profileController.editAddress);
 router.post(ROUTES.POST_EDIT_ADDRESS, profileController.postEditAddress);
 router.post(ROUTES.DELETE_ADDRESS, profileController.deleteAddress);
@@ -88,16 +93,13 @@ router.post(ROUTES.DELETE_ADDRESS, profileController.deleteAddress);
 
 //wishlist Management...............................................................................................
 
-router.get(ROUTES.WISHLIST, userAuth, wishlistController.loadWishlist);
-router.post(ROUTES.ADD_TO_WISHLIST, userAuth, wishlistController.addToWishlist)
+router.get(ROUTES.WISHLIST, userAuth, blockGuests, wishlistController.loadWishlist);
+router.post(ROUTES.ADD_TO_WISHLIST, userAuth, blockGuests, wishlistController.addToWishlist)
 router.delete(ROUTES.REMOVE_FROM_WISHLIST, wishlistController.removeFromWishlist);
 
 //shoping management...............................................................................................
 
-router.get(ROUTES.SHOP, shopController.loadshoppingPage);
-router.get(ROUTES.SEARCH, shopController.searchProducts);
-router.get(ROUTES.FILTER, shopController.loadshoppingPage);
-router.get(ROUTES.SORT, shopController.loadshoppingPage);
+
 
 //cart management...............................................................................................
 
@@ -116,7 +118,7 @@ router.post(ROUTES.RETRY_PAYMENT, userAuth, checkoutController.retryPayment);
 
 //order management...............................................................................................
 
-router.get(ROUTES.ORDER_HISTORY, orderController.getOrderHistory);
+router.get(ROUTES.ORDER_HISTORY, blockGuests, orderController.getOrderHistory);
 router.post(ROUTES.CANCEL_ORDER, orderController.cancelOrder);
 router.get(ROUTES.ORDER_STATUS, orderController.getOrderStatus);
 router.get(ROUTES.ORDER_DETAILS, orderController.getOrderDetails);
