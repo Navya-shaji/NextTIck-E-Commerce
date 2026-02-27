@@ -605,7 +605,7 @@ const getAddressPage = async (req, res) => {
 
 const addAddress = async (req, res) => {
     try {
-        const user = req.session.user._id;
+        const user = req.session.user?._id || req.session.user || req.session.guestUserId;
         res.render("add-address", { user: user });
 
     } catch (error) {
@@ -615,7 +615,7 @@ const addAddress = async (req, res) => {
 
 const postAddAddress = async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
         const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
         const userAddress = await Address.findOne({ userId: userId });
         if (!userAddress) {

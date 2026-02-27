@@ -2,15 +2,17 @@ const User = require("../models/userSchema")
 
 //userAuth............
 const userAuth = (req, res, next) => {
-    // Check both manual session and Passport session
-    const userId = req.session.user?._id || req.session.user || req.session.passport?.user || req.user?._id;
+    // Check traditional session, passport, or guest session
+    const userId = req.session.user?._id || req.session.user || req.session.passport?.user || req.user?._id || req.session.guestUserId;
 
     if (userId) {
         User.findById(userId)
             .then(data => {
                 if (data && !data.isBlocked) {
-                    // Always ensure req.session.user is the full object for controllers
-                    req.session.user = data;
+                    // Only set session.user for non-guests to maintain "isLoggedIn" logic
+                    if (!data.isGuest) {
+                        req.session.user = data;
+                    }
                     next();
                 } else {
                     // Clear session if user is blocked or not found

@@ -48,15 +48,15 @@ const createRazorpayOrder = async (amount) => {
 
 const getcheckoutPage = async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
         if (!userId) {
-            return res.redirect("/login");
+            return res.redirect("/signup?message=Please start shopping to proceed to checkout");
         }
 
         // Fetch complete user data including wallet
         const user = await User.findById(userId);
         if (!user) {
-            return res.redirect("/login");
+            return res.redirect("/signup");
         }
 
         // Fetch wallet data
@@ -163,9 +163,9 @@ const postCheckout = async (req, res) => {
         console.log("--- Post Checkout Entry ---");
         console.log("Request Body:", JSON.stringify(req.body, null, 2));
 
-        const userId = req.session.user._id;
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Please login to continue" });
+            return res.status(401).json({ success: false, message: "Session expired. Please refresh the page." });
         }
 
         const { address, products, subtotal, total, paymentMethod } = req.body;
@@ -472,10 +472,11 @@ const retryPayment = async (req, res) => {
 
 const orderConfirm = async (req, res) => {
     try {
-        const user = req.session.user;
-        if (!user) {
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
+        if (!userId) {
             return res.redirect("/signup");
         }
+        const user = await User.findById(userId);
         const orderId = req.query.id;
         return res.render("orderConfirmation", {
             user: user,
@@ -491,7 +492,7 @@ const orderConfirm = async (req, res) => {
 const applyCoupon = async (req, res) => {
     try {
         const { couponCode, totalAmount } = req.body;
-        const userId = req.session?.user?._id;
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
 
         if (!userId) {
             return res.redirect("/login");

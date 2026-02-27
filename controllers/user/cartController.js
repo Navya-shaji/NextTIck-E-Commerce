@@ -5,8 +5,8 @@ const Cart = require("../../models/cartSchema");
 // Get Cart...................................................................
 const getCart = async (req, res) => {
   try {
-    const userId = req.session.user;
-    const user = await User.findById(userId);
+    const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
+    const user = userId && !req.session.guestUserId ? await User.findById(userId) : (req.session.guestUserId ? await User.findById(req.session.guestUserId) : null);
 
     const cartItems = await Cart.findOne({ userId }).populate({
       path: "items.productId",
@@ -58,7 +58,7 @@ const getCart = async (req, res) => {
 // Update Quantity
 const updateQuantity = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
     const { productId, quantity } = req.body;
 
     // Validate quantity
@@ -139,14 +139,13 @@ const updateQuantity = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
     const { productId, quantity = 1 } = req.body;
 
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Please log in to add items to your cart.",
-        redirect: "/login",
+        message: "Session expired. Please refresh the page.",
       });
     }
 
@@ -238,7 +237,7 @@ const addToCart = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
     const { productId } = req.body;
 
     const cart = await Cart.findOne({ userId });
