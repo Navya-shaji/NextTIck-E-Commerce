@@ -55,16 +55,14 @@ const createCoupon = async (req, res) => {
             return res.status(400).send("Invalid dates provided.");
         }
 
-        if (isNaN(req.body.offerPrice) || isNaN(req.body.minimumPrice)) {
-            return res.status(400).send("Offer price and minimum price must be valid numbers.");
-        }
-
         const data = {
             couponName: req.body.couponName,
             startDate: new Date(req.body.startDate + "T00:00:00"),
             endDate: new Date(req.body.endDate + "T00:00:00"),
-            offerPrice: parseInt(req.body.offerPrice),
-            minimumPrice: parseInt(req.body.minimumPrice)
+            offerPrice: parseFloat(req.body.offerPrice),
+            minimumPrice: parseFloat(req.body.minimumPrice),
+            maximumDiscount: req.body.maximumDiscount ? parseFloat(req.body.maximumDiscount) : null,
+            couponType: req.body.couponType || 'flat'
         };
 
         const newCoupon = new Coupon({
@@ -73,6 +71,8 @@ const createCoupon = async (req, res) => {
             expireOn: data.endDate,
             offerPrice: data.offerPrice,
             minimumPrice: data.minimumPrice,
+            maximumDiscount: data.maximumDiscount,
+            couponType: data.couponType
         });
 
         await newCoupon.save();
@@ -111,7 +111,7 @@ const updateCoupon = async (req, res) => {
             return res.status(400).send("Invalid coupon ID.");
         }
 
-        const { couponName, startDate, endDate, offerPrice, minimumPrice } = req.body;
+        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType } = req.body;
         if (!couponName || !startDate || !endDate || !offerPrice || !minimumPrice) {
             return res.status(400).send("All fields (couponName, startDate, endDate, offerPrice, minimumPrice) are required.");
         }
@@ -120,8 +120,10 @@ const updateCoupon = async (req, res) => {
             name: couponName,
             createdOn: new Date(startDate),
             expireOn: new Date(endDate),
-            offerPrice: parseInt(offerPrice),
-            minimumPrice: parseInt(minimumPrice),
+            offerPrice: parseFloat(offerPrice),
+            minimumPrice: parseFloat(minimumPrice),
+            maximumDiscount: maximumDiscount ? parseFloat(maximumDiscount) : null,
+            couponType: couponType || 'flat'
         };
 
         const updatedCoupon = await Coupon.findByIdAndUpdate(

@@ -2,6 +2,9 @@ const express = require("express");
 const app = express(); // app server instance
 const path = require("path");
 const session = require("express-session");
+
+app.set('trust proxy', 1); // Required for sessions/rate-limiting behind Nginx
+
 const env = require("dotenv").config(); // inputing .env
 const passport = require("./config/passport");
 const db = require("./config/db");

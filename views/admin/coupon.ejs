@@ -243,7 +243,9 @@
                     <thead>
                         <tr>
                             <th>Code</th>
+                            <th>Type</th>
                             <th>Discount</th>
+                            <th>Max Discount</th>
                             <th>Min. Purchase</th>
                             <th>Created</th>
                             <th>Expires</th>
@@ -257,8 +259,18 @@
                                 <td class="fw-bold text-dark">
                                     <%= coupon.name %>
                                 </td>
+                                <td>
+                                    <span class="badge bg-info text-capitalize">
+                                        <%= coupon.couponType || 'flat' %>
+                                    </span>
+                                </td>
                                 <td class="text-primary fw-bold">
-                                    <%= coupon.offerPrice %>%
+                                    <%= coupon.offerPrice %>
+                                        <%= (coupon.couponType==='percentage' ) ? '%' : '' %>
+                                </td>
+                                <td>
+                                    <%= coupon.maximumDiscount ? '₹' + coupon.maximumDiscount.toLocaleString('en-IN')
+                                        : 'N/A' %>
                                 </td>
                                 <td>₹<%= coupon.minimumPrice.toLocaleString('en-IN') %>
                                 </td>
@@ -400,15 +412,32 @@
                                     placeholder="e.g., FBA001" required />
                                 <div id="error-coupon-name" class="error-message"></div>
                             </div>
+                            <!-- Coupon Type -->
+                            <div class="col-md-4 mb-3">
+                                <label for="couponType" class="form-label">Coupon Type</label>
+                                <select id="couponType" name="couponType" class="form-select"
+                                    onchange="toggleMaxDiscount(this, 'maxDiscountRow')">
+                                    <option value="flat">Flat Amount (₹)</option>
+                                    <option value="percentage">Percentage (%)</option>
+                                </select>
+                            </div>
                             <!-- Discount Amount -->
-                            <div class="col-md-6 mb-3">
-                                <label for="offerPrice" class="form-label">Discount Percentage %</label>
+                            <div class="col-md-4 mb-3">
+                                <label for="offerPrice" class="form-label">Discount Value</label>
                                 <div class="input-group">
                                     <input type="number" id="offerPrice" name="offerPrice" class="form-control" min="1"
-                                        max="100" placeholder="e.g., 10" required />
-                                    <span class="input-group-text">%</span>
+                                        placeholder="Value" required />
                                 </div>
                                 <div id="error-discount" class="error-message"></div>
+                            </div>
+                            <!-- Maximum Discount -->
+                            <div class="col-md-4 mb-3" id="maxDiscountRow" style="display:none;">
+                                <label for="maximumDiscount" class="form-label">Max Discount (Cap)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" id="maximumDiscount" name="maximumDiscount"
+                                        class="form-control" min="0" placeholder="e.g., 500" />
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -479,15 +508,32 @@
                                     placeholder="e.g., FBA001" required />
                                 <div id="edit-error-coupon-name" class="error-message"></div>
                             </div>
+                            <!-- Coupon Type -->
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-couponType" class="form-label">Coupon Type</label>
+                                <select id="edit-couponType" name="couponType" class="form-select"
+                                    onchange="toggleMaxDiscount(this, 'editMaxDiscountRow')">
+                                    <option value="flat">Flat Amount (₹)</option>
+                                    <option value="percentage">Percentage (%)</option>
+                                </select>
+                            </div>
                             <!-- Discount Amount -->
-                            <div class="col-md-6 mb-3">
-                                <label for="edit-offerPrice" class="form-label">Discount Percentage %</label>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-offerPrice" class="form-label">Discount Value</label>
                                 <div class="input-group">
                                     <input type="number" id="edit-offerPrice" name="offerPrice" class="form-control"
-                                        min="1" max="100" placeholder="e.g., 10" required />
-                                    <span class="input-group-text">%</span>
+                                        min="1" placeholder="Value" required />
                                 </div>
                                 <div id="edit-error-discount" class="error-message"></div>
+                            </div>
+                            <!-- Maximum Discount -->
+                            <div class="col-md-4 mb-3" id="editMaxDiscountRow" style="display:none;">
+                                <label for="edit-maximumDiscount" class="form-label">Max Discount (Cap)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" id="edit-maximumDiscount" name="maximumDiscount"
+                                        class="form-control" min="0" placeholder="e.g., 500" />
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -531,6 +577,18 @@
 
     <script>
         (function () {
+            window.toggleMaxDiscount = function (select, rowId) {
+                const row = document.getElementById(rowId);
+                if (select.value === 'percentage') {
+                    row.style.display = 'block';
+                } else {
+                    row.style.display = 'none';
+                    // Clear the value if switching back to flat
+                    const input = row.querySelector('input');
+                    if (input) input.value = '';
+                }
+            };
+
             window.initCoupon = function () {
                 const addCouponModal = document.getElementById('addCouponModal');
                 if (addCouponModal) {
@@ -540,35 +598,49 @@
                 }
             };
 
-            window.validateForm = function () {
+            window.validateForm = function (prefix = '') {
                 let isValid = true;
-                const couponName = document.getElementById('coupon-name').value;
-                const offerPrice = parseFloat(document.getElementById('offerPrice').value);
-                const minimumPrice = parseFloat(document.getElementById('minimumPrice').value);
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+                const couponName = document.getElementById(prefix ? 'edit-coupon-name' : 'coupon-name').value;
+                const offerPrice = parseFloat(document.getElementById(prefix ? 'edit-offerPrice' : 'offerPrice').value);
+                const minimumPrice = parseFloat(document.getElementById(prefix ? 'edit-minimumPrice' : 'minimumPrice').value);
+                const startDate = document.getElementById(prefix ? 'edit-startDate' : 'startDate').value;
+                const endDate = document.getElementById(prefix ? 'edit-endDate' : 'endDate').value;
+                const couponType = document.getElementById(prefix ? 'edit-couponType' : 'couponType').value;
 
                 // Reset error messages
                 document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
 
                 // Validate coupon name
                 if (!/^[A-Z0-9]+$/.test(couponName)) {
-                    document.getElementById('error-coupon-name').textContent = 'Coupon code must contain only uppercase letters and numbers';
-                    document.getElementById('error-coupon-name').style.display = 'block';
+                    document.getElementById(prefix ? 'edit-error-coupon-name' : 'error-coupon-name').textContent = 'Coupon code must contain only uppercase letters and numbers';
+                    document.getElementById(prefix ? 'edit-error-coupon-name' : 'error-coupon-name').style.display = 'block';
                     isValid = false;
                 }
 
-                // Validate discount percentage
-                if (isNaN(offerPrice) || offerPrice < 1 || offerPrice > 100) {
-                    document.getElementById('error-discount').textContent = 'Discount percentage must be between 1 and 100';
-                    document.getElementById('error-discount').style.display = 'block';
-                    isValid = false;
+                // Validate discount percentage/amount
+                if (couponType === 'percentage') {
+                    if (isNaN(offerPrice) || offerPrice < 1 || offerPrice > 100) {
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').textContent = 'Percentage must be between 1 and 100';
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').style.display = 'block';
+                        isValid = false;
+                    }
+                    const maxDiscount = parseFloat(document.getElementById(prefix ? 'edit-maximumDiscount' : 'maximumDiscount').value);
+                    if (maxDiscount && maxDiscount < 0) {
+                        Swal.fire('Error', 'Maximum discount cannot be negative', 'error');
+                        isValid = false;
+                    }
+                } else {
+                    if (isNaN(offerPrice) || offerPrice < 1) {
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').textContent = 'Discount amount must be at least 1';
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').style.display = 'block';
+                        isValid = false;
+                    }
                 }
 
                 // Validate minimum purchase amount
                 if (isNaN(minimumPrice) || minimumPrice < 0) {
-                    document.getElementById('error-min-amount').textContent = 'Minimum purchase amount must be 0 or greater';
-                    document.getElementById('error-min-amount').style.display = 'block';
+                    document.getElementById(prefix ? 'edit-error-min-amount' : 'error-min-amount').textContent = 'Minimum purchase amount must be 0 or greater';
+                    document.getElementById(prefix ? 'edit-error-min-amount' : 'error-min-amount').style.display = 'block';
                     isValid = false;
                 }
 
@@ -582,15 +654,15 @@
                 start.setHours(0, 0, 0, 0);
                 end.setHours(0, 0, 0, 0);
 
-                if (start < today) {
-                    document.getElementById('error-start-date').textContent = 'Start date must be today or a future date';
-                    document.getElementById('error-start-date').style.display = 'block';
+                if (start < today && prefix === '') { // Only check today for NEW coupons
+                    document.getElementById(prefix ? 'edit-error-start-date' : 'error-start-date').textContent = 'Start date must be today or a future date';
+                    document.getElementById(prefix ? 'edit-error-start-date' : 'error-start-date').style.display = 'block';
                     isValid = false;
                 }
 
                 if (end <= start) {
-                    document.getElementById('error-end-date').textContent = 'End date must be after start date';
-                    document.getElementById('error-end-date').style.display = 'block';
+                    document.getElementById(prefix ? 'edit-error-end-date' : 'error-end-date').textContent = 'End date must be after start date';
+                    document.getElementById(prefix ? 'edit-error-end-date' : 'error-end-date').style.display = 'block';
                     isValid = false;
                 }
 
@@ -607,11 +679,8 @@
                 // Show loading animation
                 Swal.fire({
                     title: 'Creating Coupon...',
-                    html: 'Please wait while we process your request',
                     allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
+                    didOpen: () => Swal.showLoading()
                 });
 
                 const formData = new FormData(event.target);
@@ -623,62 +692,40 @@
                 try {
                     const response = await fetch('/admin/createcoupon', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formDataObject)
                     });
 
                     const data = await response.json();
 
                     if (response.ok) {
-                        // Success notification
                         Swal.fire({
                             title: 'Success!',
                             text: 'Coupon created successfully',
                             icon: 'success',
                             showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true,
-                            didClose: () => {
-                                // Reset form and close modal
-                                document.getElementById('addCouponForm').reset();
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('addCouponModal'));
-                                if (modal) modal.hide();
-
-                                // Reload content for SPA
-                                if (window.loadContent) {
-                                    window.loadContent(window.location.href);
-                                } else {
-                                    window.location.reload();
-                                }
-                            }
+                            timer: 1500
+                        }).then(() => {
+                            window.location.reload();
                         });
                     } else {
                         throw new Error(data.message || 'Failed to create coupon');
                     }
                 } catch (error) {
-                    // Error notification
-                    Swal.fire({
-                        title: 'Oops...',
-                        text: error.message || 'Something went wrong!',
-                        icon: 'error',
-                        confirmButtonText: 'Try Again'
-                    });
+                    Swal.fire('Oops...', error.message, 'error');
                 }
             };
 
             function setDefaultStartDate() {
                 const today = new Date();
                 const startDateInput = document.getElementById("startDate");
-                if (startDateInput) {
+                if (startDateInput && !startDateInput.value) {
                     startDateInput.min = today.toISOString().split("T")[0];
                     startDateInput.value = today.toISOString().split("T")[0];
                 }
             }
 
             window.editCoupon = function (id) {
-                // Fetch coupon details via AJAX
                 fetch(`/admin/getCoupon?id=${id}`)
                     .then(res => res.json())
                     .then(data => {
@@ -688,15 +735,18 @@
                             document.getElementById('edit-coupon-name').value = coupon.name;
                             document.getElementById('edit-offerPrice').value = coupon.offerPrice;
                             document.getElementById('edit-minimumPrice').value = coupon.minimumPrice;
+                            document.getElementById('edit-couponType').value = coupon.couponType || 'flat';
+                            document.getElementById('edit-maximumDiscount').value = coupon.maximumDiscount || '';
 
-                            // Format dates for input[type="date"]
+                            // Trigger toggle logic
+                            window.toggleMaxDiscount(document.getElementById('edit-couponType'), 'editMaxDiscountRow');
+
                             const startDate = new Date(coupon.createdOn).toISOString().split('T')[0];
                             const endDate = new Date(coupon.expireOn).toISOString().split('T')[0];
 
                             document.getElementById('edit-startDate').value = startDate;
                             document.getElementById('edit-endDate').value = endDate;
 
-                            // Show the modal
                             const editEl = document.getElementById('editCouponModal');
                             let modalInstance = bootstrap.Modal.getInstance(editEl);
                             if (!modalInstance) modalInstance = new bootstrap.Modal(editEl);
@@ -704,67 +754,37 @@
                         } else {
                             Swal.fire('Error', 'Failed to fetch coupon details', 'error');
                         }
-                    })
-                    .catch(err => {
-                        console.error('Error fetching coupon:', err);
-                        Swal.fire('Error', 'An error occurred while fetching coupon details', 'error');
                     });
             };
 
             window.handleEditFormSubmit = async function (event) {
                 event.preventDefault();
 
-                const couponId = document.getElementById('edit-coupon-id').value;
-                const couponName = document.getElementById('edit-coupon-name').value;
-                const offerPrice = document.getElementById('edit-offerPrice').value;
-                const minimumPrice = document.getElementById('edit-minimumPrice').value;
-                const startDate = document.getElementById('edit-startDate').value;
-                const endDate = document.getElementById('edit-endDate').value;
-
-                // Simple validation
-                if (!/^[A-Z0-9]+$/.test(couponName)) {
-                    Swal.fire('Error', 'Coupon code must contain only uppercase letters and numbers', 'error');
+                if (!window.validateForm('edit-')) {
                     return;
                 }
 
+                const couponId = document.getElementById('edit-coupon-id').value;
+                const formData = new FormData(event.target);
+                const formDataObject = {};
+                formData.forEach((value, key) => {
+                    formDataObject[key] = value;
+                });
+
                 try {
-                    Swal.fire({
-                        title: 'Updating...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
+                    Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
                     const response = await fetch(`/admin/updateCoupon?id=${couponId}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            couponName,
-                            offerPrice,
-                            minimumPrice,
-                            startDate,
-                            endDate
-                        })
+                        body: JSON.stringify(formDataObject)
                     });
 
                     const result = await response.json();
 
                     if (response.ok || result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Updated',
-                            text: 'Coupon updated successfully',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('editCouponModal'));
-                            if (modal) modal.hide();
-
-                            if (window.loadContent) {
-                                window.loadContent(window.location.href);
-                            } else {
-                                window.location.reload();
-                            }
-                        });
+                        Swal.fire({ icon: 'success', title: 'Updated', timer: 1500, showConfirmButton: false })
+                            .then(() => window.location.reload());
                     } else {
                         throw new Error(result.message || 'Update failed');
                     }
