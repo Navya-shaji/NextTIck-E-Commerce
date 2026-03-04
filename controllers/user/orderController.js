@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 
 const getOrderHistory = async (req, res) => {
     try {
-        const user = req.session.user;
+        const user = req.session.user || req.user;
         if (!user) {
             return res.redirect("/login");
         }
@@ -55,7 +55,7 @@ const getOrderHistory = async (req, res) => {
 const getOrderDetails = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const userId = req.user.id;
+        const userId = req.session.user?._id || req.user?._id;
 
         const order = await Order.findOne({ _id: orderId, userId })
             .populate('orderItems.product')
@@ -225,15 +225,17 @@ const getOrderStatus = async (req, res) => {
 const viewOrderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
-        const order = await Order.findById(orderId)
+        const userId = req.session.user?._id || req.user?._id;
+
+        const order = await Order.findOne({ _id: orderId, userId })
             .populate('orderItems.product');
 
         if (!order) {
-            return res.status(404).send('Order not found');
+            return res.status(404).render('error', { message: 'Order not found' });
         }
 
-        // Fetch which products in this order the logged-in user has already reviewed
-        const userId = req.session.user?._id;
+        // Fetch which products in this order the user has already reviewed
+        const userIdForReview = req.session.user?._id || req.user?._id;
         const productIds = order.orderItems
             .filter(item => item.product)
             .map(item => item.product._id);

@@ -308,9 +308,9 @@ const postCheckout = async (req, res) => {
                 name: "Your Store Name",
                 description: "Purchase Description",
                 prefill: {
-                    name: req.session.user.name,
-                    email: req.session.user.email,
-                    contact: req.session.user.phone
+                    name: req.session.user?.name || (req.user?.name || "Guest"),
+                    email: req.session.user?.email || (req.user?.email || ""),
+                    contact: req.session.user?.phone || (req.user?.phone || "")
                 },
                 orderId: savedOrder._id
             });
@@ -338,7 +338,8 @@ const postCheckout = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
     try {
-        if (!req.session.user) {
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
+        if (!userId) {
             return res.status(401).json({
                 success: false,
                 message: "User not authenticated"
@@ -385,7 +386,7 @@ const verifyPayment = async (req, res) => {
         if (retryPayment) {
             const order = await Order.findOneAndUpdate({ _id: req.body.orderId }, { paymentStatus: "Completed", status: "Pending" })
 
-            await Cart.findOneAndUpdate({ userId: req.session.user._id }, { $set: { items: [] } });
+            await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
             return res.status(200).json({
                 success: true,
                 message: "Payment verified and order placed successfully",
@@ -396,7 +397,7 @@ const verifyPayment = async (req, res) => {
         const order = await Order.findOneAndUpdate({ _id: orderDetails.orderId }, { paymentStatus: "Completed", status: "Pending" })
 
         // Clear cart after successful online payment
-        await Cart.findOneAndUpdate({ userId: req.session.user._id }, { $set: { items: [] } });
+        await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
         return res.status(200).json({
             success: true,

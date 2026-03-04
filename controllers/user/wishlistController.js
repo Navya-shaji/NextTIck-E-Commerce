@@ -9,7 +9,10 @@ const Brand = require("../../models/brandSchema");
 
 const loadWishlist = async (req, res) => {
   try {
-    const userId = req.session.user._id;
+    const userId = req.session.user?._id || req.session.guestUserId;
+    if (!userId) {
+      return res.redirect("/login");
+    }
     const wishlist = await Wishlist.findOne({ userId })
       .populate({
         path: 'products.productId',
@@ -33,7 +36,7 @@ const loadWishlist = async (req, res) => {
 const addToWishlist = async (req, res) => {
   try {
     const productId = req.body.productId;
-    const userId = req.session.user._id;
+    const userId = req.session.user?._id || req.session.guestUserId;
 
     if (!userId) {
       return res.status(401).json({ status: false, message: "User not logged in" });
@@ -70,7 +73,7 @@ const addToWishlist = async (req, res) => {
 const removeFromWishlist = async (req, res) => {
   try {
     const productId = req.params.id;
-    const userId = req.session.user._id;
+    const userId = req.session.user?._id || req.session.guestUserId;
     if (!productId) {
       return res.status(400).json({ status: false, message: 'Product ID is required' });
     }

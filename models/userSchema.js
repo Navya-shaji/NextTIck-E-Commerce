@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose; // Correct import of Schema
+const { Schema } = mongoose; 
 
 const userSchema = new Schema({
   name: {
@@ -9,8 +9,11 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: false,
-    unique: true,
-    sparse: true,
+    index: {
+      unique: true,
+      sparse: true,
+      partialFilterExpression: { email: { $type: "string" } }
+    },
   },
   phone: {
     type: String,
@@ -25,8 +28,11 @@ const userSchema = new Schema({
   },
   guestId: {
     type: String,
-    unique: true,
-    sparse: true,
+    index: {
+      unique: true,
+      sparse: true,
+      partialFilterExpression: { guestId: { $type: "string" } }
+    }
   },
   expiresAt: {
     type: Date,
@@ -35,8 +41,11 @@ const userSchema = new Schema({
   },
   googleId: {
     type: String,
-    unique: true,
-    sparse: true,
+    index: {
+      unique: true,
+      sparse: true,
+      partialFilterExpression: { googleId: { $type: "string" } }
+    },
   },
   password: {
     type: String,

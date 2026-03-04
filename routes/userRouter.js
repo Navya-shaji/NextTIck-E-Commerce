@@ -64,7 +64,7 @@ router.post(ROUTES.UPDATE_PROFILE, profileController.updateProfile);
 
 router.use(userAuth);
 router.use(checkBlockedStatus);
-router.get(ROUTES.USER_PROFILE, blockGuests, profileController.userProfile);
+router.get(ROUTES.USER_PROFILE, profileController.userProfile);
 router.post(ROUTES.UPDATE_PROFILE_RAW, profileController.updateProfile);
 router.get(ROUTES.CHANGE_EMAIL, profileController.changeEmail);
 router.post(ROUTES.CHANGE_EMAIL, profileController.changeEmailValid);
@@ -118,7 +118,7 @@ router.post(ROUTES.RETRY_PAYMENT, userAuth, checkoutController.retryPayment);
 
 //order management...............................................................................................
 
-router.get(ROUTES.ORDER_HISTORY, blockGuests, orderController.getOrderHistory);
+router.get(ROUTES.ORDER_HISTORY, orderController.getOrderHistory);
 router.post(ROUTES.CANCEL_ORDER, orderController.cancelOrder);
 router.get(ROUTES.ORDER_STATUS, orderController.getOrderStatus);
 router.get(ROUTES.ORDER_DETAILS, orderController.getOrderDetails);

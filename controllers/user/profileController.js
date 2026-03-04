@@ -183,11 +183,12 @@ const postNewPassword = async (req, res) => {
 
 const userProfile = async (req, res) => {
     try {
-        const user = req.session.user;
+        const user = req.session.user || req.user;
 
         if (!user) {
             return res.redirect("/login");
         }
+        const userId = user._id;
 
         const page = parseInt(req.query.page) || 1;
         const walletPage = parseInt(req.query.walletPage) || 1;
@@ -197,15 +198,15 @@ const userProfile = async (req, res) => {
         const addressPerPage = 4;
 
         // Calculate pagination for orders
-        const totalOrders = await Order.countDocuments({ userId: user._id });
+        const totalOrders = await Order.countDocuments({ userId: userId });
         const totalPages = Math.ceil(totalOrders / itemsPerPage);
-        const orders = await Order.find({ userId: user._id })
+        const orders = await Order.find({ userId: userId })
             .sort({ createdOn: -1 })
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
-        const addressDoc = await Address.findOne({ userId: user._id });
-        const userWallet = await Wallet.findOne({ userId: user._id });
+        const addressDoc = await Address.findOne({ userId: userId });
+        const userWallet = await Wallet.findOne({ userId: userId });
 
         // Calculate pagination for addresses
         let paginatedAddresses = [];
@@ -639,7 +640,7 @@ const postAddAddress = async (req, res) => {
 const editAddress = async (req, res) => {
     try {
         const addressId = req.params.id;
-        const user = req.session.user._id;
+        const user = req.session.user?._id || req.session.user || req.session.guestUserId;
         const currAddress = await Address.findOne({ "address._id": addressId });
         if (!currAddress) {
             return res.redirect("/pageNotFound");
@@ -658,7 +659,10 @@ const postEditAddress = async (req, res) => {
     try {
         const data = req.body;
         const addressId = req.params.id;
-        const userId = req.session.user._id;
+        const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Session expired. Please refresh the page." });
+        }
 
         const findAddress = await Address.findOne({ "address._id": addressId });
         if (!findAddress) {

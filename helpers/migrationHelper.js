@@ -1,6 +1,7 @@
 const Cart = require("../models/cartSchema");
 const Order = require("../models/orderSchema");
 const User = require("../models/userSchema");
+const Wishlist = require("../models/wishlistSchema");
 
 /**
  * Migrates cart and order data from a guest user to a registered user.
@@ -41,6 +42,29 @@ const migrateGuestData = async (guestUserId, registeredUserId) => {
 
         // 2. Migrate Orders
         await Order.updateMany({ userId: guestUserId }, { userId: registeredUserId });
+
+        // 3. Migrate Wishlist
+        const guestWishlist = await Wishlist.findOne({ userId: guestUserId });
+        if (guestWishlist) {
+            const userWishlist = await Wishlist.findOne({ userId: registeredUserId });
+            if (userWishlist) {
+                // Merge wishlists
+                for (const item of guestWishlist.products) {
+                    const exists = userWishlist.products.some(
+                        (p) => p.productId.toString() === item.productId.toString()
+                    );
+                    if (!exists) {
+                        userWishlist.products.push(item);
+                    }
+                }
+                await userWishlist.save();
+                await Wishlist.deleteOne({ userId: guestUserId });
+            } else {
+                // Transfer wishlist
+                guestWishlist.userId = registeredUserId;
+                await guestWishlist.save();
+            }
+        }
 
         // 3. Delete Guest User
         await User.deleteOne({ _id: guestUserId, isGuest: true });

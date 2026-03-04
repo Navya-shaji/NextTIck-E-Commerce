@@ -373,73 +373,77 @@
 <body class="goto-here">
   <header class="main-header">
     <% if (locals.isGuest) { %>
-      <div class="guest-banner text-center py-1" style="background: var(--header-accent); color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-        Shopping as Guest. <a href="/signup" style="color: white; text-decoration: underline; margin-left: 5px;">Create an account</a> to save your orders!
+      <div class="guest-banner text-center py-1"
+        style="background: var(--header-accent); color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+        Tracking orders as Guest. <a href="/signup"
+          style="color: white; text-decoration: underline; margin-left: 5px;">Register</a> to save them permanently!
       </div>
-    <% } %>
-    <div class="header-container">
-      <a href="/" class="brand-logo">
-        <h1>NexTick</h1>
-      </a>
+      <% } %>
+        <div class="header-container">
+          <a href="/" class="brand-logo">
+            <h1>NexTick</h1>
+          </a>
 
-      <div class="header-search">
-        <form action="/shop" method="GET">
-          <i class="fas fa-search search-icon"></i>
-          <input type="text" name="query" class="search-input" placeholder="Search for timepieces...">
-        </form>
-      </div>
+          <div class="header-search">
+            <form action="/shop" method="GET">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" name="query" class="search-input" placeholder="Search for timepieces...">
+            </form>
+          </div>
 
-      <nav class="main-nav">
-        <ul class="nav-menu">
-          <li><a href="/" class="nav-link">Home</a></li>
-          <li><a href="/shop" class="nav-link">Shop</a></li>
-          <li><a href="/about" class="nav-link">About</a></li>
-        </ul>
-      </nav>
+          <nav class="main-nav">
+            <ul class="nav-menu">
+              <li><a href="/" class="nav-link">Home</a></li>
+              <li><a href="/shop" class="nav-link">Shop</a></li>
+              <li><a href="/about" class="nav-link">About</a></li>
+            </ul>
+          </nav>
 
-      <div class="header-actions">
-        <a href="/wishlist" class="action-icon">
-          <i class="fas fa-heart"></i>
-        </a>
-        <a href="/cart" class="action-icon cart-icon">
-          <i class="fas fa-shopping-bag"></i>
-          <span class="badge cart-count">
-            <%= locals.cartCount || 0 %>
-          </span>
-        </a>
-
-        <div class="dropdown">
-          <% if (locals.user && !locals.isGuest) { %>
-            <a href="/userProfile" class="action-icon d-flex align-items-center">
-              <i class="fas fa-user-circle"></i>
-              <span class="user-name-text">
-                <%= user.name %>
+          <div class="header-actions">
+            <a href="/wishlist" class="action-icon">
+              <i class="fas fa-heart"></i>
+            </a>
+            <a href="/cart" class="action-icon cart-icon">
+              <i class="fas fa-shopping-bag"></i>
+              <span class="badge cart-count">
+                <%= locals.cartCount || 0 %>
               </span>
             </a>
-            <% } else { %>
-              <a href="/login" class="action-icon d-flex align-items-center">
-                <i class="fas fa-user-circle"></i>
-                <% if (locals.isGuest) { %>
-                  <span class="user-name-text">Guest</span>
-                <% } %>
-              </a>
-              <% } %>
-                <div class="dropdown-menu">
-                  <% if (locals.user && !locals.isGuest) { %>
-                    <a href="/userProfile" class="dropdown-item">Profile</a>
-                    <a href="/logout" class="dropdown-item">Logout</a>
-                    <% } else { %>
-                      <a href="/login" class="dropdown-item">Sign In</a>
-                      <a href="/signup" class="dropdown-item">Register</a>
-                      <% } %>
-                </div>
-        </div>
 
-        <button class="mobile-toggle" onclick="toggleMobileMenu()">
-          <i class="fas fa-bars"></i>
-        </button>
-      </div>
-    </div>
+            <div class="dropdown">
+              <% if (locals.user || locals.isGuest) { %>
+                <a href="/userProfile" class="action-icon d-flex align-items-center">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="user-name-text">
+                    <%= locals.isGuest ? 'Guest' : user.name %>
+                  </span>
+                </a>
+                <% } else { %>
+                  <a href="/login" class="action-icon d-flex align-items-center">
+                    <i class="fas fa-user-circle"></i>
+                  </a>
+                  <% } %>
+                    <div class="dropdown-menu">
+                      <% if (locals.user || locals.isGuest) { %>
+                        <a href="/userProfile" class="dropdown-item">
+                          <%= locals.isGuest ? 'My Orders' : 'Profile' %>
+                        </a>
+                        <% if (locals.isGuest) { %>
+                          <a href="/signup" class="dropdown-item">Register</a>
+                          <% } %>
+                            <a href="/logout" class="dropdown-item">Logout</a>
+                            <% } else { %>
+                              <a href="/login" class="dropdown-item">Sign In</a>
+                              <a href="/signup" class="dropdown-item">Register</a>
+                              <% } %>
+                    </div>
+            </div>
+
+            <button class="mobile-toggle" onclick="toggleMobileMenu()">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+        </div>
   </header>
 
   <!-- Mobile Menu -->
@@ -450,12 +454,13 @@
     <ul class="mobile-menu-items">
       <li><a href="/shop">Shop</a></li>
       <li><a href="/">Home</a></li>
-      <% if (locals.user) { %>
+      <% if (locals.user && !locals.isGuest) { %>
         <li><a href="/userProfile">My Account</a></li>
         <li><a href="/wishlist">Wishlist</a></li>
         <li><a href="/cart">Cart</a></li>
         <li><a href="/logout">Logout</a></li>
         <% } else { %>
+          <li><a href="/cart">Cart</a></li>
           <li><a href="/login">Login</a></li>
           <li><a href="/signup">Sign Up</a></li>
           <% } %>

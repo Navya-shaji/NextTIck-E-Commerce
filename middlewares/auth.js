@@ -9,6 +9,7 @@ const userAuth = (req, res, next) => {
         User.findById(userId)
             .then(data => {
                 if (data && !data.isBlocked) {
+                    req.user = data;
                     // Only set session.user for non-guests to maintain "isLoggedIn" logic
                     if (!data.isGuest) {
                         req.session.user = data;
