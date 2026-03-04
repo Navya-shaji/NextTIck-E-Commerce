@@ -250,7 +250,7 @@
                                     <th>Quantity</th>
                                     <th class="text-end">Unit Price</th>
                                     <th class="text-end">Total</th>
-                                    <th>Action</th>
+                                    <th class="text-end">Total Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -264,8 +264,6 @@
                                             <div class="fw-bold text-dark">
                                                 <%= item.product?.name || 'Deleted Product' %>
                                             </div>
-                                            <div class="text-muted small">Status: <%= item.status %>
-                                            </div>
                                         </td>
                                         <td class="text-center">
                                             <%= item.quantity %>
@@ -276,15 +274,10 @@
                                                 item.price).toLocaleString('en-IN') %>
                                         </td>
                                         <td>
-                                            <select class="action-select"
-                                                onchange="updateItemStatus('<%= order._id %>', '<%= item.product?._id %>', this.value)">
-                                                <option value="" disabled selected>Update</option>
-                                                <option value="Processing">Processing</option>
-                                                <option value="Shipped">Shipped</option>
-                                                <option value="Delivered">Delivered</option>
-                                                <option value="Cancelled">Cancelled</option>
-                                                <option value="Returned">Returned</option>
-                                            </select>
+                                            <span
+                                                class="status-badge badge-<%= item.status.toLowerCase().replace(' ', '-') %>">
+                                                <%= item.status %>
+                                            </span>
                                         </td>
                                     </tr>
                                     <% }); %>
@@ -398,11 +391,27 @@
                                         </select>
                                         <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) { %>
                                             <button type="submit" class="btn btn-dark w-100 mb-2"
-                                                style="border-radius: 10px;">Update Logistics</button>
-                                            <button type="button" class="btn btn-outline-danger w-100"
+                                                style="border-radius: 10px;">Update Status</button>
+                                            <button type="button" class="btn btn-outline-danger w-100 mb-2"
                                                 style="border-radius: 10px;"
                                                 onclick="cancelOrderDetail('<%= order._id %>')">Cancel Order</button>
                                             <% } %>
+                                                <% if (order.status==='Return Request' ) { %>
+                                                    <button type="button" class="btn btn-success w-100 mb-2"
+                                                        style="border-radius: 10px;"
+                                                        onclick="approveReturn('<%= order._id %>')">Approve
+                                                        Return</button>
+                                                    <button type="button" class="btn btn-outline-warning w-100 mb-2"
+                                                        style="border-radius: 10px;"
+                                                        onclick="rejectReturn('<%= order._id %>')">Reject
+                                                        Return</button>
+                                                    <% } %>
+                                                        <hr class="my-3">
+                                                        <button type="button"
+                                                            class="btn btn-link text-danger w-100 text-decoration-none"
+                                                            onclick="deleteOrderDetails('<%= order._id %>')">
+                                                            <i class="fas fa-trash-alt me-1"></i>Delete Permanent Record
+                                                        </button>
                                     </form>
                                 </div>
                     </div>
@@ -494,6 +503,7 @@
             window.cancelOrderDetail = async function (orderId) {
                 const { value: reason } = await Swal.fire({
                     title: 'Cancel Order?',
+                    text: 'Funds will be returned to the guest/user wallet if applicable.',
                     input: 'textarea',
                     inputLabel: 'Reason for cancellation',
                     inputPlaceholder: 'Enter reason here...',
@@ -528,6 +538,102 @@
                             });
                         } else {
                             Swal.fire('Error', data.message || 'Failed to cancel order', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    }
+                }
+            };
+
+            window.approveReturn = async function (orderId) {
+                const res = await Swal.fire({
+                    title: 'Approve Return?',
+                    text: 'This will refund the amount to the user wallet and restore stock.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, Approve Return'
+                });
+
+                if (res.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/orders/update-status', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId, status: 'Returned' })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire('Returned!', 'Return request has been approved.', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to approve return', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    }
+                }
+            };
+
+            window.rejectReturn = async function (orderId) {
+                const res = await Swal.fire({
+                    title: 'Reject Return?',
+                    text: 'The order will be set back to its previous status.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, Reject Return'
+                });
+
+                if (res.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/orders/update-status', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId, status: 'Delivered' })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire('Rejected!', 'Return request has been rejected.', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to reject return', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    }
+                }
+            };
+
+            window.deleteOrderDetails = async function (orderId) {
+                const res = await Swal.fire({
+                    title: 'Delete Order Record?',
+                    text: 'This action is PERMANENT and should only be used for cleanup!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Permanently Delete'
+                });
+
+                if (res.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/orders/delete-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire('Deleted!', 'Record has been removed.', 'success').then(() => {
+                                window.location.href = '/admin/orderList';
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to delete record', 'error');
                         }
                     } catch (error) {
                         Swal.fire('Error', 'Network error occurred', 'error');

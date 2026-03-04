@@ -338,24 +338,6 @@
                                                     <i class="fas fa-eye me-2"></i>Order Details
                                                 </a>
                                             </li>
-                                            <% if (!['Delivered', 'Cancelled' , 'Returned' ].includes(order.status)) {
-                                                %>
-                                                <li>
-                                                    <a class="dropdown-item text-danger" href="#"
-                                                        onclick="cancelOrder('<%= order._id %>'); return false;">
-                                                        <i class="fas fa-times me-2"></i>Cancel Order
-                                                    </a>
-                                                </li>
-                                                <% } %>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <a class="dropdown-item text-danger" href="#"
-                                                            onclick="deleteOrder('<%= order._id %>'); return false;">
-                                                            <i class="fas fa-trash-alt me-2"></i>Delete Record
-                                                        </a>
-                                                    </li>
                                         </ul>
                                     </div>
                                 </td>
