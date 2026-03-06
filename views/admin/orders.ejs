@@ -230,8 +230,40 @@
     </style>
 
     <div class="content-wrapper">
-        <div class="content-header">
+        <div class="content-header d-flex justify-content-between align-items-center">
             <h2 class="content-title">Order Management</h2>
+            <div class="d-flex gap-3 align-items-center">
+                <form action="/admin/orders" method="get" class="d-flex gap-2" id="orderFilterForm">
+                    <div class="position-relative">
+                        <input type="text" name="search" class="form-control form-control-sm ps-4"
+                            placeholder="Order ID or User..." value="<%= typeof search !== 'undefined' ? search : '' %>"
+                            style="width: 250px; border-radius: 8px;">
+                        <i class="fas fa-search position-absolute text-muted"
+                            style="left: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8rem;"></i>
+                    </div>
+                    <select name="status" class="form-select form-select-sm" style="width: 150px; border-radius: 8px;"
+                        onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="Pending" <%=typeof selectedStatus !=='undefined' && selectedStatus==='Pending'
+                            ? 'selected' : '' %>>Pending</option>
+                        <option value="Processing" <%=typeof selectedStatus !=='undefined' &&
+                            selectedStatus==='Processing' ? 'selected' : '' %>>Processing</option>
+                        <option value="Shipped" <%=typeof selectedStatus !=='undefined' && selectedStatus==='Shipped'
+                            ? 'selected' : '' %>>Shipped</option>
+                        <option value="Delivered" <%=typeof selectedStatus !=='undefined' &&
+                            selectedStatus==='Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%=typeof selectedStatus !=='undefined' &&
+                            selectedStatus==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Return Request" <%=typeof selectedStatus !=='undefined' &&
+                            selectedStatus==='Return Request' ? 'selected' : '' %>>Return Request</option>
+                        <option value="Returned" <%=typeof selectedStatus !=='undefined' && selectedStatus==='Returned'
+                            ? 'selected' : '' %>>Returned</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-dark" style="border-radius: 8px;">Filter</button>
+                    <a href="/admin/orders" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;"
+                        title="Reset"><i class="fas fa-undo"></i></a>
+                </form>
+            </div>
         </div>
 
         <!-- Order Summary Section -->
@@ -355,21 +387,19 @@
                     <ul class="pagination">
                         <% if (currentPage> 1) { %>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<%= currentPage - 1 %>"><i
+                                <a class="page-link"
+                                    href="?page=<%= currentPage - 1 %>&status=<%= selectedStatus %>&search=<%= search %>"><i
                                         class="fas fa-chevron-left"></i></a>
                             </li>
                             <% } %>
 
                                 <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages,
-                                    currentPage + 2); if (currentPage <=3) { endPage=Math.min(totalPages, 5); } if
-                                    (currentPage> totalPages - 3) {
-                                    startPage = Math.max(1, totalPages - 4);
-                                    }
-                                    %>
+                                    currentPage + 2); %>
 
                                     <% if (startPage> 1) { %>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=1">1</a>
+                                            <a class="page-link"
+                                                href="?page=1&status=<%= selectedStatus %>&search=<%= search %>">1</a>
                                         </li>
                                         <% if (startPage> 2) { %>
                                             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -378,7 +408,8 @@
 
                                                     <% for (let i=startPage; i <=endPage; i++) { %>
                                                         <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                                            <a class="page-link" href="?page=<%= i %>">
+                                                            <a class="page-link"
+                                                                href="?page=<%= i %>&status=<%= selectedStatus %>&search=<%= search %>">
                                                                 <%= i %>
                                                             </a>
                                                         </li>
@@ -391,7 +422,7 @@
                                                                     <% } %>
                                                                         <li class="page-item">
                                                                             <a class="page-link"
-                                                                                href="?page=<%= totalPages %>">
+                                                                                href="?page=<%= totalPages %>&status=<%= selectedStatus %>&search=<%= search %>">
                                                                                 <%= totalPages %>
                                                                             </a>
                                                                         </li>
@@ -400,7 +431,7 @@
                                                                             <% if (currentPage < totalPages) { %>
                                                                                 <li class="page-item">
                                                                                     <a class="page-link"
-                                                                                        href="?page=<%= currentPage + 1 %>"><i
+                                                                                        href="?page=<%= currentPage + 1 %>&status=<%= selectedStatus %>&search=<%= search %>"><i
                                                                                             class="fas fa-chevron-right"></i></a>
                                                                                 </li>
                                                                                 <% } %>

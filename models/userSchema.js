@@ -87,17 +87,17 @@ const userSchema = new Schema({
   },
   referalCode: {
     type: String,
-    // required: true,
+    unique: true,
+    sparse: true,
   },
   redeemed: {
     type: Boolean,
-    // default: false,
+    default: false,
   },
   redeemedUsers: [
     {
       type: Schema.Types.ObjectId,
       ref: "User",
-      // required: true,
     },
   ],
   searchHistory: [

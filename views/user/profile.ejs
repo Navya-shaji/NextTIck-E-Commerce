@@ -88,6 +88,15 @@
                     </div>
                   </div>
                   <div class="info-item">
+                    <div class="info-label">My Referral Code</div>
+                    <div class="info-value">
+                      <span class="fw-bold text-gold" id="referralCodeText">
+                        <%= user.referalCode || 'Not Generated' %>
+                      </span>
+                      <button class="edit-trigger" onclick="copyReferralCode()"><i class="fas fa-copy"></i></button>
+                    </div>
+                  </div>
+                  <div class="info-item">
                     <div class="info-label">Email Address</div>
                     <div class="info-value">
                       <span>
@@ -486,6 +495,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       let hasChanges = false;
+
+      function copyReferralCode() {
+        const code = document.getElementById('referralCodeText').innerText;
+        navigator.clipboard.writeText(code).then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Copied!',
+            text: 'Referral code copied to clipboard.',
+            timer: 1000,
+            showConfirmButton: false
+          });
+        });
+      }
 
       function toggleEdit(inputId, forceDisable = false) {
         const input = document.getElementById(inputId);

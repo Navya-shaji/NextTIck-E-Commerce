@@ -131,6 +131,7 @@
                         <th>Customer</th>
                         <th>Email</th>
                         <th>Contact</th>
+                        <th>Referral Code</th>
                         <th class="text-center">Status</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -147,6 +148,9 @@
                                 </td>
                                 <td>
                                     <%= customer.phone || "Not specified" %>
+                                </td>
+                                <td>
+                                    <code class="text-dark fw-bold"><%= customer.referalCode || 'N/A' %></code>
                                 </td>
                                 <td class="text-center">
                                     <% if (customer.isBlocked) { %>

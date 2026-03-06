@@ -33,7 +33,12 @@ router.get(ROUTES.SEARCH, shopController.searchProducts);
 router.get(ROUTES.FILTER, shopController.loadshoppingPage);
 router.get(ROUTES.SORT, shopController.loadshoppingPage);
 // Google Auth Routes
-router.get(ROUTES.AUTH_GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(ROUTES.AUTH_GOOGLE, (req, res, next) => {
+    if (req.query.ref) {
+        req.session.referralCode = req.query.ref;
+    }
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 router.get(ROUTES.AUTH_GOOGLE_CALLBACK, passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     req.session.save((err) => {
         if (err) console.error("Google Auth Session Save Error:", err);

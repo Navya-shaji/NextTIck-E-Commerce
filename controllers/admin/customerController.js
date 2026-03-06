@@ -15,7 +15,8 @@ const customerInfo = async (req, res) => {
             isAdmin: false,
             $or: [
                 { name: { $regex: ".*" + search + ".*", $options: "i" } },
-                { email: { $regex: ".*" + search + ".*", $options: "i" } }
+                { email: { $regex: ".*" + search + ".*", $options: "i" } },
+                { referalCode: { $regex: ".*" + search + ".*", $options: "i" } }
             ]
         };
 

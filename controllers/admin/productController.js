@@ -112,45 +112,53 @@ const getAllProducts = async (req, res) => {
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
         const limit = 4;
+        const categoryFilter = req.query.category || "";
+        const brandFilter = req.query.brand || "";
+        const statusFilter = req.query.status || "";
 
         const searchQuery = {
             productName: { $regex: new RegExp(search, "i") }
         };
+
+        if (categoryFilter) {
+            searchQuery.category = categoryFilter;
+        }
+
+        if (brandFilter) {
+            searchQuery.brand = brandFilter;
+        }
+
+        if (statusFilter) {
+            if (statusFilter === "blocked") {
+                searchQuery.isBlocked = true;
+            } else if (statusFilter === "unblocked") {
+                searchQuery.isBlocked = false;
+            }
+        }
 
         const productData = await Product.find(searchQuery)
             .limit(limit)
             .skip((page - 1) * limit)
             .populate('category')
             .populate('brand', 'brandName')
+            .sort({ createdOn: -1 }) // Sort by newest first
             .exec();
 
         const count = await Product.countDocuments(searchQuery);
 
-        const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isBlocked: false });
-
-        // Calculate brand distribution
-        const allProducts = await Product.find().populate('brand', 'brandName');
-        const brandCounts = {};
-        allProducts.forEach(product => {
-            if (product.brand && product.brand.brandName) {
-                const brandName = product.brand.brandName;
-                brandCounts[brandName] = (brandCounts[brandName] || 0) + 1;
-            }
-        });
-
-        const brandDistribution = {
-            labels: Object.keys(brandCounts),
-            data: Object.values(brandCounts)
-        };
+        const categories = await Category.find({ isListed: true });
+        const brands = await Brand.find({ isBlocked: false });
 
         res.render("products", {
             data: productData,
             currentPage: page,
             totalPages: Math.ceil(count / limit),
-            cat: category,
-            brand: brand,
-            brandDistribution: brandDistribution
+            cat: categories,
+            brands: brands,
+            search: search,
+            selectedCategory: categoryFilter,
+            selectedBrand: brandFilter,
+            selectedStatus: statusFilter
         });
     } catch (error) {
         console.error("Error in getAllProducts:", error);

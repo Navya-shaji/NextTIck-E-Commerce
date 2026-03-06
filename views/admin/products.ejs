@@ -226,17 +226,60 @@
     <div class="content-wrapper">
         <div class="content-header">
             <h2 class="content-title">Product Inventory</h2>
-            <div class="search-container">
-                <form action="/admin/products" method="get">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search by name or brand..." name="search"
-                        value="<%= typeof search !== 'undefined' ? search : '' %>">
-                    <% if (typeof search !=='undefined' && search) { %>
-                        <a href="/admin/products" class="clear-search" title="Clear Search">
-                            <i class="fas fa-times"></i>
-                        </a>
-                        <% } %>
-                </form>
+            <div class="d-flex gap-3 align-items-center">
+                <div class="search-container">
+                    <form action="/admin/products" method="get" id="filterForm">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search products..." name="search"
+                            value="<%= typeof search !== 'undefined' ? search : '' %>">
+
+                        <!-- Hidden inputs for existing filters to preserve them on search -->
+                        <input type="hidden" name="category"
+                            value="<%= typeof selectedCategory !== 'undefined' ? selectedCategory : '' %>">
+                        <input type="hidden" name="brand"
+                            value="<%= typeof selectedBrand !== 'undefined' ? selectedBrand : '' %>">
+                        <input type="hidden" name="status"
+                            value="<%= typeof selectedStatus !== 'undefined' ? selectedStatus : '' %>">
+
+                        <% if (typeof search !=='undefined' && search) { %>
+                            <a href="/admin/products" class="clear-search" title="Clear Search">
+                                <i class="fas fa-times"></i>
+                            </a>
+                            <% } %>
+                    </form>
+                </div>
+
+                <div class="filters-container d-flex gap-2">
+                    <select class="form-select form-select-sm" name="category" onchange="applyFilters()">
+                        <option value="">All Categories</option>
+                        <% cat.forEach(c=> { %>
+                            <option value="<%= c._id %>" <%=typeof selectedCategory !=='undefined' &&
+                                selectedCategory==c._id.toString() ? 'selected' : '' %>><%= c.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+
+                    <select class="form-select form-select-sm" name="brand" onchange="applyFilters()">
+                        <option value="">All Brands</option>
+                        <% brands.forEach(b=> { %>
+                            <option value="<%= b._id %>" <%=typeof selectedBrand !=='undefined' &&
+                                selectedBrand==b._id.toString() ? 'selected' : '' %>><%= b.brandName %>
+                            </option>
+                            <% }) %>
+                    </select>
+
+                    <select class="form-select form-select-sm" name="status" onchange="applyFilters()">
+                        <option value="">All Status</option>
+                        <option value="unblocked" <%=typeof selectedStatus !=='undefined' &&
+                            selectedStatus==='unblocked' ? 'selected' : '' %>>Active</option>
+                        <option value="blocked" <%=typeof selectedStatus !=='undefined' && selectedStatus==='blocked'
+                            ? 'selected' : '' %>>Blocked</option>
+                    </select>
+
+                    <a href="/admin/products" class="btn btn-sm btn-outline-secondary" title="Reset All Filters">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -331,12 +374,15 @@
                 <ul class="pagination">
                     <% if (currentPage> 1) { %>
                         <li class="page-item">
-                            <a class="page-link" href="?page=1&search=<%= search %>" title="First Page">
+                            <a class="page-link"
+                                href="?page=1&search=<%= search %>&category=<%= selectedCategory %>&brand=<%= selectedBrand %>&status=<%= selectedStatus %>"
+                                title="First Page">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                            <a class="page-link"
+                                href="?page=<%= currentPage - 1 %>&search=<%= search %>&category=<%= selectedCategory %>&brand=<%= selectedBrand %>&status=<%= selectedStatus %>"
                                 title="Previous">
                                 <i class="fas fa-angle-left"></i>
                             </a>
@@ -350,7 +396,8 @@
 
                                     <% for (let i=startPage; i <=endPage; i++) { %>
                                         <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                            <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
+                                            <a class="page-link"
+                                                href="?page=<%= i %>&search=<%= search %>&category=<%= selectedCategory %>&brand=<%= selectedBrand %>&status=<%= selectedStatus %>">
                                                 <%= i %>
                                             </a>
                                         </li>
@@ -363,14 +410,14 @@
                                                     <% if (currentPage < totalPages) { %>
                                                         <li class="page-item">
                                                             <a class="page-link"
-                                                                href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                                                                href="?page=<%= currentPage + 1 %>&search=<%= search %>&category=<%= selectedCategory %>&brand=<%= selectedBrand %>&status=<%= selectedStatus %>"
                                                                 title="Next">
                                                                 <i class="fas fa-angle-right"></i>
                                                             </a>
                                                         </li>
                                                         <li class="page-item">
                                                             <a class="page-link"
-                                                                href="?page=<%= totalPages %>&search=<%= search %>"
+                                                                href="?page=<%= totalPages %>&search=<%= search %>&category=<%= selectedCategory %>&brand=<%= selectedBrand %>&status=<%= selectedStatus %>"
                                                                 title="Last Page">
                                                                 <i class="fas fa-angle-double-right"></i>
                                                             </a>
@@ -383,19 +430,32 @@
 
     <script>
         (function () {
+            window.applyFilters = function () {
+                const form = document.getElementById('filterForm');
+                const search = form.querySelector('input[name="search"]').value;
+                const category = document.querySelector('select[name="category"]').value;
+                const brand = document.querySelector('select[name="brand"]').value;
+                const status = document.querySelector('select[name="status"]').value;
+
+                let url = `/admin/products?search=${encodeURIComponent(search)}`;
+                if (category) url += `&category=${category}`;
+                if (brand) url += `&brand=${brand}`;
+                if (status) url += `&status=${status}`;
+
+                if (window.loadContent) {
+                    window.loadContent(url);
+                } else {
+                    window.location.href = url;
+                }
+            };
+
             window.initProducts = function () {
                 // Initialize search form
                 const searchForm = document.querySelector('.search-container form');
                 if (searchForm) {
                     searchForm.onsubmit = function (e) {
                         e.preventDefault();
-                        const search = this.querySelector('input[name="search"]').value;
-                        const url = `/admin/products?search=${encodeURIComponent(search)}`;
-                        if (window.loadContent) {
-                            window.loadContent(url);
-                        } else {
-                            window.location.href = url;
-                        }
+                        window.applyFilters();
                     };
                 }
 

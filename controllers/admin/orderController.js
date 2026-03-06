@@ -13,47 +13,63 @@ const listOrders = async (req, res) => {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = 6;
         const skip = (page - 1) * limit;
+        const statusFilter = req.query.status || "";
+        const search = req.query.search || "";
+
+        const query = {};
+        if (statusFilter) {
+            query.status = statusFilter;
+        }
+
+        if (search) {
+            // Check if search is a valid ObjectId for orderId search, 
+            // otherwise search in populate fields (need a different approach for populated fields)
+            // For simplicity, let's search by orderId (string part) or name/email via aggregation or separate lookup
+            query.$or = [
+                { orderId: { $regex: search, $options: 'i' } }
+            ];
+
+            // If it looks like an email or name, we might need to find users first
+            const matchingUsers = await User.find({
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ]
+            }).select('_id');
+
+            if (matchingUsers.length > 0) {
+                query.$or.push({ userId: { $in: matchingUsers.map(u => u._id) } });
+            }
+        }
 
         // Get total orders count
-        const totalOrders = await Order.countDocuments();
-        const totalPages = Math.ceil(totalOrders / limit);
+        const totalOrdersCount = await Order.countDocuments(query);
+        const totalPages = Math.ceil(totalOrdersCount / limit);
 
-        // Calculate order statistics
+        // Calculate global order statistics (don't filter these by query)
         const [
             activeRevenueResult,
             totalRevenueResult,
             pendingOrdersCount,
-            completedOrdersCount
+            completedOrdersCount,
+            allOrdersCount
         ] = await Promise.all([
             Order.aggregate([
-                {
-                    $match: {
-                        status: { $nin: ['Cancelled', 'Returned'] }
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$finalAmount' }
-                    }
-                }
+                { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
             ]),
             Order.aggregate([
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$finalAmount' }
-                    }
-                }
+                { $group: { _id: null, total: { $sum: '$finalAmount' } } }
             ]),
             Order.countDocuments({ status: 'Pending' }),
-            Order.countDocuments({ status: 'Delivered' })
+            Order.countDocuments({ status: 'Delivered' }),
+            Order.countDocuments()
         ]);
 
         const activeRevenue = activeRevenueResult[0]?.total || 0;
         const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-        const orders = await Order.find({})
+        const orders = await Order.find(query)
             .populate('userId', 'name email')
             .populate('orderItems.product')
             .populate('address')
@@ -64,33 +80,21 @@ const listOrders = async (req, res) => {
 
         const processedOrders = orders.map(order => ({
             ...order,
-            userName: order.userId ? order.userId.name : 'Unknown User',
-            couponDetails: order.couponApplied ? `Coupon: ${order.couponCode} applied.` : 'No coupon applied.',
-            offerDetails: order.offerApplied ? order.offerDetails : 'No offer applied.'
+            userName: order.userId ? order.userId.name : (order.address?.name || 'Unknown User'),
+            userEmail: order.userId ? order.userId.email : 'N/A'
         }));
-
-        if (req.headers.accept === 'application/json') {
-            return res.json({
-                orders: processedOrders,
-                currentPage: page,
-                totalPages,
-                totalOrders,
-                activeRevenue,
-                totalRevenue,
-                pendingOrders: pendingOrdersCount,
-                completedOrders: completedOrdersCount
-            });
-        }
 
         res.render('orders', {
             orders: processedOrders,
             currentPage: page,
             totalPages,
-            totalOrders,
+            totalOrders: allOrdersCount,
             activeRevenue,
             totalRevenue,
             pendingOrders: pendingOrdersCount,
             completedOrders: completedOrdersCount,
+            selectedStatus: statusFilter,
+            search: search,
             title: 'Order Management'
         });
 

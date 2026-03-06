@@ -34,7 +34,7 @@ const loadSignup = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
-        const { name, phone, email, password, cpassword } = req.body
+        const { name, phone, email, password, cpassword, referralCode } = req.body
         if (password !== cpassword) {
             res.session.errorMessage = "Password do not matched "
             res.redirect("/signup")
@@ -54,7 +54,7 @@ const signup = async (req, res) => {
         }
 
         req.session.userOtp = otp;
-        req.session.userData = { name, phone, email, password }
+        req.session.userData = { name, phone, email, password, referralCode }
 
 
         res.render("verify-otp");
@@ -181,14 +181,21 @@ const verifyOtp = async (req, res) => {
                 return res.json({ success: true, redirectUrl: "/" });
             }
 
+            const { generateReferralCode, processReferral } = require("../../helpers/referralHelper");
             const passwordHash = await securePassword(user.password);
             const saveUserData = new User({
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
                 password: passwordHash,
+                referalCode: generateReferralCode()
             });
             await saveUserData.save();
+
+            // Process referral if exists
+            if (user.referralCode) {
+                await processReferral(user.referralCode, saveUserData._id);
+            }
 
             // Migrate guest data if exists
             if (req.session.guestUserId) {
