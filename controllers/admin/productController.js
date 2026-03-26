@@ -141,7 +141,7 @@ const getAllProducts = async (req, res) => {
             .skip((page - 1) * limit)
             .populate('category')
             .populate('brand', 'brandName')
-            .sort({ createdOn: -1 }) // Sort by newest first
+            .sort({ createdOn: -1 })
             .exec();
 
         const count = await Product.countDocuments(searchQuery);
