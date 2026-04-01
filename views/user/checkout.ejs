@@ -263,6 +263,17 @@
                                 <a href="/signup" class="btn btn-outline-warning btn-sm">Sign Up Now</a>
                             </div>
                         </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4 class="mb-0">Contact Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="guestEmail" class="form-label">Email Address (for order updates)</label>
+                                    <input type="email" class="form-control" id="guestEmail" placeholder="Enter your email" required>
+                                </div>
+                            </div>
+                        </div>
                         <% } %>
                             <div class="card mb-4">
                                 <div class="card-header">
@@ -703,6 +714,19 @@
                 discount = document.getElementById("discountAmount").textContent;
             }
             function placeOrder() {
+                const isGuest = <%= locals.isGuest ? 'true' : 'false' %>;
+                if (isGuest) {
+                    const guestEmailInput = document.getElementById('guestEmail');
+                    if (!guestEmailInput || !guestEmailInput.value) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Please enter your email address'
+                        });
+                        return;
+                    }
+                }
+
                 if (!selectedAddressId) {
                     Swal.fire({
                         icon: 'error',
@@ -773,6 +797,9 @@
                 const shippingCost = parseFloat(document.getElementById("shippingCost").textContent.replace(/[₹,]/g, "").trim()) || 0;
                 const totalAmount = subtotal - discount + shippingCost;
 
+                const guestEmailEl = document.getElementById('guestEmail');
+                const guestEmail = guestEmailEl ? guestEmailEl.value : '';
+
                 fetch('/checkout', {
                     method: 'POST',
                     headers: {
@@ -783,7 +810,8 @@
                         products: `<%- JSON.stringify(product) %>`,
                         subtotal: subtotal,
                         total: totalAmount,
-                        paymentMethod: 'Wallet'
+                        paymentMethod: 'Wallet',
+                        guestEmail: guestEmail
                     })
                 })
                     .then(response => response.json())
@@ -821,6 +849,9 @@
                 const discount = parseFloat(discountString) || 0;
                 const shippingCost = parseFloat(document.getElementById("shippingCost").textContent.replace(/[₹,]/g, "").trim()) || 0;
 
+                const guestEmailEl = document.getElementById('guestEmail');
+                const guestEmail = guestEmailEl ? guestEmailEl.value : '';
+
                 fetch('/checkout', {
                     method: 'POST',
                     headers: {
@@ -831,7 +862,8 @@
                         products: `<%- JSON.stringify(product) %>`,
                         subtotal: subtotal,
                         total: subtotal - discount + shippingCost,
-                        paymentMethod: 'COD'
+                        paymentMethod: 'COD',
+                        guestEmail: guestEmail
                     })
                 })
                     .then(response => response.json())
@@ -867,6 +899,9 @@
                 const discountString = document.getElementById("discountAmount").textContent.replace(/[₹,]/g, "").trim();
                 const discount = parseFloat(discountString) || 0;
                 const shippingCost = parseFloat(document.getElementById("shippingCost").textContent.replace(/[₹,]/g, "").trim()) || 0;
+                const guestEmailEl = document.getElementById('guestEmail');
+                const guestEmail = guestEmailEl ? guestEmailEl.value : '';
+
                 fetch('/checkout', {
                     method: 'POST',
                     headers: {
@@ -877,7 +912,8 @@
                         products: `<%- JSON.stringify(product) %>`,
                         subtotal: subtotal,
                         total: subtotal - discount + shippingCost,
-                        paymentMethod: 'online'
+                        paymentMethod: 'online',
+                        guestEmail: guestEmail
                     })
                 })
                     .then(response => response.json())

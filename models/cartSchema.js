@@ -5,7 +5,11 @@ const cartSchema =new mongoose.Schema({
     userId:{
         type:Schema.Types.ObjectId,
         ref:"User",
-        required:true
+        required:false
+    },
+    sessionId:{
+        type:String,
+        required:false
     },
     items:[{
         productId:{

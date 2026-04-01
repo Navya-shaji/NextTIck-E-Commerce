@@ -57,7 +57,15 @@ const orderSchema = new Schema({
     address: {
         type: Schema.Types.ObjectId,
         ref: "Address",
-        required: true
+        required: false
+    },
+    guestEmail: {
+        type: String,
+        required: false
+    },
+    guestPhone: {
+        type: String,
+        required: false
     },
     shippingAddress: {
         type: String,

@@ -168,7 +168,7 @@ const postCheckout = async (req, res) => {
             return res.status(401).json({ success: false, message: "Session expired. Please refresh the page." });
         }
 
-        const { address, products, subtotal, total, paymentMethod } = req.body;
+        const { address, products, subtotal, total, paymentMethod, guestEmail } = req.body;
         if (!address || !products || !subtotal || !total || !paymentMethod) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
@@ -264,6 +264,8 @@ const postCheckout = async (req, res) => {
             paymentMethod: paymentMethod,
             paymentStatus: paymentMethod === 'Wallet' ? "Completed" : "Pending",
             paymentId: orderId,
+            guestEmail: guestEmail || null,
+            guestPhone: selectedAddress ? selectedAddress.phone : null,
         });
 
         const savedOrder = await newOrder.save();
@@ -309,8 +311,8 @@ const postCheckout = async (req, res) => {
                 description: "Purchase Description",
                 prefill: {
                     name: req.session.user?.name || (req.user?.name || "Guest"),
-                    email: req.session.user?.email || (req.user?.email || ""),
-                    contact: req.session.user?.phone || (req.user?.phone || "")
+                    email: guestEmail || req.session.user?.email || (req.user?.email || ""),
+                    contact: (selectedAddress ? selectedAddress.phone : null) || req.session.user?.phone || (req.user?.phone || "")
                 },
                 orderId: savedOrder._id
             });
