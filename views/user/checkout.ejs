@@ -313,8 +313,8 @@
                                                         <div class="d-flex justify-content-between">
                                                             <a href="/edit-address/<%=addr.id %>"
                                                                 class="btn btn-sm btn-primary">Edit</a>
-                                                            <a href="/delete-address/<%=addr.id %>"
-                                                                class="btn btn-sm btn-danger">Delete</a>
+                                                            <button onclick="deleteAddress('<%= addr._id %>')"
+                                                                class="btn btn-sm btn-danger">Delete</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -699,8 +699,8 @@
                     confirmButtonText: 'Yes, delete it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch(`/address/${addressId}`, {
-                            method: 'DELETE'
+                        fetch(`/delete-address/${addressId}`, {
+                            method: 'POST'
                         })
                             .then(response => response.json())
                             .then(data => {
