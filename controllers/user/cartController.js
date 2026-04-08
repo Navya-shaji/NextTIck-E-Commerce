@@ -30,10 +30,10 @@ const getCart = async (req, res) => {
         isOutOfStock: item.productId.quantity < 1,
         availableStock: item.productId.quantity,
         maxAllowedQuantity: Math.min(5, item.productId.quantity),
-        // Ensure price is using salesPrice from product
-        price: item.price,
+        // Ensure price is a number
+        price: Number(item.price) || 0,
         originalPrice: item.productId.regularPrice,
-        totalPrice: item.quantity * item.price
+        totalPrice: item.quantity * (Number(item.price) || 0)
       }));
 
     const totalAmount = validItems.reduce(
