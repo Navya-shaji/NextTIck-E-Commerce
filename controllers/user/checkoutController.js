@@ -318,8 +318,19 @@ const postCheckout = async (req, res) => {
             });
         }
 
-        // For COD
-        await Cart.findOneAndUpdate({ userId: userId }, { $set: { items: [] } });
+        // Record coupon usage if applied
+        if (discountAmount > 0) {
+            const couponCode = req.body.couponCode; // Ensure you have this in post body if applied
+            if (couponCode) {
+                await User.findByIdAndUpdate(userId, {
+                    $push: { coupons: { couponName: couponCode, usedAt: new Date() } }
+                });
+                
+                // Increment used count in Coupon model
+                await Coupon.findOneAndUpdate({ name: couponCode }, { $inc: { usedCount: 1 } });
+            }
+        }
+
         return res.status(200).json({
             success: true,
             message: "Order placed successfully",
@@ -494,52 +505,75 @@ const orderConfirm = async (req, res) => {
 //applying couponCode........................................................
 const applyCoupon = async (req, res) => {
     try {
-        const { couponCode, totalAmount } = req.body;
+        const { couponCode, totalAmount, cartItems } = req.body; // Expecting cartItems for category validation
         const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
 
         if (!userId) {
-            return res.redirect("/login");
+            return res.status(401).json({ success: false, message: "User not logged in" });
         }
         if (!couponCode || !totalAmount) {
-            return res.status(400).json({ success: false, message: "Value not found" });
+            return res.status(400).json({ success: false, message: "Invalid request parameters" });
         }
 
-        const findCoupon = await Coupon.findOne({ name: couponCode, isList: true });
+        const findCoupon = await Coupon.findOne({ name: couponCode, isList: true }).populate('applyToCategories');
         if (!findCoupon) {
             return res.status(400).json({ success: false, message: "Invalid coupon code" });
         }
 
         const today = new Date();
+        const start = new Date(findCoupon.createdOn);
+        if (today < start) {
+            return res.status(400).json({ success: false, message: "Coupon is not yet active" });
+        }
         if (findCoupon.expireOn < today) {
             return res.status(400).json({ success: false, message: "Coupon expired" });
         }
 
-        const parsedTotalAmount = parseFloat(totalAmount);
-        if (parsedTotalAmount < findCoupon.minimumPrice) {
-            return res.status(400).json({ success: false, message: `Minimum purchase amount of ₹${findCoupon.minimumPrice} required` });
+        // Global Usage Limit Check
+        if (findCoupon.globalUsageLimit && findCoupon.usedCount >= findCoupon.globalUsageLimit) {
+            return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
         }
 
-        let findUser = await User.findOne({ _id: userId });
+        const parsedTotalAmount = parseFloat(totalAmount);
+        if (parsedTotalAmount < findCoupon.minimumPrice) {
+            return res.status(400).json({ success: false, message: `Minimum purchase of ₹${findCoupon.minimumPrice.toFixed(2)} required` });
+        }
 
+        let findUser = await User.findById(userId);
         if (!findUser) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        if (!findUser.coupons) {
-            findUser.coupons = [];
+        // Per-User Usage Limit Check
+        const userUsageCount = (findUser.coupons || []).filter(c => c.couponName === couponCode).length;
+        const userLimit = findCoupon.usagePerUser || 1;
+        if (userUsageCount >= userLimit) {
+            return res.status(400).json({ success: false, message: `You have already used this coupon maximum (${userLimit}) times` });
         }
 
-        const isCouponUsed = findUser.coupons.some(
-            (coupon) => coupon.couponName === couponCode
-        );
-        if (isCouponUsed) {
-            return res.status(400).json({ success: false, message: "Coupon already used" });
+        // Category applicability check
+        if (findCoupon.applyToCategories && findCoupon.applyToCategories.length > 0) {
+            // If the coupon is restricted to categories, at least one item in cart must belong to those categories
+            // OR if the business logic is "discount ONLY applies to these categories", calculation changes.
+            // For now, let's assume if restricted, at least one qualifying item must be present.
+            if (!cartItems || !Array.isArray(cartItems)) {
+                return res.status(400).json({ success: false, message: "Cart data required for category validation" });
+            }
+            
+            const qualifyingProductIds = cartItems.map(item => item.productId?._id || item._id);
+            const qualifyingProducts = await Product.find({ _id: { $in: qualifyingProductIds } }).select('category');
+            
+            const categoryIds = findCoupon.applyToCategories.map(c => c._id.toString());
+            const hasQualifyingItem = qualifyingProducts.some(p => categoryIds.includes(p.category.toString()));
+            
+            if (!hasQualifyingItem) {
+                return res.status(400).json({ success: false, message: "Coupon not applicable for items in your cart" });
+            }
         }
 
         let discountAmount = 0;
         if (findCoupon.couponType === 'percentage') {
             discountAmount = (findCoupon.offerPrice / 100) * parsedTotalAmount;
-            // Apply maximum discount cap if it exists
             if (findCoupon.maximumDiscount && discountAmount > findCoupon.maximumDiscount) {
                 discountAmount = findCoupon.maximumDiscount;
             }
@@ -547,12 +581,7 @@ const applyCoupon = async (req, res) => {
             discountAmount = findCoupon.offerPrice;
         }
 
-        const finalPrice = parsedTotalAmount - discountAmount;
-
-        // We only push to used coupons once the user actually PLACES the order, 
-        // but here we are just "verifying" it for the frontend. 
-        // Actually, some systems mark it as "applied" in session. 
-        // Looking at the existing code, it saves it to DB immediately. I will stick to that for now but refine the calculation.
+        const finalPrice = Math.max(0, parsedTotalAmount - discountAmount);
 
         return res.status(200).json({
             success: true,

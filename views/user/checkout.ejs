@@ -681,12 +681,13 @@
                 const totalAmountElement = document.getElementById("totalAmount");
                 const totalAmount = totalAmountElement.textContent.replace(/[₹\s]/g, "");
                 const discounttElement = document.getElementById("discountAmount");
+                const cartItems = <%- JSON.stringify(product) %>;
                 fetch('/apply-coupon', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ couponCode, totalAmount })
+                    body: JSON.stringify({ couponCode, totalAmount, cartItems })
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -811,7 +812,8 @@
                         subtotal: subtotal,
                         total: totalAmount,
                         paymentMethod: 'Wallet',
-                        guestEmail: guestEmail
+                        guestEmail: guestEmail,
+                        couponCode: document.getElementById('couponCode').value
                     })
                 })
                     .then(response => response.json())
@@ -863,7 +865,8 @@
                         subtotal: subtotal,
                         total: subtotal - discount + shippingCost,
                         paymentMethod: 'COD',
-                        guestEmail: guestEmail
+                        guestEmail: guestEmail,
+                        couponCode: document.getElementById('couponCode').value
                     })
                 })
                     .then(response => response.json())
@@ -913,7 +916,8 @@
                         subtotal: subtotal,
                         total: subtotal - discount + shippingCost,
                         paymentMethod: 'online',
-                        guestEmail: guestEmail
+                        guestEmail: guestEmail,
+                        couponCode: document.getElementById('couponCode').value
                     })
                 })
                     .then(response => response.json())

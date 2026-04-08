@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Coupon = require("../../models/couponSchema");
+const Category = require("../../models/categorySchema");
 
 const loadcoupon = async (req, res) => {
     try {
@@ -10,13 +11,17 @@ const loadcoupon = async (req, res) => {
         const totalCoupons = await Coupon.countDocuments();
         const totalPages = Math.ceil(totalCoupons / limit);
 
+        const categories = await Category.find({ isListed: true }).sort({ name: 1 });
+        
         const coupons = await Coupon.find()
+            .populate('applyToCategories', 'name')
             .sort({ createdOn: -1 })
             .skip(skip)
             .limit(limit);
 
         res.render('coupon', {
             coupons,
+            categories,
             currentPage: page,
             totalPages,
             limit
@@ -46,10 +51,10 @@ const getCoupon = async (req, res) => {
 
 const createCoupon = async (req, res) => {
     try {
-        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType } = req.body;
+        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType, globalUsageLimit, usagePerUser, applyToCategories } = req.body;
 
         if (!couponName || !startDate || !endDate || !offerPrice || !minimumPrice) {
-            return res.status(400).json({ status: false, message: "All fields are required." });
+            return res.status(400).json({ status: false, message: "All basic fields are required." });
         }
 
         const start = new Date(startDate);
@@ -72,16 +77,22 @@ const createCoupon = async (req, res) => {
         const parsedOfferPrice = parseFloat(offerPrice);
         const parsedMinPrice = parseFloat(minimumPrice);
         const parsedMaxDiscount = maximumDiscount ? parseFloat(maximumDiscount) : null;
+        const parsedGlobalLimit = globalUsageLimit ? parseInt(globalUsageLimit) : null;
+        const parsedUserLimit = usagePerUser ? parseInt(usagePerUser) : 1;
 
-        if (parsedOfferPrice <= 0 || parsedMinPrice < 0) {
-            return res.status(400).json({ status: false, message: "Prices must be positive numbers." });
+        // Validation Rules:
+        if (parsedMinPrice < 100) {
+            return res.status(400).json({ status: false, message: "Minimum purchase must be at least ₹100." });
         }
 
         if (couponType === 'percentage') {
-            if (parsedOfferPrice <= 0 || parsedOfferPrice > 100) {
-                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 100." });
+            if (parsedOfferPrice < 1 || parsedOfferPrice > 90) {
+                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 90%." });
             }
         } else {
+            if (parsedOfferPrice < 1 || parsedOfferPrice > 100000) {
+                return res.status(400).json({ status: false, message: "Flat discount must be between ₹1 and ₹1,00,000." });
+            }
             if (parsedOfferPrice >= parsedMinPrice) {
                 return res.status(400).json({ status: false, message: "Offer price must be less than minimum purchase amount." });
             }
@@ -99,7 +110,10 @@ const createCoupon = async (req, res) => {
             offerPrice: parsedOfferPrice,
             minimumPrice: parsedMinPrice,
             maximumDiscount: parsedMaxDiscount,
-            couponType: couponType || 'flat'
+            couponType: couponType || 'flat',
+            globalUsageLimit: parsedGlobalLimit,
+            usagePerUser: parsedUserLimit,
+            applyToCategories: Array.isArray(applyToCategories) ? applyToCategories : (applyToCategories ? [applyToCategories] : [])
         });
 
         await newCoupon.save();
@@ -138,9 +152,9 @@ const updateCoupon = async (req, res) => {
             return res.status(400).json({ status: false, message: "Invalid coupon ID." });
         }
 
-        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType } = req.body;
+        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType, globalUsageLimit, usagePerUser, applyToCategories } = req.body;
         if (!couponName || !startDate || !endDate || !offerPrice || !minimumPrice) {
-            return res.status(400).json({ status: false, message: "All fields are required." });
+            return res.status(400).json({ status: false, message: "Basic fields are required." });
         }
 
         const start = new Date(startDate);
@@ -157,16 +171,21 @@ const updateCoupon = async (req, res) => {
         const parsedOfferPrice = parseFloat(offerPrice);
         const parsedMinPrice = parseFloat(minimumPrice);
         const parsedMaxDiscount = maximumDiscount ? parseFloat(maximumDiscount) : null;
+        const parsedGlobalLimit = globalUsageLimit ? parseInt(globalUsageLimit) : null;
+        const parsedUserLimit = usagePerUser ? parseInt(usagePerUser) : 1;
 
-        if (parsedOfferPrice <= 0 || parsedMinPrice < 0) {
-            return res.status(400).json({ status: false, message: "Prices must be positive numbers." });
+        if (parsedMinPrice < 100) {
+            return res.status(400).json({ status: false, message: "Minimum purchase must be at least ₹100." });
         }
 
         if (couponType === 'percentage') {
-            if (parsedOfferPrice <= 0 || parsedOfferPrice > 100) {
-                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 100." });
+            if (parsedOfferPrice < 1 || parsedOfferPrice > 90) {
+                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 90%." });
             }
         } else {
+            if (parsedOfferPrice < 1 || parsedOfferPrice > 100000) {
+                return res.status(400).json({ status: false, message: "Flat discount must be between ₹1 and ₹1,00,000." });
+            }
             if (parsedOfferPrice >= parsedMinPrice) {
                 return res.status(400).json({ status: false, message: "Offer price must be less than minimum purchase amount." });
             }
@@ -187,7 +206,10 @@ const updateCoupon = async (req, res) => {
             offerPrice: parsedOfferPrice,
             minimumPrice: parsedMinPrice,
             maximumDiscount: parsedMaxDiscount,
-            couponType: couponType || 'flat'
+            couponType: couponType || 'flat',
+            globalUsageLimit: parsedGlobalLimit,
+            usagePerUser: parsedUserLimit,
+            applyToCategories: Array.isArray(applyToCategories) ? applyToCategories : (applyToCategories ? [applyToCategories] : [])
         };
 
         const updatedCoupon = await Coupon.findByIdAndUpdate(
