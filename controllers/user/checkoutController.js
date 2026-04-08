@@ -47,9 +47,11 @@ const getcheckoutPage = async (req, res) => {
         const address = await Address.findOne({ userId: user._id });
         const addressData = address || { address: [] };
 
+        const usedCouponNames = user.coupons ? user.coupons.map(c => c.couponName) : [];
         const availableCoupons = await Coupon.find({
             isList: true,
             expireOn: { $gt: new Date() },
+            name: { $nin: usedCouponNames }
         });
 
         if (!productId) {
@@ -165,6 +167,7 @@ const postCheckout = async (req, res) => {
         }
 
         const orderedItems = parsedProducts.map(p => ({ product: p._id, price: p.salesPrice, quantity: p.quantity }));
+        const couponCode = req.body.couponCode;
         const newOrder = new Order({
             userId,
             orderItems: orderedItems,
@@ -173,6 +176,8 @@ const postCheckout = async (req, res) => {
             totalPrice: parsedSubtotal,
             finalAmount: finalTotal,
             discount: Math.max(0, discountAmount),
+            couponApplied: discountAmount > 0,
+            couponCode: discountAmount > 0 ? couponCode : null,
             status: "Pending",
             paymentMethod,
             paymentStatus: paymentMethod === 'Wallet' ? "Completed" : "Pending",
@@ -193,13 +198,10 @@ const postCheckout = async (req, res) => {
             });
         }
 
-        if (discountAmount > 0) {
-            const couponCode = req.body.couponCode;
-            if (couponCode) {
-                await User.findByIdAndUpdate(userId, {
-                    $push: { coupons: { couponName: couponCode, usedAt: new Date() } }
-                });
-            }
+        if (discountAmount > 0 && couponCode && paymentMethod !== 'online') {
+            await User.findByIdAndUpdate(userId, {
+                $push: { coupons: { couponName: couponCode, usedAt: new Date() } }
+            });
         }
 
         await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
@@ -223,11 +225,17 @@ const verifyPayment = async (req, res) => {
 
         if (generated_signature !== razorpay_signature) return res.status(400).json({ success: false, message: "Invalid signature" });
 
-        await Order.findByIdAndUpdate(orderDetails.orderId, { paymentStatus: "Completed", status: "Pending" });
+        const order = await Order.findByIdAndUpdate(orderDetails.orderId, { paymentStatus: "Completed", status: "Pending" });
+        if (order && order.couponApplied && order.couponCode) {
+            await User.findByIdAndUpdate(userId, {
+                $push: { coupons: { couponName: order.couponCode, usedAt: new Date() } }
+            });
+        }
         await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
         return res.status(200).json({ success: true, message: "Payment verified", orderId: orderDetails.orderId });
     } catch (error) {
+        console.error("Error verifying payment:", error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
@@ -268,6 +276,11 @@ const applyCoupon = async (req, res) => {
         const userId = req.session.user?._id || req.session.user || req.session.guestUserId;
 
         if (!userId) return res.status(401).json({ success: false, message: "User not logged in" });
+
+        const user = await User.findById(userId);
+        if (user && user.coupons && user.coupons.some(c => c.couponName === couponCode)) {
+            return res.status(400).json({ success: false, message: "You have already used this coupon" });
+        }
 
         const findCoupon = await Coupon.findOne({ name: couponCode, isList: true });
         if (!findCoupon) return res.status(400).json({ success: false, message: "Invalid coupon" });
