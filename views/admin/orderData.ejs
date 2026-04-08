@@ -268,10 +268,10 @@
                                         <td class="text-center">
                                             <%= item.quantity %>
                                         </td>
-                                        <td class="text-end">₹<%= item.price.toLocaleString('en-IN') %>
+                                        <td class="text-end">₹<%= item.price.toFixed(2) %>
                                         </td>
                                         <td class="text-end fw-bold">₹<%= (item.quantity *
-                                                item.price).toLocaleString('en-IN') %>
+                                                item.price).toFixed(2) %>
                                         </td>
                                         <td>
                                             <span
@@ -287,16 +287,16 @@
                     <div class="summary-row">
                         <div class="summary-item">
                             <label>Subtotal</label>
-                            <span>₹<%= order.totalPrice.toLocaleString('en-IN') %></span>
+                            <span>₹<%= order.totalPrice.toFixed(2) %></span>
                         </div>
                         <div class="summary-item">
                             <label>Discount</label>
                             <span class="text-success">-₹<%= (order.totalPrice -
-                                    order.finalAmount).toLocaleString('en-IN') %></span>
+                                    order.finalAmount).toFixed(2) %></span>
                         </div>
                         <div class="summary-item total">
                             <label>Final Value</label>
-                            <span>₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                            <span>₹<%= order.finalAmount.toFixed(2) %></span>
                         </div>
                     </div>
                 </div>

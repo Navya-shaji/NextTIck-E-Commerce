@@ -236,6 +236,13 @@
                                               </a>
                                             </li>
                                             <% } %>
+
+                                              <li>
+                                                <a class="dropdown-item py-2 text-dark"
+                                                  href="/orders/<%= order._id %>/invoice">
+                                                  <i class="fas fa-file-pdf me-2 text-info"></i> Download Invoice
+                                                </a>
+                                              </li>
                                 </ul>
                               </div>
                             </td>
@@ -406,7 +413,7 @@
                             </td>
                             <td
                               class="fw-bold <%= tx.type === 'Withdrawal' || tx.type === 'Purchase' ? 'text-danger' : 'text-success' %>">
-                              <%= tx.type==='Withdrawal' || tx.type==='Purchase' ? '-' : '+' %>₹<%= tx.amount %>
+                              <%= tx.type==='Withdrawal' || tx.type==='Purchase' ? '-' : '+' %>₹<%= tx.amount.toFixed(2) %>
                             </td>
                           </tr>
                           <% }) %>

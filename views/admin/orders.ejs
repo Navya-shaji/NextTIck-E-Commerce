@@ -276,12 +276,12 @@
             </div>
             <div class="premium-card">
                 <p class="card-label">Active Revenue</p>
-                <h3 class="card-value" style="color: #10b981;">₹<%= activeRevenue.toLocaleString('en-IN') %>
+                <h3 class="card-value" style="color: #10b981;">₹<%= activeRevenue.toFixed(2) %>
                 </h3>
             </div>
             <div class="premium-card">
                 <p class="card-label">Total Revenue</p>
-                <h3 class="card-value">₹<%= totalRevenue.toLocaleString('en-IN') %>
+                <h3 class="card-value">₹<%= totalRevenue.toFixed(2) %>
                 </h3>
             </div>
             <div class="premium-card">
@@ -356,8 +356,8 @@
                                         </select>
                                     </div>
                                 </td>
-                                <td class="fw-bold">₹<%= order.finalAmount.toLocaleString('en-IN') %>
-                                </td>
+                                 <td class="fw-bold">₹<%= order.finalAmount.toFixed(2) %>
+                                 </td>
                                 <td class="text-end">
                                     <div class="dropdown">
                                         <button class="action-dropdown-btn" type="button" data-bs-toggle="dropdown"

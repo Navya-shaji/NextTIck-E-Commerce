@@ -11,7 +11,11 @@ const orderSchema = new Schema({
     },
     orderId: {
         type: String,
-        default: () => uuidv4(),
+        default: () => "NT-" + Math.floor(100000 + Math.random() * 900000),
+        unique: true
+    },
+    orderNumber: {
+        type: Number,
         unique: true
     },
     orderItems: [{
@@ -114,8 +118,35 @@ const orderSchema = new Schema({
         type: String,
         default: null
     },
+});
 
+orderSchema.pre('save', async function (next) {
+    if (this.isNew && !this.orderNumber) {
+        try {
+            const OrderModel = mongoose.model('Order');
+            const lastOrder = await OrderModel.findOne({}, 'orderNumber').sort({ orderNumber: -1 });
+            this.orderNumber = lastOrder && lastOrder.orderNumber ? lastOrder.orderNumber + 1 : 100001;
+        } catch (error) {
+            console.error("Error generating orderNumber:", error);
+            // Fallback for uniqueness
+            this.orderNumber = Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 1000);
+        }
+    }
 
-})
+    if (this.totalPrice) this.totalPrice = Math.round(this.totalPrice * 100) / 100;
+    if (this.discount) this.discount = Math.round(this.discount * 100) / 100;
+    if (this.finalAmount) this.finalAmount = Math.round(this.finalAmount * 100) / 100;
+    if (this.deliveryCharge) this.deliveryCharge = Math.round(this.deliveryCharge * 100) / 100;
+    
+    // Ensure orderItems prices are also rounded
+    if (this.orderItems && this.orderItems.length > 0) {
+        this.orderItems.forEach(item => {
+            if (item.price) item.price = Math.round(item.price * 100) / 100;
+        });
+    }
+
+    next();
+});
+
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

@@ -265,14 +265,12 @@
                                     </span>
                                 </td>
                                 <td class="text-primary fw-bold">
-                                    <%= coupon.offerPrice %>
-                                        <%= (coupon.couponType==='percentage' ) ? '%' : '' %>
+                                    <%= coupon.offerPrice.toFixed(2) %><%= (coupon.couponType==='percentage' ) ? '%' : '' %>
                                 </td>
                                 <td>
-                                    <%= coupon.maximumDiscount ? '₹' + coupon.maximumDiscount.toLocaleString('en-IN')
-                                        : 'N/A' %>
+                                    <%= coupon.maximumDiscount ? '₹' + coupon.maximumDiscount.toFixed(2) : 'N/A' %>
                                 </td>
-                                <td>₹<%= coupon.minimumPrice.toLocaleString('en-IN') %>
+                                <td>₹<%= coupon.minimumPrice.toFixed(2) %>
                                 </td>
                                 <td class="text-muted">
                                     <%= new Date(coupon.createdOn).toLocaleDateString() %>
@@ -425,8 +423,8 @@
                             <div class="col-md-4 mb-3">
                                 <label for="offerPrice" class="form-label">Discount Value</label>
                                 <div class="input-group">
-                                    <input type="number" id="offerPrice" name="offerPrice" class="form-control" min="1"
-                                        placeholder="Value" required />
+                                    <input type="number" id="offerPrice" name="offerPrice" class="form-control" min="0"
+                                        step="0.01" placeholder="Value" required />
                                 </div>
                                 <div id="error-discount" class="error-message"></div>
                             </div>
@@ -436,7 +434,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" id="maximumDiscount" name="maximumDiscount"
-                                        class="form-control" min="0" placeholder="e.g., 500" />
+                                        class="form-control" min="0" step="0.01" placeholder="e.g., 500" />
                                 </div>
                             </div>
                         </div>
@@ -447,7 +445,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" id="minimumPrice" name="minimumPrice" class="form-control"
-                                        min="0" placeholder="e.g., 1000" required />
+                                        min="0" step="0.01" placeholder="e.g., 1000" required />
                                 </div>
                                 <div id="error-min-amount" class="error-message"></div>
                             </div>
@@ -522,7 +520,7 @@
                                 <label for="edit-offerPrice" class="form-label">Discount Value</label>
                                 <div class="input-group">
                                     <input type="number" id="edit-offerPrice" name="offerPrice" class="form-control"
-                                        min="1" placeholder="Value" required />
+                                        min="0" step="0.01" placeholder="Value" required />
                                 </div>
                                 <div id="edit-error-discount" class="error-message"></div>
                             </div>
@@ -532,7 +530,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" id="edit-maximumDiscount" name="maximumDiscount"
-                                        class="form-control" min="0" placeholder="e.g., 500" />
+                                        class="form-control" min="0" step="0.01" placeholder="e.g., 500" />
                                 </div>
                             </div>
                         </div>
@@ -543,7 +541,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" id="edit-minimumPrice" name="minimumPrice" class="form-control"
-                                        min="0" placeholder="e.g., 1000" required />
+                                        min="0" step="0.01" placeholder="e.g., 1000" required />
                                 </div>
                                 <div id="edit-error-min-amount" class="error-message"></div>
                             </div>
@@ -618,27 +616,29 @@
                 }
 
                 // Validate discount percentage/amount
+                const parsedOfferPrice = parseFloat(offerPrice);
+                const parsedMinPrice = parseFloat(minimumPrice);
+
                 if (couponType === 'percentage') {
-                    if (isNaN(offerPrice) || offerPrice < 1 || offerPrice > 100) {
+                    if (isNaN(parsedOfferPrice) || parsedOfferPrice < 1 || parsedOfferPrice > 100) {
                         document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').textContent = 'Percentage must be between 1 and 100';
                         document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').style.display = 'block';
                         isValid = false;
                     }
-                    const maxDiscount = parseFloat(document.getElementById(prefix ? 'edit-maximumDiscount' : 'maximumDiscount').value);
-                    if (maxDiscount && maxDiscount < 0) {
-                        Swal.fire('Error', 'Maximum discount cannot be negative', 'error');
-                        isValid = false;
-                    }
                 } else {
-                    if (isNaN(offerPrice) || offerPrice < 1) {
+                    if (isNaN(parsedOfferPrice) || parsedOfferPrice < 1) {
                         document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').textContent = 'Discount amount must be at least 1';
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').style.display = 'block';
+                        isValid = false;
+                    } else if (parsedOfferPrice >= parsedMinPrice) {
+                        document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').textContent = 'Discount must be less than minimum purchase amount';
                         document.getElementById(prefix ? 'edit-error-discount' : 'error-discount').style.display = 'block';
                         isValid = false;
                     }
                 }
 
                 // Validate minimum purchase amount
-                if (isNaN(minimumPrice) || minimumPrice < 0) {
+                if (isNaN(parsedMinPrice) || parsedMinPrice < 0) {
                     document.getElementById(prefix ? 'edit-error-min-amount' : 'error-min-amount').textContent = 'Minimum purchase amount must be 0 or greater';
                     document.getElementById(prefix ? 'edit-error-min-amount' : 'error-min-amount').style.display = 'block';
                     isValid = false;

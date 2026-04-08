@@ -223,6 +223,9 @@
                     <span class="status-pill status-<%= order.status.toLowerCase().replace(' ', '-') %>">
                         <%= order.status %>
                     </span>
+                    <a href="/orders/<%= order._id %>/invoice" class="btn btn-outline-dark px-3" title="Download Invoice">
+                        <i class="fas fa-file-pdf me-2"></i>Invoice
+                    </a>
                     <button onclick="window.print()" class="btn-outline-gold px-3"><i class="fas fa-print"></i></button>
                 </div>
             </div>

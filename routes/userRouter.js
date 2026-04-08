@@ -140,6 +140,8 @@ router.get(ROUTES.ORDER_PRODUCTS, orderController.getOrderProducts);
 router.post(ROUTES.CANCEL_ORDER_PRODUCTS, orderController.cancelOrderProducts);
 router.post(ROUTES.RETURN_ORDER_PRODUCTS, orderController.returnOrderProducts);
 
+router.get(ROUTES.DOWNLOAD_INVOICE, orderController.downloadInvoice);
+
 // wallet.........................................................................................................................
 
 router.post(ROUTES.ADD_MONEY, walletController.createRazorpayOrder);

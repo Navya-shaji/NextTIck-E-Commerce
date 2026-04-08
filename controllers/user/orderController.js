@@ -6,6 +6,7 @@ const Order = require('../../models/orderSchema');
 const Wallet = require("../../models/walletSchema");
 const Review = require("../../models/reviewSchema");
 const mongoose = require('mongoose');
+const PDFDocument = require('pdfkit-table');
 
 //for getting the order history page..........................................
 
@@ -614,6 +615,91 @@ const returnOrderProducts = async (req, res) => {
     }
 };
 
+const downloadInvoice = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId)
+            .populate('userId')
+            .populate('orderItems.product')
+            .populate('address');
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
+
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(20).text('NEXTICK', { align: 'center' });
+        doc.fontSize(10).text('Premium Timepieces', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(15).text('INVOICE', { align: 'right' });
+        doc.moveDown();
+
+        // Order Info
+        doc.fontSize(10).text(`Order ID: ${order.orderId}`);
+        doc.text(`Date: ${new Date(order.createdOn).toLocaleDateString()}`);
+        doc.text(`Payment Method: ${order.paymentMethod}`);
+        doc.text(`Status: ${order.status}`);
+        doc.moveDown();
+
+        // Customer Info
+        doc.fontSize(12).text('Shipping Address:', { underline: true });
+        doc.fontSize(10).text(order.shippingAddress || 'N/A');
+        doc.moveDown();
+
+        // Items Table
+        const table = {
+            title: "Order Details",
+            headers: ["Product", "Quantity", "Unit Price", "Total"],
+            rows: []
+        };
+
+        order.orderItems.forEach(item => {
+            table.rows.push([
+                item.product ? item.product.productName : "Unknown Product",
+                item.quantity.toString(),
+                `INR ${item.price.toFixed(2)}`,
+                `INR ${(item.price * item.quantity).toFixed(2)}`
+            ]);
+        });
+
+        await doc.table(table, {
+            prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
+            prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                doc.font("Helvetica").fontSize(10);
+            },
+        });
+
+        doc.moveDown();
+
+        // Summary
+        doc.text(`Subtotal: INR ${order.totalPrice.toFixed(2)}`, { align: 'right' });
+        if (order.discount > 0) {
+            doc.text(`Discount: - INR ${order.discount.toFixed(2)}`, { align: 'right' });
+        }
+        if (order.deliveryCharge > 0) {
+            doc.text(`Shipping: INR ${order.deliveryCharge.toFixed(2)}`, { align: 'right' });
+        }
+        doc.fontSize(12).font("Helvetica-Bold").text(`Total Amount: INR ${order.finalAmount.toFixed(2)}`, { align: 'right' });
+
+        doc.moveDown(2);
+        doc.fontSize(10).font("Helvetica").text('Thank you for shopping with NextTick!', { align: 'center' });
+
+        doc.end();
+
+    } catch (error) {
+        console.error('Error generating invoice:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
 module.exports = {
     getOrderHistory,
     cancelOrder,
@@ -627,5 +713,6 @@ module.exports = {
     processReturn,
     getOrderProducts,
     cancelOrderProducts,
-    returnOrderProducts
+    returnOrderProducts,
+    downloadInvoice
 };

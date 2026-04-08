@@ -650,11 +650,9 @@
                             regularPrice=product.salesPrice || 0; const discountAmount=regularPrice * (bestOffer / 100);
                             const salesPrice=regularPrice - discountAmount; %>
 
-                            <span class="current-price">₹<%= salesPrice.toLocaleString('en-IN', {minimumFractionDigits:
-                                    2}) %></span>
+                            <span class="current-price">₹<%= salesPrice.toFixed(2) %></span>
                             <% if (bestOffer> 0) { %>
-                                <span class="original-price">₹<%= regularPrice.toLocaleString('en-IN',
-                                        {minimumFractionDigits: 2}) %></span>
+                                <span class="original-price">₹<%= regularPrice.toFixed(2) %></span>
                                 <span class="discount-tag">
                                     <%= bestOffer %>% OFF
                                 </span>
@@ -690,13 +688,13 @@
                                                             <%= coupon.name %>
                                                         </div>
                                                         <div class="text-muted" style="font-size: 0.7rem;">
-                                                            Min Purchase: ₹<%= coupon.minimumPrice %>
+                                                            Min Purchase: ₹<%= coupon.minimumPrice.toFixed(2) %>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="text-end">
                                                     <div class="fw-bold" style="color: var(--success-color);">
-                                                        ₹<%= coupon.offerPrice %> OFF
+                                                        ₹<%= coupon.offerPrice.toFixed(2) %> OFF
                                                     </div>
                                                 </div>
                                             </div>

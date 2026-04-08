@@ -279,7 +279,7 @@
             <div class="premium-card">
                 <div class="card-icon icon-revenue"><i class="fas fa-rupee-sign"></i></div>
                 <p class="card-label">Total Revenue</p>
-                <h3 class="card-value">₹<%= totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                <h3 class="card-value">₹<%= totalRevenue.toFixed(2) %>
                 </h3>
                 <p class="card-subtext">Net revenue (discounts applied)</p>
             </div>

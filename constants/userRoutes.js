@@ -89,6 +89,7 @@ const USER_ROUTES = {
     CANCEL_ORDER_PRODUCTS: '/orders/:orderId/cancel',
     RETURN_ORDER_PRODUCTS: '/orders/:orderId/return',
     DELETE_ORDER: '/orders/:orderId',
+    DOWNLOAD_INVOICE: '/orders/:id/invoice',
 
     // Wallet
     ADD_MONEY: '/add-money',

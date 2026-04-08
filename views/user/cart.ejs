@@ -346,7 +346,7 @@
                                             </div>
 
                                             <div class="cart-item-price">
-                                                ₹<%= item.price.toLocaleString() %>
+                                                ₹<%= item.price.toFixed(2) %>
                                             </div>
 
                                             <div class="cart-item-quantity">
@@ -364,7 +364,7 @@
                                             </div>
 
                                             <div class="cart-item-total" id="total-<%= item.productId._id %>">
-                                                ₹<%= (item.price * item.quantity).toLocaleString() %>
+                                                ₹<%= (item.price * item.quantity).toFixed(2) %>
                                             </div>
 
                                             <div class="cart-item-actions">
@@ -385,7 +385,7 @@
                         <h2>Summary</h2>
                         <div class="summary-row">
                             <span>Subtotal</span>
-                            <span id="cart-subtotal">₹<%= totalAmount.toLocaleString() %></span>
+                            <span id="cart-subtotal">₹<%= totalAmount.toFixed(2) %></span>
                         </div>
                         <div class="summary-row">
                             <span>Shipping</span>
@@ -398,7 +398,7 @@
 
                         <div class="summary-row total">
                             <span>Estimated Total</span>
-                            <span id="cart-total">₹<%= totalAmount.toLocaleString() %></span>
+                            <span id="cart-total">₹<%= totalAmount.toFixed(2) %></span>
                         </div>
 
                         <button onclick="window.location.href='/checkout'" class="checkout-btn-premium" <%=!products ||
@@ -439,14 +439,14 @@
                         // Update item total
                         const itemTotalEl = document.querySelector(`#total-${productId}`);
                         if (itemTotalEl) {
-                            itemTotalEl.textContent = `₹${data.totalPrice.toLocaleString()}`;
+                            itemTotalEl.textContent = `₹${data.totalPrice.toFixed(2)}`;
                         }
 
                         // Update cart subtotal & total
                         const subtotalEl = document.querySelector('#cart-subtotal');
                         const totalEl = document.querySelector('#cart-total');
-                        if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
-                        if (totalEl) totalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+                        if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toFixed(2)}`;
+                        if (totalEl) totalEl.textContent = `₹${data.cartTotal.toFixed(2)}`;
 
                         // Update header cart count
                         if (data.cartCount !== undefined) {
@@ -524,8 +524,8 @@
                                         if (data.cartTotal !== undefined) {
                                             const subtotalEl = document.querySelector('#cart-subtotal');
                                             const totalEl = document.querySelector('#cart-total');
-                                            if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
-                                            if (totalEl) totalEl.textContent = `₹${data.cartTotal.toLocaleString()}`;
+                                            if (subtotalEl) subtotalEl.textContent = `₹${data.cartTotal.toFixed(2)}`;
+                                            if (totalEl) totalEl.textContent = `₹${data.cartTotal.toFixed(2)}`;
                                         } else {
                                             // Fallback to reload if controller doesn't provide total yet
                                             location.reload();

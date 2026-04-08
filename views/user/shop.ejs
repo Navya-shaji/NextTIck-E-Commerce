@@ -668,9 +668,9 @@
                     </a>
 
                     <div class="price-display-premium">
-                      ₹<%= (product.salesPrice || product.regularPrice).toLocaleString('en-IN') %>
+                      ₹<%= (product.salesPrice || product.regularPrice).toFixed(2) %>
                         <% if (product.salesPrice && product.salesPrice < product.regularPrice) { %>
-                          <span class="original-price">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
+                          <span class="original-price">₹<%= product.regularPrice.toFixed(2) %></span>
                           <% } %>
                     </div>
 

@@ -46,33 +46,60 @@ const getCoupon = async (req, res) => {
 
 const createCoupon = async (req, res) => {
     try {
-        if (!req.body.couponName || !req.body.startDate || !req.body.endDate ||
-            !req.body.offerPrice || !req.body.minimumPrice) {
-            return res.status(400).send("Invalid input: All fields are required.");
+        const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType } = req.body;
+
+        if (!couponName || !startDate || !endDate || !offerPrice || !minimumPrice) {
+            return res.status(400).json({ status: false, message: "All fields are required." });
         }
 
-        if (isNaN(new Date(req.body.startDate)) || isNaN(new Date(req.body.endDate))) {
-            return res.status(400).send("Invalid dates provided.");
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (isNaN(start) || isNaN(end)) {
+            return res.status(400).json({ status: false, message: "Invalid dates provided." });
         }
 
-        const data = {
-            couponName: req.body.couponName,
-            startDate: new Date(req.body.startDate + "T00:00:00"),
-            endDate: new Date(req.body.endDate + "T00:00:00"),
-            offerPrice: parseFloat(req.body.offerPrice),
-            minimumPrice: parseFloat(req.body.minimumPrice),
-            maximumDiscount: req.body.maximumDiscount ? parseFloat(req.body.maximumDiscount) : null,
-            couponType: req.body.couponType || 'flat'
-        };
+        if (start < today) {
+            return res.status(400).json({ status: false, message: "Start date cannot be in the past." });
+        }
+
+        if (end <= start) {
+            return res.status(400).json({ status: false, message: "End date must be after start date." });
+        }
+
+        const parsedOfferPrice = parseFloat(offerPrice);
+        const parsedMinPrice = parseFloat(minimumPrice);
+        const parsedMaxDiscount = maximumDiscount ? parseFloat(maximumDiscount) : null;
+
+        if (parsedOfferPrice <= 0 || parsedMinPrice < 0) {
+            return res.status(400).json({ status: false, message: "Prices must be positive numbers." });
+        }
+
+        if (couponType === 'percentage') {
+            if (parsedOfferPrice <= 0 || parsedOfferPrice > 100) {
+                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 100." });
+            }
+        } else {
+            if (parsedOfferPrice >= parsedMinPrice) {
+                return res.status(400).json({ status: false, message: "Offer price must be less than minimum purchase amount." });
+            }
+        }
+
+        const existingCoupon = await Coupon.findOne({ name: { $regex: new RegExp("^" + couponName + "$", "i") } });
+        if (existingCoupon) {
+            return res.status(400).json({ status: false, message: "Coupon code already exists." });
+        }
 
         const newCoupon = new Coupon({
-            name: data.couponName,
-            createdOn: data.startDate,
-            expireOn: data.endDate,
-            offerPrice: data.offerPrice,
-            minimumPrice: data.minimumPrice,
-            maximumDiscount: data.maximumDiscount,
-            couponType: data.couponType
+            name: couponName.toUpperCase(),
+            createdOn: start,
+            expireOn: end,
+            offerPrice: parsedOfferPrice,
+            minimumPrice: parsedMinPrice,
+            maximumDiscount: parsedMaxDiscount,
+            couponType: couponType || 'flat'
         });
 
         await newCoupon.save();
@@ -108,21 +135,58 @@ const updateCoupon = async (req, res) => {
         const id = req.query.id;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).send("Invalid coupon ID.");
+            return res.status(400).json({ status: false, message: "Invalid coupon ID." });
         }
 
         const { couponName, startDate, endDate, offerPrice, minimumPrice, maximumDiscount, couponType } = req.body;
         if (!couponName || !startDate || !endDate || !offerPrice || !minimumPrice) {
-            return res.status(400).send("All fields (couponName, startDate, endDate, offerPrice, minimumPrice) are required.");
+            return res.status(400).json({ status: false, message: "All fields are required." });
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start) || isNaN(end)) {
+            return res.status(400).json({ status: false, message: "Invalid dates provided." });
+        }
+
+        if (end <= start) {
+            return res.status(400).json({ status: false, message: "End date must be after start date." });
+        }
+
+        const parsedOfferPrice = parseFloat(offerPrice);
+        const parsedMinPrice = parseFloat(minimumPrice);
+        const parsedMaxDiscount = maximumDiscount ? parseFloat(maximumDiscount) : null;
+
+        if (parsedOfferPrice <= 0 || parsedMinPrice < 0) {
+            return res.status(400).json({ status: false, message: "Prices must be positive numbers." });
+        }
+
+        if (couponType === 'percentage') {
+            if (parsedOfferPrice <= 0 || parsedOfferPrice > 100) {
+                return res.status(400).json({ status: false, message: "Percentage discount must be between 1 and 100." });
+            }
+        } else {
+            if (parsedOfferPrice >= parsedMinPrice) {
+                return res.status(400).json({ status: false, message: "Offer price must be less than minimum purchase amount." });
+            }
+        }
+
+        const existingCoupon = await Coupon.findOne({ 
+            name: { $regex: new RegExp("^" + couponName + "$", "i") },
+            _id: { $ne: id }
+        });
+        if (existingCoupon) {
+            return res.status(400).json({ status: false, message: "Coupon code already exists." });
         }
 
         const updateData = {
-            name: couponName,
-            createdOn: new Date(startDate),
-            expireOn: new Date(endDate),
-            offerPrice: parseFloat(offerPrice),
-            minimumPrice: parseFloat(minimumPrice),
-            maximumDiscount: maximumDiscount ? parseFloat(maximumDiscount) : null,
+            name: couponName.toUpperCase(),
+            createdOn: start,
+            expireOn: end,
+            offerPrice: parsedOfferPrice,
+            minimumPrice: parsedMinPrice,
+            maximumDiscount: parsedMaxDiscount,
             couponType: couponType || 'flat'
         };
 
