@@ -12,7 +12,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Configure multer for profile image uploads...................................................
-const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile-images');
+const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'profile-images');
 
 // Create upload directory if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
@@ -314,14 +314,17 @@ const updateProfileImage = async (req, res) => {
             user.profileImage = req.file.filename;
             await user.save();
 
-
             // Update the session user data
             req.session.user = user;
-
-            res.json({
-                success: true,
-                message: 'Profile image updated successfully',
-                imageUrl: `/uploads/profile-images/${req.file.filename}`
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                }
+                res.json({
+                    success: true,
+                    message: 'Profile image updated successfully',
+                    imageUrl: `/uploads/profile-images/${req.file.filename}`
+                });
             });
 
         } catch (error) {
@@ -378,11 +381,13 @@ const deleteProfileImage = async (req, res) => {
 
             // Update session
             req.session.user = user;
-
-            return res.status(200).json({
-                success: true,
-                message: 'Profile image deleted successfully',
-                defaultImage: '/uploads/profile-images/default-profile.jpg'
+            req.session.save((err) => {
+                if (err) console.error('Session save error:', err);
+                return res.status(200).json({
+                    success: true,
+                    message: 'Profile image deleted successfully',
+                    defaultImage: '/uploads/profile-images/default-profile.jpg'
+                });
             });
         } catch (error) {
             console.error('Error updating user:', error);
