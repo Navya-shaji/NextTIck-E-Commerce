@@ -627,7 +627,7 @@ const downloadInvoice = async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
-        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
         // Set response headers
         res.setHeader('Content-Type', 'application/pdf');
@@ -635,62 +635,108 @@ const downloadInvoice = async (req, res) => {
 
         doc.pipe(res);
 
-        // Header
-        doc.fontSize(20).text('NEXTICK', { align: 'center' });
-        doc.fontSize(10).text('Premium Timepieces', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(15).text('INVOICE', { align: 'right' });
-        doc.moveDown();
+        // Logo / Title
+        doc.fillColor("#000000")
+           .fontSize(24)
+           .font("Helvetica-Bold")
+           .text('NEXTICK', 40, 40);
+        
+        doc.fontSize(10)
+           .font("Helvetica")
+           .text('Premium Timepieces', 40, 65)
+           .moveDown();
 
-        // Order Info
-        doc.fontSize(10).text(`Order ID: ${order.orderId}`);
-        doc.text(`Date: ${new Date(order.createdOn).toLocaleDateString()}`);
-        doc.text(`Payment Method: ${order.paymentMethod}`);
-        doc.text(`Status: ${order.status}`);
-        doc.moveDown();
+        // Company Info
+        doc.fontSize(10)
+           .text('NextTick E-Commerce Inc.', 400, 40, { align: 'right' })
+           .text('123 Luxury Avenue, Sector 18', 400, 52, { align: 'right' })
+           .text('Noida, UP, 201301', 400, 64, { align: 'right' })
+           .text('Email: support@nexttick.com', 400, 76, { align: 'right' })
+           .text('Phone: +91 98765 43210', 400, 88, { align: 'right' });
 
-        // Customer Info
-        doc.fontSize(12).text('Shipping Address:', { underline: true });
-        doc.fontSize(10).text(order.shippingAddress || 'N/A');
-        doc.moveDown();
+        doc.moveTo(40, 110).lineTo(555, 110).strokeColor("#dddddd").stroke();
+
+        // Invoice Heading
+        doc.fillColor("#333333")
+           .fontSize(18)
+           .font("Helvetica-Bold")
+           .text('INVOICE', 40, 130);
+
+        // Details Section
+        doc.fontSize(10).font("Helvetica-Bold").text('Bill To:', 40, 160);
+        doc.font("Helvetica")
+           .text(order.userId ? order.userId.name : (order.address ? order.address.name : "Customer"), 40, 175)
+           .text(order.shippingAddress || "N/A", 40, 187, { width: 200 });
+
+        doc.font("Helvetica-Bold").text('Order Details:', 400, 160, { align: 'right' });
+        doc.font("Helvetica")
+           .text(`Order ID: ${order.orderId}`, 400, 175, { align: 'right' })
+           .text(`Order Date: ${new Date(order.createdOn).toLocaleDateString()}`, 400, 187, { align: 'right' })
+           .text(`Payment: ${order.paymentMethod}`, 400, 199, { align: 'right' })
+           .text(`Status: ${order.status}`, 400, 211, { align: 'right' });
+
+        doc.moveDown(4);
 
         // Items Table
         const table = {
-            title: "Order Details",
             headers: ["Product", "Quantity", "Unit Price", "Total"],
-            rows: []
-        };
-
-        order.orderItems.forEach(item => {
-            table.rows.push([
+            rows: order.orderItems.map(item => [
                 item.product ? item.product.productName : "Unknown Product",
                 item.quantity.toString(),
                 `INR ${item.price.toFixed(2)}`,
                 `INR ${(item.price * item.quantity).toFixed(2)}`
-            ]);
-        });
+            ])
+        };
 
         await doc.table(table, {
-            prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
+            prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10).fillColor("#000000"),
             prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-                doc.font("Helvetica").fontSize(10);
+                doc.font("Helvetica").fontSize(10).fillColor("#333333");
             },
+            padding: 5,
+            hideHeader: false,
+            width: 515
         });
 
         doc.moveDown();
 
-        // Summary
-        doc.text(`Subtotal: INR ${order.totalPrice.toFixed(2)}`, { align: 'right' });
-        if (order.discount > 0) {
-            doc.text(`Discount: - INR ${order.discount.toFixed(2)}`, { align: 'right' });
-        }
-        if (order.deliveryCharge > 0) {
-            doc.text(`Shipping: INR ${order.deliveryCharge.toFixed(2)}`, { align: 'right' });
-        }
-        doc.fontSize(12).font("Helvetica-Bold").text(`Total Amount: INR ${order.finalAmount.toFixed(2)}`, { align: 'right' });
+        // Totals
+        const summaryX = 350;
+        doc.fontSize(10).font("Helvetica").fillColor("#000000");
+        
+        doc.text("Subtotal:", summaryX, doc.y);
+        doc.text(`INR ${order.totalPrice.toFixed(2)}`, 500, doc.y - 12, { align: "right" });
+        doc.moveDown(0.2);
 
-        doc.moveDown(2);
-        doc.fontSize(10).font("Helvetica").text('Thank you for shopping with NextTick!', { align: 'center' });
+        if (order.discount > 0) {
+            doc.text("Discount:", summaryX, doc.y);
+            doc.text(`- INR ${order.discount.toFixed(2)}`, 500, doc.y - 12, { align: "right" });
+            doc.moveDown(0.2);
+        }
+
+        if (order.deliveryCharge > 0) {
+            doc.text("Shipping:", summaryX, doc.y);
+            doc.text(`INR ${order.deliveryCharge.toFixed(2)}`, 500, doc.y - 12, { align: "right" });
+            doc.moveDown(0.2);
+        }
+
+        doc.moveTo(summaryX, doc.y).lineTo(555, doc.y).strokeColor("#eeeeee").stroke();
+        doc.moveDown(0.5);
+        
+        doc.fontSize(12).font("Helvetica-Bold").text("Total Amount:", summaryX, doc.y);
+        doc.text(`INR ${order.finalAmount.toFixed(2)}`, 500, doc.y - 15, { align: "right" });
+
+        // Footer Section
+        doc.moveTo(40, 700).lineTo(555, 700).strokeColor("#dddddd").stroke();
+        
+        doc.fontSize(10).font("Helvetica-Bold").text('Terms & Conditions:', 40, 715);
+        doc.fontSize(8).font("Helvetica").fillColor("#666666")
+           .text('1. Returns are accepted within 30 days of delivery for unworn items.', 40, 730)
+           .text('2. Warranty is subject to manufacturer terms.', 40, 740)
+           .text('3. This is a computer generated invoice and does not require a signature.', 40, 750);
+
+        doc.fontSize(10).font("Helvetica-Bold").fillColor("#000000")
+           .text('Thank you for shopping with NEXTICK!', 0, 770, { align: 'center' });
 
         doc.end();
 

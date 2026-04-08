@@ -104,53 +104,53 @@
             document.getElementById('addressForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
 
-                const fullName = document.getElementById('fullName').value;
-                const phone = document.getElementById('phone').value;
-                const addressType = document.getElementById('addressType').value;
-                const city = document.getElementById('city').value;
-                const state = document.getElementById('state').value;
-                const landmark = document.getElementById('landmark').value;
-                const pincode = document.getElementById('pincode').value;
-                const altPhone = document.getElementById('altPhone').value;
+                const fullName = document.getElementById('fullName').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const addressType = document.getElementById('addressType').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const state = document.getElementById('state').value.trim();
+                const landmark = document.getElementById('landmark').value.trim();
+                const pincode = document.getElementById('pincode').value.trim();
+                const altPhone = document.getElementById('altPhone').value.trim();
                 const saveButton = document.getElementById('saveButton');
 
                 document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
 
                 let valid = true;
                 const nameRegex = /^[A-Za-z\s]+$/;
-                const phoneRegex = /^\d{10}$/;
+                const phoneRegex = /^[6-9]\d{9}$/;
                 const pincodeRegex = /^\d{6}$/;
 
-                if (!fullName.trim() || !nameRegex.test(fullName)) {
-                    document.getElementById('nameError').textContent = "Name must contain only letters.";
+                if (!fullName || !nameRegex.test(fullName)) {
+                    document.getElementById('nameError').textContent = "Please enter a valid name (letters only).";
                     valid = false;
                 }
                 if (!phoneRegex.test(phone)) {
-                    document.getElementById('phoneError').textContent = "Phone must be 10 digits.";
+                    document.getElementById('phoneError').textContent = "Please enter a valid 10-digit phone number.";
                     valid = false;
                 }
-                if (!addressType.trim()) {
-                    document.getElementById('addressError').textContent = "Address is required.";
+                if (!addressType) {
+                    document.getElementById('addressError').textContent = "Address details are required.";
                     valid = false;
                 }
-                if (!city.trim()) {
+                if (!city) {
                     document.getElementById('cityError').textContent = "City is required.";
                     valid = false;
                 }
-                if (!state.trim()) {
+                if (!state) {
                     document.getElementById('stateError').textContent = "State is required.";
                     valid = false;
                 }
                 if (!pincodeRegex.test(pincode)) {
-                    document.getElementById('pincodeError').textContent = "Pincode must be 6 digits.";
+                    document.getElementById('pincodeError').textContent = "Please enter a valid 6-digit pincode.";
                     valid = false;
                 }
-                if (!landmark.trim()) {
+                if (!landmark) {
                     document.getElementById('landmarkError').textContent = "Landmark is required.";
                     valid = false;
                 }
                 if (altPhone && !phoneRegex.test(altPhone)) {
-                    document.getElementById('altPhoneError').textContent = "Alt phone must be 10 digits.";
+                    document.getElementById('altPhoneError').textContent = "Please enter a valid 10-digit alt phone number.";
                     valid = false;
                 }
 
@@ -181,6 +181,7 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Address Saved',
+                            text: 'Your address has been saved successfully!',
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {

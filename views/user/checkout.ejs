@@ -608,33 +608,76 @@
             }
 
             function saveAddress() {
+                const name = document.getElementById('name').value.trim();
+                const addressType = document.getElementById('addressType').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const state = document.getElementById('state').value.trim();
+                const pincode = document.getElementById('pincode').value.trim();
+                const landmark = document.getElementById('landmark').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const altPhone = document.getElementById('altPhone').value.trim();
+                const addressId = document.getElementById('addressId').value;
+
+                // Validation
+                const nameRegex = /^[A-Za-z\s]+$/;
+                const phoneRegex = /^[6-9]\d{9}$/;
+                const pincodeRegex = /^\d{6}$/;
+
+                if (!name || !nameRegex.test(name)) {
+                    return Swal.fire('Error', 'Please enter a valid name (letters only)', 'error');
+                }
+                if (!phoneRegex.test(phone)) {
+                    return Swal.fire('Error', 'Please enter a valid 10-digit phone number', 'error');
+                }
+                if (!addressType) {
+                    return Swal.fire('Error', 'Address details are required', 'error');
+                }
+                if (!city) {
+                    return Swal.fire('Error', 'City is required', 'error');
+                }
+                if (!state) {
+                    return Swal.fire('Error', 'State is required', 'error');
+                }
+                if (!pincodeRegex.test(pincode)) {
+                    return Swal.fire('Error', 'Please enter a valid 6-digit pincode', 'error');
+                }
+                if (!landmark) {
+                    return Swal.fire('Error', 'Landmark is required', 'error');
+                }
+                if (altPhone && !phoneRegex.test(altPhone)) {
+                    return Swal.fire('Error', 'Please enter a valid 10-digit alternate phone number', 'error');
+                }
+
                 const addressData = {
-                    name: document.getElementById('name').value,
-                    addressType: document.getElementById('addressType').value,
-                    city: document.getElementById('city').value,
-                    state: document.getElementById('state').value,
-                    pincode: document.getElementById('pincode').value,
-                    landMark: document.getElementById('landmark').value,
-                    phone: document.getElementById('phone').value,
-                    altPhone: document.getElementById('altPhone').value
+                    name, addressType, city, state, pincode, landMark: landmark, phone, altPhone
                 };
 
-                const addressId = document.getElementById('addressId').value;
                 const endpoint = addressId ? `/postEditAddress/${addressId}` : '/addaddress';
+
+                Swal.fire({
+                    title: 'Saving...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
 
                 fetch(endpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(addressData)
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            Swal.fire('Success', 'Address saved successfully', 'success');
-                            bootstrap.Modal.getInstance(document.getElementById('addressModal')).hide();
-                            location.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Address saved successfully',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                bootstrap.Modal.getInstance(document.getElementById('addressModal')).hide();
+                                location.reload();
+                            });
                         } else {
                             Swal.fire('Error', data.message || 'Failed to save address', 'error');
                         }
