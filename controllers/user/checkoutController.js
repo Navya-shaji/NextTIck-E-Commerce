@@ -277,12 +277,13 @@ const applyCoupon = async (req, res) => {
 
         if (!userId) return res.status(401).json({ success: false, message: "User not logged in" });
 
+        const code = couponCode.toUpperCase();
         const user = await User.findById(userId);
-        if (user && user.coupons && user.coupons.some(c => c.couponName === couponCode)) {
+        if (user && user.coupons && user.coupons.some(c => c.couponName === code)) {
             return res.status(400).json({ success: false, message: "You have already used this coupon" });
         }
 
-        const findCoupon = await Coupon.findOne({ name: couponCode, isList: true });
+        const findCoupon = await Coupon.findOne({ name: code, isList: true });
         if (!findCoupon) return res.status(400).json({ success: false, message: "Invalid coupon" });
 
         const today = new Date();
@@ -310,6 +311,7 @@ const applyCoupon = async (req, res) => {
             originalAmount: parsedTotalAmount.toFixed(2)
         });
     } catch (error) {
+        console.error("Error applying coupon:", error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };

@@ -719,25 +719,35 @@
                 });
             }
 
+            let isCouponApplied = false;
+
             function applyCoupon() {
-                const couponCode = document.getElementById('couponCode').value;
+                if (isCouponApplied) {
+                    Swal.fire('Info', 'A coupon is already applied. Remove it or refresh to apply another.', 'info');
+                    return;
+                }
+
+                const couponCode = document.getElementById('couponCode').value.trim();
+                if (!couponCode) {
+                    Swal.fire('Error', 'Please enter a coupon code', 'error');
+                    return;
+                }
+
+                const originalSubtotal = parseFloat('<%= subtotal %>');
                 const totalAmountElement = document.getElementById("totalAmount");
-                const totalAmount = totalAmountElement.textContent.replace(/[₹\s]/g, "");
-                const discounttElement = document.getElementById("discountAmount");
-                const cartItems = <%- JSON.stringify(product) %>;
+                const discountElement = document.getElementById("discountAmount");
+
                 fetch('/apply-coupon', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ couponCode, totalAmount, cartItems })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode, totalAmount: originalSubtotal })
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            discounttElement.textContent = data.discount
-                            totalAmountElement.textContent = data.totalAmount
-                            // updateOrderSummary();
+                            isCouponApplied = true;
+                            discountElement.textContent = `₹${parseFloat(data.discount).toFixed(2)}`;
+                            totalAmountElement.textContent = `₹${parseFloat(data.totalAmount).toFixed(2)}`;
                             Swal.fire('Success', 'Coupon applied successfully', 'success');
                         } else {
                             Swal.fire('Error', data.message || 'Failed to apply coupon', 'error');
