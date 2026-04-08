@@ -218,7 +218,7 @@
     <div class="content-wrapper">
         <div class="order-header">
             <div>
-                <a href="/admin/orderList" class="btn-back">
+                <a href="/admin/orders" class="btn-back">
                     <i class="fas fa-arrow-left"></i> Back to Fleet
                 </a>
                 <h2 class="page-title mt-3">Order #<%= order.orderId %>
@@ -630,7 +630,7 @@
                         const data = await response.json();
                         if (data.success) {
                             Swal.fire('Deleted!', 'Record has been removed.', 'success').then(() => {
-                                window.location.href = '/admin/orderList';
+                                window.location.href = '/admin/orders';
                             });
                         } else {
                             Swal.fire('Error', data.message || 'Failed to delete record', 'error');

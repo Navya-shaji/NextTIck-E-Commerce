@@ -114,8 +114,8 @@ router.post(ROUTES.UPDATE_CART_QUANTITY, userAuth, cartController.updateQuantity
 router.post(ROUTES.REMOVE_FROM_CART, userAuth, cartController.removeFromCart);
 
 //checkoutpage...................................................................................................
-router.get(ROUTES.CHECKOUT, userAuth, checkoutController.getcheckoutPage);
-router.post(ROUTES.CHECKOUT, userAuth, checkoutController.postCheckout);
+router.get(ROUTES.CHECKOUT, userAuth, blockGuests, checkoutController.getcheckoutPage);
+router.post(ROUTES.CHECKOUT, userAuth, blockGuests, checkoutController.postCheckout);
 router.get(ROUTES.ORDER_CONFIRMATION, checkoutController.orderConfirm);
 router.post(ROUTES.VERIFY_PAYMENT, userAuth, checkoutController.verifyPayment);
 router.post(ROUTES.RETRY_PAYMENT, userAuth, checkoutController.retryPayment);

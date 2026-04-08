@@ -405,6 +405,11 @@
                             products.length===0 ? 'disabled' : '' %>>
                             Proceed to Checkout
                         </button>
+                        <% if (user && user.isGuest) { %>
+                            <p style="color: #c5a059; font-size: 0.85rem; text-align: center; margin-top: 15px; font-weight: 500;">
+                                <i class="fas fa-info-circle me-1"></i> Note: You'll need to create an account to complete your purchase.
+                            </p>
+                        <% } %>
 
                         <a href="/shop" class="continue-link">
                             <i class="fas fa-chevron-left me-2"></i>Continue Shopping

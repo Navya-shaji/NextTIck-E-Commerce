@@ -51,7 +51,7 @@ const ADMIN_ROUTES = {
     UPDATE_PRODUCT: '/product/edit/:id',
 
     // Order Management
-    ORDER_LIST: '/orderList',
+    ORDER_LIST: '/orders',
     ORDERS_CANCELLED: '/orders/cancelled',
     ORDER_DETAILS: '/orders/:orderId',
     UPDATE_ORDER_STATUS: '/orders/update-status',
